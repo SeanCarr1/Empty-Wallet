@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Switch } from 'react-native';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { X } from 'lucide-react-native';
 
@@ -27,17 +26,26 @@ export const DashboardWidgetModal: React.FC<Props> = ({ visible, onClose }) => {
               <X color='#FFF' size={24} />
             </TouchableOpacity>
           </View>
-          {widgets.map(({ key, label }) => (
-            <View key={key} style={styles.row}>
-              <Text style={styles.label}>{label}</Text>
-              <TouchableOpacity
-                style={[styles.toggle, dashboardWidgets[key] ? styles.toggleActive : styles.toggleInactive]}
-                onPress={() => setDashboardWidget(key, !dashboardWidgets[key])}
-              >
-                <View style={dashboardWidgets[key] ? styles.circleActive : styles.circleInactive} />
-              </TouchableOpacity>
-            </View>
-          ))}
+          {widgets.map(({ key, label }) => {
+            const value = dashboardWidgets[key];
+            return (
+              <View key={key} style={styles.row}>
+                <Text style={styles.label}>{label}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={[styles.badge, { color: value ? '#10B981' : '#6B7280' }]}>
+                    {value ? 'ON' : 'OFF'}
+                  </Text>
+                  <Switch
+                    trackColor={{ false: '#2A2D35', true: '#10B981' }}
+                    thumbColor={value ? '#FFFFFF' : '#9CA3AF'}
+                    ios_backgroundColor="#2A2D35"
+                    onValueChange={() => setDashboardWidget(key, !value)}
+                    value={value}
+                  />
+                </View>
+              </View>
+            );
+          })}
         </View>
       </View>
     </Modal>
@@ -51,6 +59,7 @@ const styles = StyleSheet.create({
   title: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   label: { color: '#FFF', fontSize: 16 },
+  badge: { fontSize: 12, fontWeight: 'bold', marginRight: 10 },
   toggle: { width: 50, height: 30, borderRadius: 15, padding: 3, justifyContent: 'center' },
   toggleActive: { backgroundColor: '#2A2D35', alignItems: 'flex-end' },
   toggleInactive: { backgroundColor: '#212329', alignItems: 'flex-start' },

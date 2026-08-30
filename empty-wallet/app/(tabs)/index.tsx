@@ -66,7 +66,7 @@ export default function DashboardScreen() {
       >
         {/* Top Header with App Logo, Net Balance & Quick Actions */}
         <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-row items-center">
+          <View className="flex-1 mr-3 flex-row items-center">
             <Image
               source={require('../../assets/logo.jpg')}
               className="w-9 h-9 rounded-lg mr-3 border border-background-border"
@@ -82,7 +82,7 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-2">
+          <View className="flex-row items-center space-x-2 shrink-0">
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => setCustomizeModalVisible(true)}

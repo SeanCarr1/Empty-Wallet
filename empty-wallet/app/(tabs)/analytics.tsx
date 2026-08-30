@@ -331,17 +331,26 @@ export default function AnalyticsScreen() {
               { id: 'balanceTrend', label: 'Balance Trend' },
               { id: 'categoryDonut', label: 'Category Donut' },
               { id: 'monthlyTrend', label: 'Monthly Trend' },
-            ].map((chart) => (
-              <View key={chart.id} className="flex-row items-center justify-between mb-4">
-                <Text className="text-content-primary font-medium text-sm">{chart.label}</Text>
-                <Switch
-                  value={enabledCharts[chart.id as keyof typeof enabledCharts]}
-                  onValueChange={(val) => setEnabledCharts(chart.id as keyof typeof enabledCharts, val)}
-                  trackColor={{ false: '#2A2D35', true: '#10B981' }}
-                  thumbColor="#F3F4F6"
-                />
-              </View>
-            ))}
+            ].map((chart) => {
+              const value = enabledCharts[chart.id as keyof typeof enabledCharts];
+              return (
+                <View key={chart.id} className="flex-row items-center justify-between mb-4">
+                  <Text className="text-content-primary font-medium text-sm">{chart.label}</Text>
+                  <View className="flex-row items-center">
+                    <Text className={`font-bold text-xs mr-3 ${value ? 'text-[#10B981]' : 'text-[#6B7280]'}`}>
+                      {value ? 'ON' : 'OFF'}
+                    </Text>
+                    <Switch
+                      value={value}
+                      onValueChange={(val) => setEnabledCharts(chart.id as keyof typeof enabledCharts, val)}
+                      trackColor={{ false: '#2A2D35', true: '#10B981' }}
+                      thumbColor={value ? '#FFFFFF' : '#9CA3AF'}
+                      ios_backgroundColor="#2A2D35"
+                    />
+                  </View>
+                </View>
+              );
+            })}
           </View>
         </View>
       </Modal>
