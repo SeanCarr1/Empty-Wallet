@@ -197,7 +197,7 @@ export default function RecordsScreen() {
 
         {/* Search Bar & Filter Button */}
         <View className="flex-row items-center mb-3">
-          <View className="flex-1 flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2.5 mr-2">
+          <View className="h-11 flex-1 flex-row items-center bg-background-card border border-background-border rounded-lg px-3 mr-2">
             <Search size={15} color="#6B7280" />
             <TextInput
               value={searchQuery}
@@ -219,10 +219,8 @@ export default function RecordsScreen() {
               triggerHaptic.selection();
               setFilterModalOpen(true);
             }}
-            className={`h-11 w-11 items-center justify-center rounded-lg border ${
-              activeFilterCount > 0
-                ? 'bg-primary/15 border-primary'
-                : 'bg-background-card border-background-border'
+            className={`h-11 w-11 items-center justify-center rounded-lg border bg-background-card border-background-border shrink-0 ${
+              activeFilterCount > 0 ? 'border-primary' : ''
             }`}
           >
             <SlidersHorizontal size={17} color={activeFilterCount > 0 ? '#10B981' : '#9CA3AF'} />
@@ -271,19 +269,15 @@ export default function RecordsScreen() {
             </View>
           ) : (
             filteredTransactions.map((tx) => (
-              <TouchableOpacity
+              <TransactionItem
                 key={tx.id}
-                activeOpacity={0.7}
+                transaction={tx}
+                category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
+                wallet={walletMap.get(tx.walletId)}
+                currency={currency}
                 onPress={() => router.push({ pathname: '/modal/quick-add', params: { id: tx.id } })}
-              >
-                <TransactionItem
-                  transaction={tx}
-                  category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
-                  wallet={walletMap.get(tx.walletId)}
-                  currency={currency}
-                  onDelete={deleteTransaction}
-                />
-              </TouchableOpacity>
+                onDelete={deleteTransaction}
+              />
             ))
           )}
         </ScrollView>

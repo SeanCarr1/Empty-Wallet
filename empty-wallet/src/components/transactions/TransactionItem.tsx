@@ -13,6 +13,7 @@ interface TransactionItemProps {
   currency?: string;
   onDelete?: (id: string) => void;
   onPress?: () => void;
+  onLongPress?: () => void;
 }
 
 export const TransactionItem: React.FC<TransactionItemProps> = ({
@@ -22,6 +23,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   currency = 'PHP',
   onDelete,
   onPress,
+  onLongPress,
 }) => {
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
@@ -36,10 +38,14 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
         triggerHaptic.selection();
         onPress?.();
       }}
+      onLongPress={() => {
+        triggerHaptic.heavy();
+        onLongPress?.();
+      }}
       className="flex-row items-center justify-between p-3 bg-background-card border border-background-border rounded-xl mb-2"
     >
       {/* Left side: Category Icon & Details */}
-      <View className="flex-row items-center flex-1 mr-3">
+      <View pointerEvents="none" className="flex-row items-center flex-1 mr-3">
         <View
           className="w-9 h-9 rounded-lg items-center justify-center mr-2.5 border border-background-border/50"
           style={{ backgroundColor: `${iconColor}20` }}
@@ -75,7 +81,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       </View>
 
       {/* Right side: Amount & Date/Time */}
-      <View className="items-end">
+      <View pointerEvents="none" className="items-end">
         <Text
           className={`font-black text-xs tabular-nums ${
             isIncome ? 'text-primary' : isTransfer ? 'text-accent-blue' : 'text-expense'

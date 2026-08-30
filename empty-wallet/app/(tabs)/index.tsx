@@ -13,18 +13,21 @@ import { WalletGrid } from '../../src/components/wallets/WalletGrid';
 import { SafeToSpendGauge } from '../../src/components/velocity/SafeToSpendGauge';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
 import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
+import { DashboardWidgetModal } from '../../src/components/ui/DashboardWidgetModal';
 import { Plus, ArrowRightLeft, Sparkles } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = React.useState(false);
+  const [customizeModalVisible, setCustomizeModalVisible] = React.useState(false);
 
   const { wallets, fetchWallets, getTotalBalance } = useWalletStore();
   const { transactions, fetchTransactions, deleteTransaction } = useTransactionStore();
   const { budgets, fetchBudgets } = useBudgetStore();
   const { categories, fetchCategories } = useCategoryStore();
   const currency = useSettingsStore((s) => s.currency);
+  const dashboardWidgets = useSettingsStore((s) => s.dashboardWidgets);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -49,6 +52,10 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <DashboardWidgetModal
+        visible={customizeModalVisible}
+        onClose={() => setCustomizeModalVisible(false)}
+      />
       <ScrollView
         className="flex-1 px-4 pt-2"
         showsVerticalScrollIndicator={false}
@@ -76,6 +83,14 @@ export default function DashboardScreen() {
           </View>
 
           <View className="flex-row items-center space-x-2">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setCustomizeModalVisible(true)}
+              className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg"
+            >
+              <Text className="text-content-primary font-semibold text-xs">Customize</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {
@@ -122,19 +137,23 @@ export default function DashboardScreen() {
         </View>
 
         {/* Safe-to-Spend Velocity Gauge */}
-        <View className="mb-4">
-          <SafeToSpendGauge metrics={safeToSpendMetrics} currency={currency} />
-        </View>
+        {dashboardWidgets.safeToSpendGauge && (
+          <View className="mb-4">
+            <SafeToSpendGauge metrics={safeToSpendMetrics} currency={currency} />
+          </View>
+        )}
 
         {/* Balance Trend Sparkline Graph */}
-        <View className="mb-2">
-          <BalanceTrendLineChart
-            transactions={transactions}
-            currentTotalBalance={totalBalance}
-            currency={currency}
-            isSparkline={true}
-          />
-        </View>
+        {dashboardWidgets.sparklineTrend && (
+          <View className="mb-2">
+            <BalanceTrendLineChart
+              transactions={transactions}
+              currentTotalBalance={totalBalance}
+              currency={currency}
+              isSparkline={true}
+            />
+          </View>
+        )}
 
         {/* Recent Transactions Section */}
         <View className="mb-4">

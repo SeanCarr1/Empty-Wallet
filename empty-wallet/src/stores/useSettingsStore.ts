@@ -7,6 +7,13 @@ export interface EnabledCharts {
   categoryDonut: boolean;
   monthlyTrend: boolean;
   sparklineTrend: boolean;
+  safeToSpendGauge: boolean;
+}
+
+export interface DashboardWidgets {
+  safeToSpendGauge: boolean;
+  sparklineTrend: boolean;
+  cashFlowSummary: boolean;
 }
 
 interface SettingsState {
@@ -15,12 +22,15 @@ interface SettingsState {
   theme: 'dark' | 'light' | 'system';
   hasUnlockedSession: boolean;
   enabledCharts: EnabledCharts;
+  dashboardWidgets: DashboardWidgets;
   setCurrency: (currency: string) => void;
   setBiometricsEnabled: (enabled: boolean) => void;
   setTheme: (theme: 'dark' | 'light' | 'system') => void;
   setUnlockedSession: (unlocked: boolean) => void;
   toggleChart: (key: keyof EnabledCharts) => void;
   setEnabledCharts: (key: keyof EnabledCharts, enabled: boolean) => void;
+  toggleDashboardWidget: (key: keyof DashboardWidgets) => void;
+  setDashboardWidget: (key: keyof DashboardWidgets, enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -34,6 +44,12 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     categoryDonut: true,
     monthlyTrend: true,
     sparklineTrend: true,
+    safeToSpendGauge: true,
+  },
+  dashboardWidgets: {
+    safeToSpendGauge: true,
+    sparklineTrend: true,
+    cashFlowSummary: true,
   },
 
   setCurrency: (currency) => set({ currency }),
@@ -47,5 +63,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setEnabledCharts: (key, enabled) =>
     set((state) => ({
       enabledCharts: { ...state.enabledCharts, [key]: enabled },
+    })),
+  toggleDashboardWidget: (key) =>
+    set((state) => ({
+      dashboardWidgets: { ...state.dashboardWidgets, [key]: !state.dashboardWidgets[key] },
+    })),
+  setDashboardWidget: (key, enabled) =>
+    set((state) => ({
+      dashboardWidgets: { ...state.dashboardWidgets, [key]: enabled },
     })),
 }));

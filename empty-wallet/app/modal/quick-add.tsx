@@ -365,13 +365,13 @@ export default function QuickAddModal() {
           <View className="flex-1 mr-2">
             <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">Date</Text>
             <View className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center">
-              <Calendar size={14} color="#6B7280" className="mr-2" />
+              <Calendar size={14} color="#6B7280" className="mr-2.5" />
               <TextInput
                 value={dateStr}
                 onChangeText={setDateStr}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor="#6B7280"
-                className="flex-1 text-xs font-mono text-[#F3F4F6] p-0"
+                className="ml-1 flex-1 text-xs font-mono text-[#F3F4F6] p-0"
               />
             </View>
           </View>
@@ -379,13 +379,13 @@ export default function QuickAddModal() {
           <View className="flex-1 ml-2">
             <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">Time</Text>
             <View className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center">
-              <Clock size={14} color="#6B7280" className="mr-2" />
+              <Clock size={14} color="#6B7280" className="mr-2.5" />
               <TextInput
                 value={timeStr}
                 onChangeText={setTimeStr}
                 placeholder="HH:mm"
                 placeholderTextColor="#6B7280"
-                className="flex-1 text-xs font-mono text-[#F3F4F6] p-0"
+                className="ml-1 flex-1 text-xs font-mono text-[#F3F4F6] p-0"
               />
             </View>
           </View>
@@ -550,13 +550,13 @@ export default function QuickAddModal() {
 
             {/* Search Input */}
             <View className="flex-row items-center bg-[#212329] px-3 py-2 rounded-xl mb-3">
-              <Search size={15} color="#6B7280" className="mr-2" />
+              <Search size={15} color="#6B7280" className="mr-2.5" />
               <TextInput
                 value={categorySearch}
                 onChangeText={setCategorySearch}
                 placeholder="Search category or group..."
                 placeholderTextColor="#6B7280"
-                className="flex-1 text-xs text-[#F3F4F6] p-0"
+                className="ml-1 flex-1 text-xs text-[#F3F4F6] p-0"
               />
               {categorySearch ? (
                 <TouchableOpacity onPress={() => setCategorySearch('')}>
@@ -585,7 +585,7 @@ export default function QuickAddModal() {
                       </Text>
                     </View>
 
-                    <View className="flex-row flex-wrap -mx-1">
+                    <View className="flex-row flex-wrap justify-between">
                       {groupCats.map((cat) => {
                         const isSelected = selectedCategoryId === cat.id;
                         return (
@@ -596,7 +596,7 @@ export default function QuickAddModal() {
                               setSelectedCategoryId(cat.id);
                               setCategoryModalOpen(false);
                             }}
-                            className={`w-[48%] m-1 p-2.5 rounded-lg flex-row items-center border ${
+                            className={`w-[48%] mb-2 p-2.5 rounded-lg flex-row items-center border ${
                               isSelected
                                 ? 'bg-[#10B981]/20 border-[#10B981]'
                                 : 'bg-[#212329] border-[#2A2D35]'
