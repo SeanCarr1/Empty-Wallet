@@ -1,9 +1,13 @@
 # Workflow & Multi-Agent Orchestration Directives
 
-## Standard Execution Protocol:
-1. **Interactive Questions & Scoping**:
-   - Conduct design/feature discovery and questions using Gemini 3.7 Flash Medium.
-2. **Detailed Plan Generation**:
-   - Once a generic plan is aligned, generate the full structured chronological plan (in `plans/XXX_...md`) using Gemini 3.7 Flash High / High reasoning.
-3. **Parallel Subagent Execution**:
-   - Decompose and execute implementation tasks using parallel subagents equipped with Gemini 3.7 Flash Low (`flash_lite` / `flash`) models.
+## Model Hierarchy & Task Assignment Rules:
+
+1. **Planning & Architectural Reasoning**:
+   - Always plan using **Gemini 3.7 Flash High** (Parent Coordinator).
+   - Generates full chronological plans in `plans/` before execution.
+
+2. **Subagent Spawning & Tier Allocation**:
+   - **Small Individual Tasks** (Modular code edits, types, specific UI components, test runners, JSX fixes, script runs):
+     -> Use **Gemini 3.7 Flash Low** (`Model: 'flash_lite'`).
+   - **Bigger Tasks & Decisioning** (Complex component refactors, multi-file architectural transitions, domain evaluation, heuristic scoring):
+     -> Use **Gemini 3.7 Flash Medium** (`Model: 'flash'`).
