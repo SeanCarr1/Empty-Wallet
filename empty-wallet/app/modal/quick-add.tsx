@@ -1,115 +1,127 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTransactionStore } from '../../src/stores/useTransactionStore';
 import { useWalletStore } from '../../src/stores/useWalletStore';
 import { useCategoryStore } from '../../src/stores/useCategoryStore';
 import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { TransactionType, PaymentType } from '../../src/types';
 import { formatCurrency } from '../../src/services/currency';
-import { HapticKeypad } from '../../src/components/keypad/HapticKeypad';
 import { Icon } from '../../src/components/ui/Icon';
 import { triggerHaptic } from '../../src/services/haptics';
 import { MACRO_CATEGORY_GROUPS } from '../../src/constants/categories';
-import { X, Calendar, Clock, Edit3, ChevronDown, Check, User, CreditCard, Search } from 'lucide-react-native';
+import { X, Calendar, Clock, ChevronDown, Check, User, CreditCard, Search, Trash2, Delete, ArrowRightLeft } from 'lucide-react-native';
 import { format } from 'date-fns';
 
 export default function QuickAddModal() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditMode = !!id;
 
-  const { addTransaction } = useTransactionStore();
+  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useTransactionStore();
   const { wallets } = useWalletStore();
   const { categories, getExpenseCategories, getIncomeCategories } = useCategoryStore();
   const currency = useSettingsStore((s) => s.currency);
 
-  // 1. Record Type State
-  const [type, setType] = useState<TransactionType>('expense');
+  const existingTx = useMemo(() => transactions.find((t) => t.id === id), [transactions, id]);
 
-  // 2. Amount State
-  const [amountStr, setAmountStr] = useState<string>('');
+  const [type, setType] = useState<TransactionType>(existingTx?.type || 'expense');
+  const [amountStr, setAmountStr] = useState<string>(existingTx?.amount ? existingTx.amount.toString() : '');
+  const [selectedWalletId, setSelectedWalletId] = useState<string>(existingTx?.walletId || wallets[0]?.id || 'wallet_cash');
+  const [destinationWalletId, setDestinationWalletId] = useState<string>(existingTx?.destinationWalletId || wallets[1]?.id || '');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(existingTx?.categoryId || 'cat_food_dining');
+  const [dateStr, setDateStr] = useState<string>(existingTx?.transactionDate || format(new Date(), 'yyyy-MM-dd'));
+  const [timeStr, setTimeStr] = useState<string>(existingTx?.transactionTime || format(new Date(), 'HH:mm'));
+  const [payee, setPayee] = useState<string>(existingTx?.payee || '');
+  const [payer, setPayer] = useState<string>(existingTx?.payer || '');
+  const [note, setNote] = useState<string>(existingTx?.note || '');
+  const [paymentType, setPaymentType] = useState<PaymentType>(existingTx?.paymentType || 'cash');
 
-  // 3. Wallet Selectors
-  const [selectedWalletId, setSelectedWalletId] = useState<string>(wallets[0]?.id || 'wallet_cash');
-  const [destinationWalletId, setDestinationWalletId] = useState<string>(wallets[1]?.id || '');
-  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
-  const [destDropdownOpen, setDestDropdownOpen] = useState(false);
-
-  // 4. Category Selector
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('cat_food_dining');
+  // Modals
+  const [keypadModalOpen, setKeypadModalOpen] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [categorySearchQuery, setCategorySearchQuery] = useState('');
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [destWalletModalOpen, setDestWalletModalOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
 
-  // 5. Date & Time State
-  const now = new Date();
-  const [dateStr, setDateStr] = useState<string>(format(now, 'yyyy-MM-dd'));
-  const [timeStr, setTimeStr] = useState<string>(format(now, 'HH:mm'));
-  const [dateTimeModalOpen, setDateTimeModalOpen] = useState(false);
-
-  // 6. Other Details State
-  const [payee, setPayee] = useState<string>('');
-  const [payer, setPayer] = useState<string>('');
-  const [note, setNote] = useState<string>('');
-  const [paymentType, setPaymentType] = useState<PaymentType>('cash');
-  const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
-
-  const activeCategories = useMemo(() => {
-    return type === 'expense' ? getExpenseCategories() : getIncomeCategories();
-  }, [type, categories, getExpenseCategories, getIncomeCategories]);
-
-  // Grouped active categories filtered by current active type and search query
-  const groupedCategories = useMemo(() => {
-    const query = categorySearchQuery.trim().toLowerCase();
-    const filtered = activeCategories.filter((c) => {
-      if (!query) return true;
-      const matchName = c.name.toLowerCase().includes(query);
-      const groupObj = MACRO_CATEGORY_GROUPS.find((g) => g.id === c.group);
-      const matchGroup = groupObj ? groupObj.name.toLowerCase().includes(query) : false;
-      return matchName || matchGroup;
-    });
-
-    const groups: { group: (typeof MACRO_CATEGORY_GROUPS)[number]; items: typeof categories }[] = [];
-
-    for (const macroGroup of MACRO_CATEGORY_GROUPS) {
-      if (macroGroup.type !== 'both' && macroGroup.type !== type) {
-        continue;
-      }
-      const items = filtered.filter(
-        (c) => (c.group || (c.type === 'income' ? 'income' : 'others')) === macroGroup.id
-      );
-      if (items.length > 0) {
-        groups.push({ group: macroGroup, items });
-      }
+  useEffect(() => {
+    if (existingTx) {
+      setType(existingTx.type);
+      setAmountStr(existingTx.amount.toString());
+      setSelectedWalletId(existingTx.walletId);
+      if (existingTx.destinationWalletId) setDestinationWalletId(existingTx.destinationWalletId);
+      if (existingTx.categoryId) setSelectedCategoryId(existingTx.categoryId);
+      if (existingTx.transactionDate) setDateStr(existingTx.transactionDate);
+      if (existingTx.transactionTime) setTimeStr(existingTx.transactionTime);
+      if (existingTx.payee) setPayee(existingTx.payee);
+      if (existingTx.payer) setPayer(existingTx.payer);
+      if (existingTx.note) setNote(existingTx.note);
+      if (existingTx.paymentType) setPaymentType(existingTx.paymentType);
     }
+  }, [existingTx]);
 
-    return groups;
-  }, [activeCategories, categorySearchQuery, type]);
-
+  const selectedWallet = wallets.find((w) => w.id === selectedWalletId) || wallets[0];
+  const destWallet = wallets.find((w) => w.id === destinationWalletId) || wallets[1];
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
-  const selectedWallet = wallets.find((w) => w.id === selectedWalletId);
-  const destWallet = wallets.find((w) => w.id === destinationWalletId);
 
-  const PAYMENT_OPTIONS: { type: PaymentType; label: string; icon: string }[] = [
-    { type: 'cash', label: 'Cash', icon: 'Banknote' },
-    { type: 'debit_card', label: 'Debit Card', icon: 'CreditCard' },
-    { type: 'credit_card', label: 'Credit Card', icon: 'CreditCard' },
-    { type: 'transfer', label: 'Bank Transfer', icon: 'Landmark' },
-    { type: 'web_payment', label: 'Web Payment / E-Wallet', icon: 'Globe' },
-  ];
-
-  // Evaluate amount string
   const evaluatedAmount = useMemo(() => {
-    if (!amountStr) return 0;
     try {
       const sanitized = amountStr.replace(/[^0-9.+-]/g, '');
       if (!sanitized) return 0;
       const tokens = sanitized.match(/([+-]?[0-9.]+)/g);
       if (!tokens) return 0;
-      return tokens.reduce((sum, token) => sum + (parseFloat(token) || 0), 0);
+      const total = tokens.reduce((sum, token) => sum + (parseFloat(token) || 0), 0);
+      return Math.max(0, isNaN(total) ? 0 : total);
     } catch {
       return 0;
     }
   }, [amountStr]);
+
+  const availableCategories = useMemo(() => {
+    return type === 'income' ? getIncomeCategories() : getExpenseCategories();
+  }, [type, categories]);
+
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch.trim()) return availableCategories;
+    const q = categorySearch.toLowerCase().trim();
+    return availableCategories.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.group.toLowerCase().includes(q)
+    );
+  }, [availableCategories, categorySearch]);
+
+  const categoriesByGroup = useMemo(() => {
+    const map = new Map<string, typeof availableCategories>();
+    filteredCategories.forEach((cat) => {
+      const g = cat.group || 'others';
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(cat);
+    });
+    return map;
+  }, [filteredCategories]);
+
+  const handleKeyPress = (val: string) => {
+    triggerHaptic.selection();
+    if (val === 'C') {
+      setAmountStr('');
+      return;
+    }
+    if (val === 'BACK') {
+      setAmountStr((prev) => prev.slice(0, -1));
+      return;
+    }
+    if (val === '.') {
+      if (!amountStr.includes('.')) setAmountStr((prev) => (prev ? prev + '.' : '0.'));
+      return;
+    }
+    if (val === '+' || val === '-') {
+      if (amountStr && !amountStr.endsWith('+') && !amountStr.endsWith('-')) {
+        setAmountStr((prev) => prev + val);
+      }
+      return;
+    }
+    setAmountStr((prev) => prev + val);
+  };
 
   const handleSave = () => {
     if (evaluatedAmount <= 0) {
@@ -117,563 +129,581 @@ export default function QuickAddModal() {
       return;
     }
 
-    if (type === 'transfer' && (!destinationWalletId || destinationWalletId === selectedWalletId)) {
+    if (type === 'transfer' && selectedWalletId === destinationWalletId) {
       triggerHaptic.error();
+      Alert.alert('Invalid Transfer', 'Source and destination wallets cannot be the same.');
       return;
     }
 
-    const defaultPayee =
-      payee.trim() ||
-      (type === 'transfer'
-        ? `Transfer to ${destWallet?.name || 'Wallet'}`
-        : type === 'income'
-        ? 'Income Deposit'
-        : selectedCategory?.name || 'General Expense');
-
-    addTransaction({
+    const payload = {
       walletId: selectedWalletId,
       destinationWalletId: type === 'transfer' ? destinationWalletId : null,
-      categoryId: type === 'transfer' ? null : selectedCategoryId || null,
+      categoryId: type === 'transfer' ? null : selectedCategoryId,
       amount: evaluatedAmount,
       type,
-      payee: defaultPayee,
+      payee: payee.trim() || (type === 'transfer' ? `Transfer to ${destWallet?.name || 'Wallet'}` : selectedCategory?.name || 'Transaction'),
       payer: payer.trim() || null,
       paymentType,
       note: note.trim() || null,
       transactionDate: dateStr,
       transactionTime: timeStr,
-    });
+    };
 
     triggerHaptic.success();
+    if (isEditMode && id) {
+      updateTransaction(id, payload);
+    } else {
+      addTransaction(payload);
+    }
     router.back();
   };
 
+  const handleDelete = () => {
+    if (!id) return;
+    Alert.alert('Delete Record', 'Are you sure you want to permanently delete this transaction?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          triggerHaptic.heavy();
+          deleteTransaction(id);
+          router.back();
+        },
+      },
+    ]);
+  };
+
+  const PAYMENT_TYPES: { id: PaymentType; label: string }[] = [
+    { id: 'cash', label: 'Cash' },
+    { id: 'debit_card', label: 'Debit Card' },
+    { id: 'credit_card', label: 'Credit Card' },
+    { id: 'transfer', label: 'Bank Transfer' },
+    { id: 'web_payment', label: 'Web / E-Wallet' },
+  ];
+
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
-      {/* Header Bar */}
-      <View className="flex-row items-center justify-between px-4 py-2.5 border-b border-background-border">
+    <SafeAreaView className="flex-1 bg-[#0F1012]" edges={['top', 'bottom']}>
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-5 py-3 border-b border-[#2A2D35]">
         <TouchableOpacity
           onPress={() => {
             triggerHaptic.light();
             router.back();
           }}
-          className="p-1.5 -ml-1 rounded-lg"
+          className="w-9 h-9 rounded-lg bg-[#17181C] items-center justify-center"
         >
-          <X size={22} color="#9CA3AF" />
+          <X size={20} color="#9CA3AF" />
         </TouchableOpacity>
 
-        {/* 1. Record Type Switcher */}
-        <View className="flex-row bg-background-card p-1 rounded-lg border border-background-border">
-          {(['expense', 'income', 'transfer'] as const).map((t) => {
+        <Text className="text-base font-bold text-[#F3F4F6]">
+          {isEditMode ? 'Edit Record' : 'New Record'}
+        </Text>
+
+        {isEditMode ? (
+          <TouchableOpacity
+            onPress={handleDelete}
+            className="w-9 h-9 rounded-lg bg-[#212329] items-center justify-center"
+          >
+            <Trash2 size={18} color="#EF4444" />
+          </TouchableOpacity>
+        ) : (
+          <View className="w-9" />
+        )}
+      </View>
+
+      {/* Main Scrollable Form */}
+      <ScrollView
+        className="flex-1 px-5 pt-4"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 60 }}
+      >
+        {/* 1. Type Switcher */}
+        <View className="flex-row bg-[#17181C] p-1 rounded-xl mb-4 border border-[#2A2D35]">
+          {(['expense', 'income', 'transfer'] as TransactionType[]).map((t) => {
             const isSelected = type === t;
             const label = t === 'expense' ? 'Expense' : t === 'income' ? 'Income' : 'Transfer';
-            const bgClass =
-              t === 'expense' ? 'bg-expense' : t === 'income' ? 'bg-primary' : 'bg-accent-blue';
-            const textClass = isSelected
-              ? t === 'income'
-                ? 'text-[#0F1012] font-bold'
-                : 'text-content-primary font-bold'
-              : 'text-content-secondary';
-
             return (
               <TouchableOpacity
                 key={t}
                 onPress={() => {
                   triggerHaptic.selection();
                   setType(t);
-                  if (t === 'expense') {
-                    const expenseCats = getExpenseCategories();
-                    if (!expenseCats.some((c) => c.id === selectedCategoryId)) {
-                      setSelectedCategoryId(expenseCats[0]?.id || 'cat_food_dining');
-                    }
-                  } else if (t === 'income') {
-                    const incomeCats = getIncomeCategories();
-                    if (!incomeCats.some((c) => c.id === selectedCategoryId)) {
-                      setSelectedCategoryId(incomeCats[0]?.id || 'cat_salary');
-                    }
-                  }
                 }}
-                className={`px-3 py-1 rounded-md ${isSelected ? bgClass : ''}`}
+                className={`flex-1 py-2.5 rounded-lg items-center ${
+                  isSelected
+                    ? t === 'expense'
+                      ? 'bg-[#EF4444]'
+                      : t === 'income'
+                      ? 'bg-[#10B981]'
+                      : 'bg-[#3B82F6]'
+                    : ''
+                }`}
               >
-                <Text className={`text-xs font-semibold ${textClass}`}>{label}</Text>
+                <Text
+                  className={`text-xs font-bold ${
+                    isSelected ? 'text-[#0F1012]' : 'text-[#9CA3AF]'
+                  }`}
+                >
+                  {label}
+                </Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        <View className="w-8" />
-      </View>
-
-      <ScrollView className="flex-1 px-4 pt-1" showsVerticalScrollIndicator={false}>
-        {/* 2. Amount Display */}
-        <View className="items-center justify-center my-2.5">
-          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-            {type === 'expense'
-              ? 'Amount to Spend'
-              : type === 'income'
-              ? 'Amount to Receive'
-              : 'Transfer Amount'}
+        {/* 2. Amount Field (Spawns Keypad Modal) */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            triggerHaptic.selection();
+            setKeypadModalOpen(true);
+          }}
+          className="bg-[#17181C] p-4 rounded-xl border border-[#2A2D35] items-center mb-4"
+        >
+          <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1">
+            Amount ({currency}) • Tap to Enter
           </Text>
-          <View className="flex-row items-baseline">
-            <Text
-              className={`text-4xl font-extrabold tracking-tight font-mono ${
-                type === 'expense'
-                  ? 'text-expense'
-                  : type === 'income'
-                  ? 'text-primary'
-                  : 'text-accent-blue'
-              }`}
+          <Text className="text-3xl font-extrabold text-[#F3F4F6] font-mono">
+            {evaluatedAmount > 0 ? formatCurrency(evaluatedAmount, currency) : `0.00`}
+          </Text>
+          {amountStr && (amountStr.includes('+') || amountStr.includes('-')) && (
+            <Text className="text-xs text-[#9CA3AF] font-mono mt-1">{amountStr} = {formatCurrency(evaluatedAmount, currency)}</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* 3. Wallet Selectors */}
+        <View className="flex-row mb-4">
+          {/* Source Wallet */}
+          <View className="flex-1 mr-2">
+            <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+              {type === 'transfer' ? 'From Wallet' : 'Wallet'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setWalletModalOpen(true)}
+              className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center justify-between"
             >
-              {amountStr
-                ? `${type === 'expense' ? '-' : type === 'income' ? '+' : ''}${amountStr}`
-                : '0.00'}
-            </Text>
-            <Text className="text-content-secondary text-sm font-semibold ml-2 font-mono">{currency}</Text>
+              <View className="flex-row items-center flex-1 mr-2">
+                <View
+                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                  style={{ backgroundColor: `${selectedWallet?.color || '#10B981'}20` }}
+                >
+                  <Icon name={selectedWallet?.icon || 'Landmark'} size={15} color={selectedWallet?.color || '#10B981'} />
+                </View>
+                <Text className="text-xs font-bold text-[#F3F4F6] truncate" numberOfLines={1}>
+                  {selectedWallet?.name || 'Select'}
+                </Text>
+              </View>
+              <ChevronDown size={14} color="#6B7280" />
+            </TouchableOpacity>
           </View>
-          {amountStr.includes('+') || amountStr.includes('-') ? (
-            <Text className="text-content-secondary text-xs mt-0.5 font-mono">
-              Evaluates to: {formatCurrency(evaluatedAmount, currency)}
-            </Text>
-          ) : null}
+
+          {/* Destination Wallet (Transfer only) */}
+          {type === 'transfer' && (
+            <View className="flex-1 ml-2">
+              <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                To Wallet
+              </Text>
+              <TouchableOpacity
+                onPress={() => setDestWalletModalOpen(true)}
+                className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center justify-between"
+              >
+                <View className="flex-row items-center flex-1 mr-2">
+                  <View
+                    className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                    style={{ backgroundColor: `${destWallet?.color || '#3B82F6'}20` }}
+                  >
+                    <Icon name={destWallet?.icon || 'Landmark'} size={15} color={destWallet?.color || '#3B82F6'} />
+                  </View>
+                  <Text className="text-xs font-bold text-[#F3F4F6] truncate" numberOfLines={1}>
+                    {destWallet?.name || 'Select'}
+                  </Text>
+                </View>
+                <ChevronDown size={14} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        {/* 3. Wallet Dropdown / Selector */}
-        <View className="mb-2.5">
-          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-            {type === 'transfer' ? 'From Source Wallet' : 'Wallet / Account'}
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setWalletDropdownOpen(!walletDropdownOpen)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
-          >
-            <View className="flex-row items-center">
-              <View
-                className="w-7 h-7 rounded-lg items-center justify-center mr-2"
-                style={{ backgroundColor: `${selectedWallet?.color || '#10B981'}20` }}
-              >
-                <Icon
-                  name={selectedWallet?.icon || 'Wallet'}
-                  size={15}
-                  color={selectedWallet?.color || '#10B981'}
-                />
+        {/* 4. Category Selector (for Expense / Income) */}
+        {type !== 'transfer' && (
+          <View className="mb-4">
+            <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+              Category
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                triggerHaptic.selection();
+                setCategoryModalOpen(true);
+              }}
+              className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center flex-1 mr-2">
+                <View
+                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                  style={{ backgroundColor: `${selectedCategory?.color || '#10B981'}20` }}
+                >
+                  <Icon name={selectedCategory?.icon || 'ShoppingBag'} size={15} color={selectedCategory?.color || '#10B981'} />
+                </View>
+                <View>
+                  <Text className="text-xs font-bold text-[#F3F4F6]">
+                    {selectedCategory?.name || 'Choose Category'}
+                  </Text>
+                  <Text className="text-[10px] text-[#6B7280] capitalize">
+                    {selectedCategory?.group.replace('_', ' ') || 'General'}
+                  </Text>
+                </View>
               </View>
-              <Text className="text-content-primary font-bold text-xs">
-                {selectedWallet?.name || 'Select Wallet'}
+              <ChevronDown size={14} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* 5. Date & Time */}
+        <View className="flex-row mb-4">
+          <View className="flex-1 mr-2">
+            <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">Date</Text>
+            <View className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center">
+              <Calendar size={14} color="#6B7280" className="mr-2" />
+              <TextInput
+                value={dateStr}
+                onChangeText={setDateStr}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor="#6B7280"
+                className="flex-1 text-xs font-mono text-[#F3F4F6] p-0"
+              />
+            </View>
+          </View>
+
+          <View className="flex-1 ml-2">
+            <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">Time</Text>
+            <View className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] flex-row items-center">
+              <Clock size={14} color="#6B7280" className="mr-2" />
+              <TextInput
+                value={timeStr}
+                onChangeText={setTimeStr}
+                placeholder="HH:mm"
+                placeholderTextColor="#6B7280"
+                className="flex-1 text-xs font-mono text-[#F3F4F6] p-0"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* 6. Payment Type */}
+        <View className="mb-4">
+          <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+            Payment Type
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row -mx-1">
+            {PAYMENT_TYPES.map((pt) => {
+              const isSelected = paymentType === pt.id;
+              return (
+                <TouchableOpacity
+                  key={pt.id}
+                  onPress={() => {
+                    triggerHaptic.selection();
+                    setPaymentType(pt.id);
+                  }}
+                  className={`px-3 py-2 rounded-lg mx-1 border ${
+                    isSelected ? 'bg-[#10B981]/20 border-[#10B981]' : 'bg-[#17181C] border-[#2A2D35]'
+                  }`}
+                >
+                  <Text className={`text-xs font-semibold ${isSelected ? 'text-[#10B981]' : 'text-[#9CA3AF]'}`}>
+                    {pt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* 7. Payee / Payer / Note Details */}
+        <View className="mb-4">
+          <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+            {type === 'income' ? 'Payer / Source' : 'Payee / Merchant'}
+          </Text>
+          <TextInput
+            value={type === 'income' ? payer : payee}
+            onChangeText={type === 'income' ? setPayer : setPayee}
+            placeholder={type === 'income' ? 'e.g. Employer, Client name' : 'e.g. Starbucks, Shell, Supermarket'}
+            placeholderTextColor="#6B7280"
+            className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] text-xs text-[#F3F4F6] mb-3"
+          />
+
+          <Text className="text-[#6B7280] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+            Note / Description (Optional)
+          </Text>
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder="Add any additional details..."
+            placeholderTextColor="#6B7280"
+            className="bg-[#17181C] p-3 rounded-xl border border-[#2A2D35] text-xs text-[#F3F4F6]"
+          />
+        </View>
+
+        {/* 8. Save / Update Button */}
+        <TouchableOpacity
+          onPress={handleSave}
+          className="bg-[#10B981] py-3.5 rounded-xl items-center mt-2 shadow-lg shadow-[#10B981]/20"
+        >
+          <Text className="text-[#0F1012] font-bold text-sm">
+            {isEditMode ? 'Update Record' : 'Save Record'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* POPUP MODAL: NUMERIC KEYPAD */}
+      <Modal visible={keypadModalOpen} animationType="slide" transparent>
+        <View className="flex-1 bg-black/70 justify-end">
+          <View className="bg-[#17181C] rounded-t-2xl p-5 border-t border-[#2A2D35]">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                Enter Amount ({currency})
               </Text>
-              <Text className="text-content-tertiary text-[11px] ml-2 font-mono">
-                ({formatCurrency(selectedWallet?.balance || 0, selectedWallet?.currency)})
+              <TouchableOpacity
+                onPress={() => setKeypadModalOpen(false)}
+                className="p-1 rounded-lg bg-[#212329]"
+              >
+                <X size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Display */}
+            <View className="bg-[#0F1012] p-4 rounded-xl border border-[#2A2D35] items-end mb-4">
+              <Text className="text-2xl font-extrabold text-[#F3F4F6] font-mono">
+                {amountStr || '0'}
+              </Text>
+              <Text className="text-xs text-[#10B981] font-mono mt-0.5">
+                = {formatCurrency(evaluatedAmount, currency)}
               </Text>
             </View>
-            <ChevronDown size={15} color="#6B7280" />
-          </TouchableOpacity>
 
-          {walletDropdownOpen && (
-            <View className="bg-background-elevated border border-background-border rounded-xl p-1.5 mt-1">
+            {/* Keypad Grid */}
+            <View className="flex-row flex-wrap justify-between">
+              {['1', '2', '3', '+', '4', '5', '6', '-', '7', '8', '9', 'C', '.', '0', 'BACK', 'OK'].map((k) => {
+                const isOp = k === '+' || k === '-';
+                const isOk = k === 'OK';
+                const isClear = k === 'C' || k === 'BACK';
+
+                if (isOk) {
+                  return (
+                    <TouchableOpacity
+                      key={k}
+                      onPress={() => {
+                        triggerHaptic.medium();
+                        setKeypadModalOpen(false);
+                      }}
+                      className="w-[23%] bg-[#10B981] h-12 rounded-lg mb-2.5 items-center justify-center"
+                    >
+                      <Text className="text-[#0F1012] font-bold text-sm">Done</Text>
+                    </TouchableOpacity>
+                  );
+                }
+
+                return (
+                  <TouchableOpacity
+                    key={k}
+                    onPress={() => handleKeyPress(k)}
+                    className={`w-[23%] h-12 rounded-lg mb-2.5 items-center justify-center ${
+                      isOp
+                        ? 'bg-[#3B82F6]/20 border border-[#3B82F6]/40'
+                        : isClear
+                        ? 'bg-[#EF4444]/20 border border-[#EF4444]/40'
+                        : 'bg-[#212329]'
+                    }`}
+                  >
+                    {k === 'BACK' ? (
+                      <Delete size={18} color="#EF4444" />
+                    ) : (
+                      <Text
+                        className={`text-base font-bold font-mono ${
+                          isOp ? 'text-[#3B82F6]' : isClear ? 'text-[#EF4444]' : 'text-[#F3F4F6]'
+                        }`}
+                      >
+                        {k}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* POPUP MODAL: CATEGORY PICKER */}
+      <Modal visible={categoryModalOpen} animationType="slide" transparent>
+        <View className="flex-1 bg-black/75 justify-end">
+          <View className="bg-[#17181C] rounded-t-2xl max-h-[80%] p-5 border-t border-[#2A2D35]">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-sm font-bold text-[#F3F4F6]">Choose Category</Text>
+              <TouchableOpacity
+                onPress={() => setCategoryModalOpen(false)}
+                className="p-1 rounded-lg bg-[#212329]"
+              >
+                <X size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Input */}
+            <View className="flex-row items-center bg-[#212329] px-3 py-2 rounded-xl mb-3">
+              <Search size={15} color="#6B7280" className="mr-2" />
+              <TextInput
+                value={categorySearch}
+                onChangeText={setCategorySearch}
+                placeholder="Search category or group..."
+                placeholderTextColor="#6B7280"
+                className="flex-1 text-xs text-[#F3F4F6] p-0"
+              />
+              {categorySearch ? (
+                <TouchableOpacity onPress={() => setCategorySearch('')}>
+                  <X size={14} color="#6B7280" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {/* Sectioned Group Grid */}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {MACRO_CATEGORY_GROUPS.filter((g) => (type === 'income' ? g.type === 'income' : g.type === 'expense')).map((grp) => {
+                const groupCats = categoriesByGroup.get(grp.id) || [];
+                if (groupCats.length === 0) return null;
+
+                return (
+                  <View key={grp.id} className="mb-4">
+                    <View className="flex-row items-center mb-2">
+                      <View
+                        className="w-5 h-5 rounded-md items-center justify-center mr-2"
+                        style={{ backgroundColor: `${grp.color}20` }}
+                      >
+                        <Icon name={grp.icon} size={12} color={grp.color} />
+                      </View>
+                      <Text className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                        {grp.label}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row flex-wrap -mx-1">
+                      {groupCats.map((cat) => {
+                        const isSelected = selectedCategoryId === cat.id;
+                        return (
+                          <TouchableOpacity
+                            key={cat.id}
+                            onPress={() => {
+                              triggerHaptic.selection();
+                              setSelectedCategoryId(cat.id);
+                              setCategoryModalOpen(false);
+                            }}
+                            className={`w-[48%] m-1 p-2.5 rounded-lg flex-row items-center border ${
+                              isSelected
+                                ? 'bg-[#10B981]/20 border-[#10B981]'
+                                : 'bg-[#212329] border-[#2A2D35]'
+                            }`}
+                          >
+                            <View
+                              className="w-6 h-6 rounded-md items-center justify-center mr-2"
+                              style={{ backgroundColor: `${cat.color}20` }}
+                            >
+                              <Icon name={cat.icon} size={13} color={cat.color} />
+                            </View>
+                            <Text
+                              className={`text-xs font-semibold flex-1 truncate ${
+                                isSelected ? 'text-[#10B981]' : 'text-[#F3F4F6]'
+                              }`}
+                              numberOfLines={1}
+                            >
+                              {cat.name}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* POPUP MODAL: SOURCE WALLET PICKER */}
+      <Modal visible={walletModalOpen} animationType="slide" transparent>
+        <View className="flex-1 bg-black/75 justify-end">
+          <View className="bg-[#17181C] rounded-t-2xl p-5 border-t border-[#2A2D35]">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-sm font-bold text-[#F3F4F6]">Select Wallet</Text>
+              <TouchableOpacity onPress={() => setWalletModalOpen(false)} className="p-1 rounded-lg bg-[#212329]">
+                <X size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {wallets.map((w) => (
                 <TouchableOpacity
                   key={w.id}
                   onPress={() => {
                     triggerHaptic.selection();
                     setSelectedWalletId(w.id);
-                    setWalletDropdownOpen(false);
+                    setWalletModalOpen(false);
                   }}
-                  className="flex-row items-center justify-between p-2 rounded-lg active:bg-background-card"
+                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 border ${
+                    selectedWalletId === w.id ? 'bg-[#10B981]/20 border-[#10B981]' : 'bg-[#212329] border-[#2A2D35]'
+                  }`}
                 >
                   <View className="flex-row items-center">
-                    <Icon name={w.icon} size={15} color={w.color} />
-                    <Text className="text-content-primary text-xs font-semibold ml-2">{w.name}</Text>
-                  </View>
-                  <Text className="text-content-tertiary text-xs font-mono">
-                    {formatCurrency(w.balance, w.currency)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* 3b. Destination Wallet (If Transfer) */}
-        {type === 'transfer' && (
-          <View className="mb-2.5">
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-              To Destination Wallet
-            </Text>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setDestDropdownOpen(!destDropdownOpen)}
-              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
-            >
-              <View className="flex-row items-center">
-                <View
-                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
-                  style={{ backgroundColor: `${destWallet?.color || '#3B82F6'}20` }}
-                >
-                  <Icon
-                    name={destWallet?.icon || 'Landmark'}
-                    size={15}
-                    color={destWallet?.color || '#3B82F6'}
-                  />
-                </View>
-                <Text className="text-content-primary font-bold text-xs">
-                  {destWallet?.name || 'Select Destination Wallet'}
-                </Text>
-              </View>
-              <ChevronDown size={15} color="#6B7280" />
-            </TouchableOpacity>
-
-            {destDropdownOpen && (
-              <View className="bg-background-elevated border border-background-border rounded-xl p-1.5 mt-1">
-                {wallets
-                  .filter((w) => w.id !== selectedWalletId)
-                  .map((w) => (
-                    <TouchableOpacity
-                      key={w.id}
-                      onPress={() => {
-                        triggerHaptic.selection();
-                        setDestinationWalletId(w.id);
-                        setDestDropdownOpen(false);
-                      }}
-                      className="flex-row items-center justify-between p-2 rounded-lg active:bg-background-card"
-                    >
-                      <View className="flex-row items-center">
-                        <Icon name={w.icon} size={15} color={w.color} />
-                        <Text className="text-content-primary text-xs font-semibold ml-2">{w.name}</Text>
-                      </View>
-                      <Text className="text-content-tertiary text-xs font-mono">
-                        {formatCurrency(w.balance, w.currency)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* 4. Category Dropdown / Selector */}
-        {type !== 'transfer' && (
-          <View className="mb-2.5">
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-              Category
-            </Text>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setCategoryModalOpen(true)}
-              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
-            >
-              <View className="flex-row items-center">
-                <View
-                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
-                  style={{ backgroundColor: `${selectedCategory?.color || '#10B981'}20` }}
-                >
-                  <Icon
-                    name={selectedCategory?.icon || 'Tag'}
-                    size={15}
-                    color={selectedCategory?.color || '#10B981'}
-                  />
-                </View>
-                <Text className="text-content-primary font-bold text-xs">
-                  {selectedCategory?.name || 'Choose Category'}
-                </Text>
-              </View>
-              <ChevronDown size={15} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* 5. Date & Time Calendar Selector */}
-        <View className="mb-2.5">
-          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-            Date & Time
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setDateTimeModalOpen(true)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
-          >
-            <View className="flex-row items-center">
-              <Calendar size={15} color="#10B981" />
-              <Text className="text-content-primary font-bold text-xs ml-2 font-mono">{dateStr}</Text>
-              <Text className="text-content-muted mx-2">•</Text>
-              <Clock size={15} color="#9CA3AF" />
-              <Text className="text-content-primary font-bold text-xs ml-2 font-mono">{timeStr}</Text>
-            </View>
-            <Edit3 size={14} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-
-        {/* 6. Other Details (Payer, Payee, Payment Type, Note) */}
-        <View className="mb-2.5">
-          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
-            Payment Type & Merchant Details
-          </Text>
-
-          {/* Payment Type Dropdown */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setPaymentDropdownOpen(!paymentDropdownOpen)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-lg p-2.5 mb-1.5"
-          >
-            <View className="flex-row items-center">
-              <CreditCard size={15} color="#F59E0B" />
-              <Text className="text-content-primary font-semibold text-xs ml-2">
-                Payment: {PAYMENT_OPTIONS.find((p) => p.type === paymentType)?.label || 'Cash'}
-              </Text>
-            </View>
-            <ChevronDown size={15} color="#6B7280" />
-          </TouchableOpacity>
-
-          {paymentDropdownOpen && (
-            <View className="bg-background-elevated border border-background-border rounded-lg p-1.5 mb-1.5">
-              {PAYMENT_OPTIONS.map((opt) => (
-                <TouchableOpacity
-                  key={opt.type}
-                  onPress={() => {
-                    triggerHaptic.selection();
-                    setPaymentType(opt.type);
-                    setPaymentDropdownOpen(false);
-                  }}
-                  className="flex-row items-center justify-between p-2 rounded-md active:bg-background-card"
-                >
-                  <Text className="text-content-primary text-xs font-semibold">{opt.label}</Text>
-                  {paymentType === opt.type && <Check size={15} color="#10B981" />}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* Payee / Merchant */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
-            <Edit3 size={15} color="#6B7280" />
-            <TextInput
-              value={payee}
-              onChangeText={setPayee}
-              placeholder={type === 'expense' ? 'Payee / Merchant (e.g. Starbucks, Shell)' : 'Income Source'}
-              placeholderTextColor="#6B7280"
-              className="flex-1 ml-2 text-content-primary text-xs font-medium"
-            />
-          </View>
-
-          {/* Payer (Optional) */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
-            <User size={15} color="#6B7280" />
-            <TextInput
-              value={payer}
-              onChangeText={setPayer}
-              placeholder="Payer / Spender (Optional)"
-              placeholderTextColor="#6B7280"
-              className="flex-1 ml-2 text-content-primary text-xs font-medium"
-            />
-          </View>
-
-          {/* Note / Memo */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
-            <TextInput
-              value={note}
-              onChangeText={setNote}
-              placeholder="Add note, receipt tags, or memo (Optional)..."
-              placeholderTextColor="#6B7280"
-              className="flex-1 text-content-primary text-xs font-medium"
-            />
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Built-in Haptic Keypad at Bottom */}
-      <HapticKeypad
-        value={amountStr}
-        onChange={setAmountStr}
-        onSubmit={handleSave}
-        submitDisabled={evaluatedAmount <= 0}
-      />
-
-      {/* CATEGORY PICKER MODAL */}
-      <Modal visible={categoryModalOpen} animationType="slide" transparent>
-        <View className="flex-1 bg-black/80 justify-end">
-          <View className="bg-background-card rounded-t-2xl p-5 border-t border-background-border max-h-[85%]">
-            {/* Modal Header */}
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center">
-                <Text className="text-base font-bold text-content-primary">Choose Category</Text>
-                <View className="bg-background-elevated px-2 py-0.5 rounded-md border border-background-border ml-2.5">
-                  <Text className="text-[10px] font-semibold text-content-secondary uppercase tracking-wider">
-                    {type === 'expense' ? 'Expense' : 'Income'}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setCategoryModalOpen(false);
-                  setCategorySearchQuery('');
-                }}
-                className="p-1 rounded-lg"
-              >
-                <X size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Real-Time Search Bar */}
-            <View className="flex-row items-center bg-background-elevated border border-background-border rounded-lg px-3 py-2 mb-3">
-              <Search size={15} color="#6B7280" />
-              <TextInput
-                value={categorySearchQuery}
-                onChangeText={setCategorySearchQuery}
-                placeholder="Search categories or groups..."
-                placeholderTextColor="#6B7280"
-                className="flex-1 ml-2 text-content-primary text-xs font-medium"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              {categorySearchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setCategorySearchQuery('')}>
-                  <X size={14} color="#6B7280" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {/* Sectioned Visual Grid */}
-            <ScrollView showsVerticalScrollIndicator={false} className="mb-2">
-              {groupedCategories.length === 0 ? (
-                <View className="py-8 items-center justify-center">
-                  <Text className="text-content-tertiary text-xs">
-                    No categories found for "{categorySearchQuery}"
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setCategorySearchQuery('')}
-                    className="mt-2.5 bg-background-elevated px-3 py-1.5 rounded-lg border border-background-border"
-                  >
-                    <Text className="text-primary text-xs font-semibold">Clear Search</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                groupedCategories.map(({ group, items }) => (
-                  <View key={group.id} className="mb-4">
-                    {/* Sticky / Clear Group Header */}
-                    <View className="flex-row items-center justify-between mb-2 px-1">
-                      <View className="flex-row items-center">
-                        <View
-                          className="w-5 h-5 rounded-md items-center justify-center mr-1.5"
-                          style={{ backgroundColor: `${group.color}20` }}
-                        >
-                          <Icon name={group.icon} size={12} color={group.color} />
-                        </View>
-                        <Text className="text-[11px] font-bold text-content-secondary uppercase tracking-wider">
-                          {group.name}
-                        </Text>
-                      </View>
-                      <Text className="text-[10px] text-content-tertiary font-mono">
-                        {items.length} {items.length === 1 ? 'item' : 'items'}
-                      </Text>
+                    <View className="w-8 h-8 rounded-lg items-center justify-center mr-3" style={{ backgroundColor: `${w.color}20` }}>
+                      <Icon name={w.icon} size={16} color={w.color} />
                     </View>
-
-                    {/* Category Items in Sleek Grid Tiles */}
-                    <View className="flex-row flex-wrap justify-between">
-                      {items.map((c) => {
-                        const isSelected = selectedCategoryId === c.id;
-                        return (
-                          <TouchableOpacity
-                            key={c.id}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              triggerHaptic.selection();
-                              setSelectedCategoryId(c.id);
-                              setCategoryModalOpen(false);
-                              setCategorySearchQuery('');
-                            }}
-                            className={`w-[48.5%] flex-row items-center p-2.5 rounded-lg mb-2 border ${
-                              isSelected
-                                ? 'bg-primary/20 border-primary shadow-sm'
-                                : 'bg-background-elevated border-background-border'
-                            }`}
-                          >
-                            <View
-                              className="w-7 h-7 rounded-md items-center justify-center mr-2"
-                              style={{
-                                backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.25)' : `${c.color}20`,
-                              }}
-                            >
-                              <Icon name={c.icon} size={14} color={isSelected ? '#10B981' : c.color} />
-                            </View>
-                            <Text
-                              className={`text-xs font-semibold flex-1 mr-1 ${
-                                isSelected ? 'text-primary' : 'text-content-primary'
-                              }`}
-                              numberOfLines={1}
-                            >
-                              {c.name}
-                            </Text>
-                            {isSelected && <Check size={13} color="#10B981" />}
-                          </TouchableOpacity>
-                        );
-                      })}
+                    <View>
+                      <Text className="text-xs font-bold text-[#F3F4F6]">{w.name}</Text>
+                      <Text className="text-[10px] text-[#6B7280] uppercase">{w.type}</Text>
                     </View>
                   </View>
-                ))
-              )}
+                  <Text className="text-xs font-mono font-bold text-[#F3F4F6]">{formatCurrency(w.balance, w.currency)}</Text>
+                </TouchableOpacity>
+              ))}
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* DATE & TIME PICKER MODAL */}
-      <Modal visible={dateTimeModalOpen} animationType="slide" transparent>
+      {/* POPUP MODAL: DESTINATION WALLET PICKER */}
+      <Modal visible={destWalletModalOpen} animationType="slide" transparent>
         <View className="flex-1 bg-black/75 justify-end">
-          <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border">
-            <View className="flex-row items-center justify-between mb-3.5">
-              <Text className="text-base font-bold text-content-primary">Select Date & Time</Text>
-              <TouchableOpacity onPress={() => setDateTimeModalOpen(false)}>
+          <View className="bg-[#17181C] rounded-t-2xl p-5 border-t border-[#2A2D35]">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-sm font-bold text-[#F3F4F6]">Select Destination Wallet</Text>
+              <TouchableOpacity onPress={() => setDestWalletModalOpen(false)} className="p-1 rounded-lg bg-[#212329]">
                 <X size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
-
-            {/* Quick Presets */}
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1.5">Quick Date</Text>
-            <View className="flex-row mb-3.5">
-              <TouchableOpacity
-                onPress={() => setDateStr(format(new Date(), 'yyyy-MM-dd'))}
-                className="flex-1 bg-background-elevated py-2 rounded-lg items-center mr-2 border border-background-border"
-              >
-                <Text className="text-content-primary font-bold text-xs">Today</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() =>
-                  setDateStr(format(new Date(Date.now() - 86400000), 'yyyy-MM-dd'))
-                }
-                className="flex-1 bg-background-elevated py-2 rounded-lg items-center mr-2 border border-background-border"
-              >
-                <Text className="text-content-primary font-bold text-xs">Yesterday</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Date Input */}
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Date (YYYY-MM-DD)</Text>
-            <TextInput
-              value={dateStr}
-              onChangeText={setDateStr}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#6B7280"
-              className="bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold mb-2.5 font-mono"
-            />
-
-            {/* Time Input */}
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Time (HH:mm)</Text>
-            <TextInput
-              value={timeStr}
-              onChangeText={setTimeStr}
-              placeholder="HH:mm (e.g. 14:30)"
-              placeholderTextColor="#6B7280"
-              className="bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold mb-5 font-mono"
-            />
-
-            <TouchableOpacity
-              onPress={() => {
-                triggerHaptic.selection();
-                setDateTimeModalOpen(false);
-              }}
-              className="bg-primary py-2.5 rounded-lg items-center active:opacity-80"
-            >
-              <Text className="text-[#0F1012] font-bold text-xs">Done</Text>
-            </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {wallets.map((w) => (
+                <TouchableOpacity
+                  key={w.id}
+                  onPress={() => {
+                    triggerHaptic.selection();
+                    setDestinationWalletId(w.id);
+                    setDestWalletModalOpen(false);
+                  }}
+                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 border ${
+                    destinationWalletId === w.id ? 'bg-[#3B82F6]/20 border-[#3B82F6]' : 'bg-[#212329] border-[#2A2D35]'
+                  }`}
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-8 h-8 rounded-lg items-center justify-center mr-3" style={{ backgroundColor: `${w.color}20` }}>
+                      <Icon name={w.icon} size={16} color={w.color} />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-bold text-[#F3F4F6]">{w.name}</Text>
+                      <Text className="text-[10px] text-[#6B7280] uppercase">{w.type}</Text>
+                    </View>
+                  </View>
+                  <Text className="text-xs font-mono font-bold text-[#F3F4F6]">{formatCurrency(w.balance, w.currency)}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </View>
       </Modal>

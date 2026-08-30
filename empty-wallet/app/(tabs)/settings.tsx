@@ -180,7 +180,40 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Section 4: App Information & Brand Logo */}
+        {/* Section 4: Chart & Widget Visibility */}
+        <View className="mb-5">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
+            Chart & Widget Visibility
+          </Text>
+          <View className="bg-background-card rounded-xl border border-background-border overflow-hidden p-3.5">
+            {[
+              { id: 'cashFlow', label: 'Cash Flow' },
+              { id: 'balanceTrend', label: 'Balance Trend' },
+              { id: 'categoryDonut', label: 'Category Donut' },
+              { id: 'monthlyTrend', label: 'Monthly Trend' },
+              { id: 'sparklineTrend', label: 'Sparkline Trend' },
+            ].map((chart) => {
+              const { enabledCharts, setEnabledCharts } = useSettingsStore();
+              const isEnabled = enabledCharts[chart.id as keyof typeof enabledCharts];
+              return (
+                <View key={chart.id} className="flex-row items-center justify-between mb-3 last:mb-0">
+                  <Text className="text-content-primary font-medium text-xs">{chart.label}</Text>
+                  <Switch
+                    value={isEnabled}
+                    onValueChange={(val) => {
+                      triggerHaptic.selection();
+                      setEnabledCharts(chart.id as keyof typeof enabledCharts, val);
+                    }}
+                    trackColor={{ false: '#2A2D35', true: '#10B981' }}
+                    thumbColor="#F3F4F6"
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Section 5: App Information & Brand Logo */}
         <View className="bg-background-card rounded-xl p-5 border border-background-border items-center">
           <Image
             source={require('../../assets/logo.jpg')}

@@ -132,19 +132,15 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   return (
     <View className="w-full bg-background-card p-4 rounded-xl border border-background-border mb-4">
       {/* Header & Timeframe Switcher */}
-      <View className="flex-row items-center justify-between mb-3">
-        <View>
-          <Text className="text-content-primary font-bold text-sm">Net Balance Progression</Text>
-          <View className="flex-row items-center mt-0.5">
-            {isPositive ? <TrendingUp size={13} color="#10B981" /> : <TrendingDown size={13} color="#EF4444" />}
-            <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-              {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)} ({timeframe})
-            </Text>
-          </View>
+      <View className="flex-row items-center justify-between mb-3 gap-2">
+        <View className="flex-1 mr-2">
+          <Text className="text-content-primary font-bold text-xs uppercase tracking-wider" numberOfLines={1}>
+            Net Balance Progression
+          </Text>
         </View>
 
         {/* Timeframe Chips */}
-        <View className="flex-row bg-background-elevated p-0.5 rounded-md border border-background-border">
+        <View className="flex-row bg-background-elevated p-0.5 rounded-md border border-background-border shrink-0">
           {(['7D', '30D', '90D', 'ALL'] as const).map((tf) => (
             <TouchableOpacity
               key={tf}
@@ -152,7 +148,7 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
                 triggerHaptic.selection();
                 setTimeframe(tf);
               }}
-              className={`px-2.5 py-1 rounded-md ${
+              className={`px-2 py-1 rounded-md ${
                 timeframe === tf ? 'bg-[#10B981]' : ''
               }`}
             >

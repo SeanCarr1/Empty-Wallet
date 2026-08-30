@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useWalletStore } from '../../src/stores/useWalletStore';
 import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { WalletType } from '../../src/types';
@@ -15,7 +15,8 @@ export default function ManageWalletsModal() {
   const { wallets, addWallet, deleteWallet, transferFunds } = useWalletStore();
   const currency = useSettingsStore((s) => s.currency);
 
-  const [activeTab, setActiveTab] = useState<'list' | 'transfer'>('list');
+  const { tab } = useLocalSearchParams<{ tab?: 'list' | 'transfer' }>();
+  const [activeTab, setActiveTab] = useState<'list' | 'transfer'>(tab || 'list');
 
   // Add Wallet Modal State
   const [addModalVisible, setAddModalVisible] = useState(false);

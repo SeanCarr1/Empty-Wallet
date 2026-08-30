@@ -10,7 +10,7 @@ import { formatCurrency } from '../../src/services/currency';
 import { calculateCategoryBudgetStatus } from '../../src/services/budgetEngine';
 import { Icon } from '../../src/components/ui/Icon';
 import { MACRO_CATEGORY_GROUPS } from '../../src/constants/categories';
-import { Plus, Target, CreditCard, Sparkles, AlertTriangle, Trash2, Check, X } from 'lucide-react-native';
+import { Plus, Target, CreditCard, Sparkles, AlertTriangle, Trash2, Check, X, ChevronDown, Search } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function BudgetsScreen() {
@@ -26,6 +26,8 @@ export default function BudgetsScreen() {
   const [budgetModalVisible, setBudgetModalVisible] = useState(false);
   const [selectedCatId, setSelectedCatId] = useState('');
   const [budgetLimitInput, setBudgetLimitInput] = useState('');
+  const [budgetCatPickerOpen, setBudgetCatPickerOpen] = useState(false);
+  const [budgetCatSearch, setBudgetCatSearch] = useState('');
 
   // Goal Modal State
   const [goalModalVisible, setGoalModalVisible] = useState(false);
@@ -47,6 +49,7 @@ export default function BudgetsScreen() {
 
   const expenseCategories = getExpenseCategories();
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const selectedCat = selectedCatId ? categoryMap.get(selectedCatId) : null;
 
   const groupedExpenseCategories = useMemo(() => {
     const groups: { group: (typeof MACRO_CATEGORY_GROUPS)[number]; items: typeof expenseCategories }[] = [];
@@ -432,96 +435,35 @@ export default function BudgetsScreen() {
                 Pick a category and assign a monthly spending limit
               </Text>
 
-              {/* Selected Category Preview */}
-              {selectedCatId ? (
-                <View className="flex-row items-center bg-primary/10 border border-primary/30 rounded-lg p-2 mb-3">
-                  <View
-                    className="w-6 h-6 rounded-md items-center justify-center mr-2"
-                    style={{
-                      backgroundColor: `${categoryMap.get(selectedCatId)?.color || '#10B981'}25`,
-                    }}
-                  >
-                    <Icon
-                      name={categoryMap.get(selectedCatId)?.icon || 'Tag'}
-                      size={13}
-                      color={categoryMap.get(selectedCatId)?.color || '#10B981'}
-                    />
-                  </View>
-                  <Text className="text-xs font-bold text-primary flex-1">
-                    Selected: {categoryMap.get(selectedCatId)?.name}
-                  </Text>
-                  <Check size={14} color="#10B981" />
-                </View>
-              ) : null}
-
-              {/* Category Picker Organized by Macro Groups */}
-              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">
-                Expense Categories
+              {/* Category Dropdown Button */}
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                Category
               </Text>
-
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                className="max-h-56 bg-background-elevated/40 border border-background-border/60 rounded-xl p-2.5 mb-3.5"
+              <TouchableOpacity
+                onPress={() => {
+                  triggerHaptic.selection();
+                  setBudgetCatPickerOpen(true);
+                }}
+                className="bg-background-elevated border border-background-border rounded-lg p-3 mb-4 flex-row items-center justify-between"
               >
-                {groupedExpenseCategories.map(({ group, items }, idx) => (
-                  <View
-                    key={group.id}
-                    className={`${idx > 0 ? 'mt-3 pt-2.5 border-t border-background-border/40' : ''}`}
-                  >
-                    {/* Section Divider & Group Header */}
-                    <View className="flex-row items-center justify-between mb-2">
-                      <View className="flex-row items-center">
-                        <View
-                          className="w-4 h-4 rounded-md items-center justify-center mr-1.5"
-                          style={{ backgroundColor: `${group.color}20` }}
-                        >
-                          <Icon name={group.icon} size={11} color={group.color} />
-                        </View>
-                        <Text className="text-[11px] font-bold text-content-secondary uppercase tracking-wider">
-                          {group.name}
-                        </Text>
-                      </View>
-                      <Text className="text-[10px] text-content-tertiary font-mono">
-                        {items.length} {items.length === 1 ? 'category' : 'categories'}
-                      </Text>
+                {selectedCat ? (
+                  <View className="flex-row items-center">
+                    <View
+                      className="w-7 h-7 rounded-lg items-center justify-center mr-2.5"
+                      style={{ backgroundColor: `${selectedCat.color}20` }}
+                    >
+                      <Icon name={selectedCat.icon} size={15} color={selectedCat.color} />
                     </View>
-
-                    {/* Category Chips in Group */}
-                    <View className="flex-row flex-wrap">
-                      {items.map((c) => {
-                        const isSelected = selectedCatId === c.id;
-                        return (
-                          <TouchableOpacity
-                            key={c.id}
-                            onPress={() => {
-                              triggerHaptic.selection();
-                              setSelectedCatId(c.id);
-                            }}
-                            className={`flex-row items-center px-2.5 py-1.5 rounded-lg mr-1.5 mb-1.5 border ${
-                              isSelected
-                                ? 'bg-primary/20 border-primary'
-                                : 'bg-background-card border-background-border'
-                            }`}
-                          >
-                            <Icon
-                              name={c.icon}
-                              size={12}
-                              color={isSelected ? '#10B981' : c.color}
-                            />
-                            <Text
-                              className={`text-xs font-semibold ml-1.5 ${
-                                isSelected ? 'text-primary' : 'text-content-primary'
-                              }`}
-                            >
-                              {c.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                    <View>
+                      <Text className="text-content-primary font-bold text-xs">{selectedCat.name}</Text>
+                      <Text className="text-content-tertiary text-[10px] capitalize">{selectedCat.group?.replace('_', ' ')}</Text>
                     </View>
                   </View>
-                ))}
-              </ScrollView>
+                ) : (
+                  <Text className="text-content-secondary text-xs">Select Category...</Text>
+                )}
+                <ChevronDown size={16} color="#6B7280" />
+              </TouchableOpacity>
 
               <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1.5">
                 Monthly Limit ({currency})
@@ -549,6 +491,83 @@ export default function BudgetsScreen() {
                   <Text className="text-[#0F1012] font-bold text-xs">Save Budget</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* MODAL: BUDGET CATEGORY SEARCH PICKER */}
+        <Modal visible={budgetCatPickerOpen} animationType="slide" transparent>
+          <View className="flex-1 bg-black/85 justify-end">
+            <View className="bg-background-card rounded-t-2xl max-h-[80%] p-5 border-t border-background-border">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-sm font-bold text-content-primary">Select Category</Text>
+                <TouchableOpacity onPress={() => setBudgetCatPickerOpen(false)} className="p-1 rounded-lg bg-background-elevated">
+                  <X size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Search Bar */}
+              <View className="flex-row items-center bg-background-elevated px-3 py-2 rounded-lg mb-3 border border-background-border">
+                <Search size={15} color="#6B7280" className="mr-2" />
+                <TextInput
+                  value={budgetCatSearch}
+                  onChangeText={setBudgetCatSearch}
+                  placeholder="Search categories..."
+                  placeholderTextColor="#6B7280"
+                  className="flex-1 text-xs text-content-primary p-0"
+                />
+                {budgetCatSearch ? (
+                  <TouchableOpacity onPress={() => setBudgetCatSearch('')}>
+                    <X size={14} color="#6B7280" />
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {groupedExpenseCategories.map(({ group, items }) => {
+                  const filteredItems = items.filter((c) =>
+                    !budgetCatSearch || c.name.toLowerCase().includes(budgetCatSearch.toLowerCase())
+                  );
+                  if (filteredItems.length === 0) return null;
+
+                  return (
+                    <View key={group.id} className="mb-3.5">
+                      <View className="flex-row items-center mb-1.5">
+                        <View className="w-5 h-5 rounded-md items-center justify-center mr-2" style={{ backgroundColor: `${group.color}20` }}>
+                          <Icon name={group.icon} size={12} color={group.color} />
+                        </View>
+                        <Text className="text-xs font-bold text-content-tertiary uppercase tracking-wider">{group.label}</Text>
+                      </View>
+
+                      <View className="flex-row flex-wrap -mx-1">
+                        {filteredItems.map((cat) => {
+                          const isSel = selectedCatId === cat.id;
+                          return (
+                            <TouchableOpacity
+                              key={cat.id}
+                              onPress={() => {
+                                triggerHaptic.selection();
+                                setSelectedCatId(cat.id);
+                                setBudgetCatPickerOpen(false);
+                              }}
+                              className={`w-[48%] m-1 p-2 rounded-lg flex-row items-center border ${
+                                isSel ? 'bg-primary/20 border-primary' : 'bg-background-elevated border-background-border'
+                              }`}
+                            >
+                              <View className="w-6 h-6 rounded-md items-center justify-center mr-2" style={{ backgroundColor: `${cat.color}20` }}>
+                                <Icon name={cat.icon} size={13} color={cat.color} />
+                              </View>
+                              <Text className={`text-xs font-semibold flex-1 truncate ${isSel ? 'text-primary' : 'text-content-primary'}`} numberOfLines={1}>
+                                {cat.name}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
             </View>
           </View>
         </Modal>

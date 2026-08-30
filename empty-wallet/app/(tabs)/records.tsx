@@ -196,8 +196,8 @@ export default function RecordsScreen() {
         </View>
 
         {/* Search Bar & Filter Button */}
-        <View className="flex-row items-center space-x-2 mb-3">
-          <View className="flex-1 flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mr-2">
+        <View className="flex-row items-center mb-3">
+          <View className="flex-1 flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2.5 mr-2">
             <Search size={15} color="#6B7280" />
             <TextInput
               value={searchQuery}
@@ -219,16 +219,15 @@ export default function RecordsScreen() {
               triggerHaptic.selection();
               setFilterModalOpen(true);
             }}
-            className={`flex-row items-center px-3 py-2 rounded-lg border ${
+            className={`h-11 w-11 items-center justify-center rounded-lg border ${
               activeFilterCount > 0
                 ? 'bg-primary/15 border-primary'
                 : 'bg-background-card border-background-border'
             }`}
           >
-            <SlidersHorizontal size={15} color={activeFilterCount > 0 ? '#10B981' : '#9CA3AF'} />
+            <SlidersHorizontal size={17} color={activeFilterCount > 0 ? '#10B981' : '#9CA3AF'} />
             {activeFilterCount > 0 && (
-              <View className="w-4 h-4 rounded-full bg-primary items-center justify-center ml-1.5">
-                <Text className="text-[9px] font-bold text-[#0F1012]">{activeFilterCount}</Text>
+              <View className="absolute top-2 right-2 w-3 h-3 rounded-full bg-primary items-center justify-center">
               </View>
             )}
           </TouchableOpacity>
@@ -272,14 +271,19 @@ export default function RecordsScreen() {
             </View>
           ) : (
             filteredTransactions.map((tx) => (
-              <TransactionItem
+              <TouchableOpacity
                 key={tx.id}
-                transaction={tx}
-                category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
-                wallet={walletMap.get(tx.walletId)}
-                currency={currency}
-                onDelete={deleteTransaction}
-              />
+                activeOpacity={0.7}
+                onPress={() => router.push({ pathname: '/modal/quick-add', params: { id: tx.id } })}
+              >
+                <TransactionItem
+                  transaction={tx}
+                  category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
+                  wallet={walletMap.get(tx.walletId)}
+                  currency={currency}
+                  onDelete={deleteTransaction}
+                />
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>

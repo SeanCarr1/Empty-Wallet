@@ -17,6 +17,10 @@ interface TransactionState {
   ) => void;
   getRecentTransactions: (limit?: number) => Transaction[];
   getTransactionsByMonth: (yearMonth: string) => Transaction[];
+  updateTransaction: (
+    id: string,
+    updatedData: Omit<Transaction, 'id' | 'createdAt'>
+  ) => void;
 }
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
@@ -205,5 +209,62 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
   getTransactionsByMonth: (yearMonth) => {
     return get().transactions.filter((tx) => tx.transactionDate.startsWith(yearMonth));
+  },
+
+  updateTransaction: (id, updatedData) => {
+    try {
+      const db = SQLite.openDatabaseSync(DATABASE_NAME);
+      const oldTx = get().transactions.find((t) => t.id === id);
+      if (!oldTx) return;
+
+      db.withTransactionSync(() => {
+        // 1. Reverse old effect
+        if (oldTx.type === 'expense') {
+          db.execSync(`UPDATE wallets SET balance = balance + ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
+        } else if (oldTx.type === 'income') {
+          db.execSync(`UPDATE wallets SET balance = balance - ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
+        } else if (oldTx.type === 'transfer' && oldTx.destinationWalletId) {
+          db.execSync(`UPDATE wallets SET balance = balance + ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
+          db.execSync(`UPDATE wallets SET balance = balance - ${oldTx.amount} WHERE id = '${oldTx.destinationWalletId}'`);
+        }
+
+        // 2. Apply new effect
+        if (updatedData.type === 'expense') {
+          db.execSync(`UPDATE wallets SET balance = balance - ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
+        } else if (updatedData.type === 'income') {
+          db.execSync(`UPDATE wallets SET balance = balance + ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
+        } else if (updatedData.type === 'transfer' && updatedData.destinationWalletId) {
+          db.execSync(`UPDATE wallets SET balance = balance - ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
+          db.execSync(`UPDATE wallets SET balance = balance + ${updatedData.amount} WHERE id = '${updatedData.destinationWalletId}'`);
+        }
+
+        // 3. Update row
+        const stmt = db.prepareSync(
+          'UPDATE transactions SET wallet_id = ?, destination_wallet_id = ?, category_id = ?, subscription_id = ?, amount = ?, type = ?, payee = ?, payer = ?, payment_type = ?, note = ?, transaction_date = ?, transaction_time = ?, tags = ? WHERE id = ?'
+        );
+        stmt.executeSync([
+          updatedData.walletId,
+          updatedData.destinationWalletId || null,
+          updatedData.categoryId || null,
+          updatedData.subscriptionId || null,
+          updatedData.amount,
+          updatedData.type,
+          updatedData.payee,
+          updatedData.payer || null,
+          updatedData.paymentType || 'cash',
+          updatedData.note || null,
+          updatedData.transactionDate,
+          updatedData.transactionTime || null,
+          updatedData.tags || null,
+          id,
+        ]);
+        stmt.finalizeSync();
+      });
+
+      get().fetchTransactions();
+      useWalletStore.getState().fetchWallets();
+    } catch (err) {
+      console.error('Error updating transaction:', err);
+    }
   },
 }));

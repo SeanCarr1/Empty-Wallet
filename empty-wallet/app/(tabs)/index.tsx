@@ -9,7 +9,7 @@ import { useCategoryStore } from '../../src/stores/useCategoryStore';
 import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { calculateSafeToSpend } from '../../src/services/budgetEngine';
 import { formatCurrency } from '../../src/services/currency';
-import { WalletCard } from '../../src/components/wallets/WalletCard';
+import { WalletGrid } from '../../src/components/wallets/WalletGrid';
 import { SafeToSpendGauge } from '../../src/components/velocity/SafeToSpendGauge';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
 import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
@@ -80,7 +80,7 @@ export default function DashboardScreen() {
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic.selection();
-                router.push('/modal/manage-wallets');
+                router.push('/modal/manage-wallets?tab=transfer');
               }}
               className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg mr-1.5"
             >
@@ -118,23 +118,7 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row -mx-1">
-            {wallets.map((w) => (
-              <WalletCard key={w.id} wallet={w} />
-            ))}
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => {
-                triggerHaptic.selection();
-                router.push('/modal/manage-wallets');
-              }}
-              className="min-w-[130px] p-3 rounded-xl border border-dashed border-background-border items-center justify-center bg-background-card/40 mr-2"
-            >
-              <Plus size={18} color="#6B7280" />
-              <Text className="text-content-tertiary font-semibold text-xs mt-1.5">New Wallet</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          <WalletGrid />
         </View>
 
         {/* Safe-to-Spend Velocity Gauge */}
@@ -184,14 +168,19 @@ export default function DashboardScreen() {
             </View>
           ) : (
             recentTransactions.map((tx) => (
-              <TransactionItem
+              <TouchableOpacity
                 key={tx.id}
-                transaction={tx}
-                category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
-                wallet={walletMap.get(tx.walletId)}
-                currency={currency}
-                onDelete={deleteTransaction}
-              />
+                activeOpacity={0.7}
+                onPress={() => router.push({ pathname: '/modal/quick-add', params: { id: tx.id } })}
+              >
+                <TransactionItem
+                  transaction={tx}
+                  category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
+                  wallet={walletMap.get(tx.walletId)}
+                  currency={currency}
+                  onDelete={deleteTransaction}
+                />
+              </TouchableOpacity>
             ))
           )}
         </View>

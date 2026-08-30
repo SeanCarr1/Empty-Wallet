@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Share } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share, Modal, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTransactionStore } from '../../src/stores/useTransactionStore';
 import { useCategoryStore } from '../../src/stores/useCategoryStore';
@@ -11,7 +11,7 @@ import { MonthlyTrendBarChart, MonthlyTrendData } from '../../src/components/cha
 import { HorizontalCashFlowChart } from '../../src/components/charts/HorizontalCashFlowChart';
 import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
 import { triggerHaptic } from '../../src/services/haptics';
-import { Download, ArrowUpRight, ArrowDownRight, Award } from 'lucide-react-native';
+import { Download, ArrowUpRight, ArrowDownRight, Award, Settings2, X } from 'lucide-react-native';
 import { format, subMonths, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Category } from '../../src/types';
 
@@ -19,9 +19,10 @@ export default function AnalyticsScreen() {
   const { transactions } = useTransactionStore();
   const { categories } = useCategoryStore();
   const { getTotalBalance } = useWalletStore();
-  const currency = useSettingsStore((s) => s.currency);
+  const { currency, enabledCharts, setEnabledCharts } = useSettingsStore();
 
   const [selectedMonthOffset, setSelectedMonthOffset] = useState<number>(0);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const totalNetBalance = getTotalBalance();
@@ -130,26 +131,41 @@ export default function AnalyticsScreen() {
     }
   };
 
+  const allChartsDisabled = !enabledCharts.cashFlow && !enabledCharts.balanceTrend && !enabledCharts.categoryDonut && !enabledCharts.monthlyTrend;
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1 px-4 pt-2">
         {/* Header */}
-        <View className="flex-row items-center justify-between mb-3.5">
-          <View>
+        <View className="flex-row items-start justify-between mb-3.5">
+          <View className="flex-1 mr-3">
             <Text className="text-xl font-bold text-content-primary">Financial Insights</Text>
             <Text className="text-content-secondary text-xs mt-0.5">
               Cash flow ratios, balance curves & category slices
             </Text>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={handleExportCSV}
-            className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg"
-          >
-            <Download size={14} color="#10B981" />
-            <Text className="text-content-primary font-semibold text-xs ml-1.5">Export CSV</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-x-2 shrink-0">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                triggerHaptic.selection();
+                setShowCustomizeModal(true);
+              }}
+              className="bg-background-card border border-background-border p-2 rounded-lg"
+            >
+              <Settings2 size={16} color="#6B7280" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleExportCSV}
+              className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg"
+            >
+              <Download size={14} color="#10B981" />
+              <Text className="text-content-primary font-semibold text-xs ml-1.5">Export</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Month Selector Pills */}
@@ -219,70 +235,116 @@ export default function AnalyticsScreen() {
             </View>
           </View>
 
-          {/* 1. HORIZONTAL CASH FLOW GRAPH */}
-          <View className="mb-4">
-            <HorizontalCashFlowChart income={totalIncome} expense={totalExpense} currency={currency} />
-          </View>
+          {allChartsDisabled ? (
+            <View className="bg-background-card p-8 rounded-xl border border-background-border items-center justify-center">
+              <Text className="text-content-secondary text-sm mb-4">All charts are currently disabled.</Text>
+              <TouchableOpacity
+                onPress={() => setShowCustomizeModal(true)}
+                className="bg-primary px-4 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold text-xs">Customize Charts</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {enabledCharts.cashFlow && (
+                <View className="mb-4">
+                  <HorizontalCashFlowChart income={totalIncome} expense={totalExpense} currency={currency} />
+                </View>
+              )}
 
-          {/* 2. BALANCE TREND LINE GRAPH */}
-          <View className="mb-2">
-            <BalanceTrendLineChart
-              transactions={transactions}
-              currentTotalBalance={totalNetBalance}
-              currency={currency}
-            />
-          </View>
+              {enabledCharts.balanceTrend && (
+                <View className="mb-2">
+                  <BalanceTrendLineChart
+                    transactions={transactions}
+                    currentTotalBalance={totalNetBalance}
+                    currency={currency}
+                  />
+                </View>
+              )}
 
-          {/* 3. CATEGORY BREAKDOWN DONUT CHART */}
-          <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
-            <Text className="text-content-primary font-bold text-sm mb-0.5">Spending by Category</Text>
-            <Text className="text-content-tertiary text-xs mb-2.5">
-              Distribution for {format(targetDate, 'MMMM yyyy')}
-            </Text>
+              {enabledCharts.categoryDonut && (
+                <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
+                  <Text className="text-content-primary font-bold text-sm mb-0.5">Spending by Category</Text>
+                  <Text className="text-content-tertiary text-xs mb-2.5">
+                    Distribution for {format(targetDate, 'MMMM yyyy')}
+                  </Text>
 
-            <CategoryDonutChart
-              data={categorySpendData}
-              totalSpent={totalExpense}
-              currency={currency}
-              size={180}
-            />
+                  <CategoryDonutChart
+                    data={categorySpendData}
+                    totalSpent={totalExpense}
+                    currency={currency}
+                    size={180}
+                  />
 
-            {/* Category Legend List */}
-            <View className="mt-3 border-t border-background-border pt-2.5">
-              {categorySpendData.slice(0, 6).map((item) => (
-                <View
-                  key={item.category.id}
-                  className="flex-row items-center justify-between py-1.5 border-b border-background-border/30"
-                >
-                  <View className="flex-row items-center">
-                    <View
-                      className="w-2.5 h-2.5 rounded-full mr-2"
-                      style={{ backgroundColor: item.category.color }}
-                    />
-                    <Text className="text-content-primary text-xs font-medium">
-                      {item.category.name}
-                    </Text>
-                  </View>
+                  <View className="mt-3 border-t border-background-border pt-2.5">
+                    {categorySpendData.slice(0, 6).map((item) => (
+                      <View
+                        key={item.category.id}
+                        className="flex-row items-center justify-between py-1.5 border-b border-background-border/30"
+                      >
+                        <View className="flex-row items-center">
+                          <View
+                            className="w-2.5 h-2.5 rounded-full mr-2"
+                            style={{ backgroundColor: item.category.color }}
+                          />
+                          <Text className="text-content-primary text-xs font-medium">
+                            {item.category.name}
+                          </Text>
+                        </View>
 
-                  <View className="flex-row items-center">
-                    <Text className="text-content-primary font-bold text-xs mr-2 font-mono">
-                      {formatCurrency(item.amount, currency)}
-                    </Text>
-                    <Text className="text-content-tertiary text-[11px] w-10 text-right font-mono">
-                      {item.percentage.toFixed(1)}%
-                    </Text>
+                        <View className="flex-row items-center">
+                          <Text className="text-content-primary font-bold text-xs mr-2 font-mono">
+                            {formatCurrency(item.amount, currency)}
+                          </Text>
+                          <Text className="text-content-tertiary text-[11px] w-10 text-right font-mono">
+                            {item.percentage.toFixed(1)}%
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
                   </View>
                 </View>
-              ))}
-            </View>
-          </View>
+              )}
 
-          {/* 4. MONTHLY 6-MONTH COMPARISON BARS */}
-          <View className="mb-4">
-            <MonthlyTrendBarChart data={trendData} currency={currency} />
-          </View>
+              {enabledCharts.monthlyTrend && (
+                <View className="mb-4">
+                  <MonthlyTrendBarChart data={trendData} currency={currency} />
+                </View>
+              )}
+            </>
+          )}
         </ScrollView>
       </View>
+
+      <Modal visible={showCustomizeModal} transparent animationType="fade">
+        <View className="flex-1 bg-black/60 items-center justify-center p-4">
+          <View className="bg-background w-full rounded-xl p-4 border border-background-border">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-content-primary font-bold text-lg">Customize Charts</Text>
+              <TouchableOpacity onPress={() => setShowCustomizeModal(false)}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            {[
+              { id: 'cashFlow', label: 'Cash Flow' },
+              { id: 'balanceTrend', label: 'Balance Trend' },
+              { id: 'categoryDonut', label: 'Category Donut' },
+              { id: 'monthlyTrend', label: 'Monthly Trend' },
+            ].map((chart) => (
+              <View key={chart.id} className="flex-row items-center justify-between mb-4">
+                <Text className="text-content-primary font-medium text-sm">{chart.label}</Text>
+                <Switch
+                  value={enabledCharts[chart.id as keyof typeof enabledCharts]}
+                  onValueChange={(val) => setEnabledCharts(chart.id as keyof typeof enabledCharts, val)}
+                  trackColor={{ false: '#2A2D35', true: '#10B981' }}
+                  thumbColor="#F3F4F6"
+                />
+              </View>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
