@@ -39,7 +39,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         destinationWalletId: r.destination_wallet_id,
         categoryId: r.category_id,
         subscriptionId: r.subscription_id,
-        amount: r.amount,
+        amount: Number(r.amount) || 0,
         type: r.type,
         payee: r.payee,
         payer: r.payer,
@@ -61,50 +61,39 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const db = SQLite.openDatabaseSync(DATABASE_NAME);
       const id = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const now = new Date().toISOString();
+      const amt = Number(tx.amount) || 0;
 
-      db.withTransactionSync(() => {
-        // 1. Insert transaction
-        const stmt = db.prepareSync(
-          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-        stmt.executeSync([
+      // 1. Insert transaction with safe parameterized binding
+      db.runSync(
+        'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+        [
           id,
-          tx.walletId,
-          tx.destinationWalletId || null,
-          tx.categoryId || null,
-          tx.subscriptionId || null,
-          tx.amount,
-          tx.type,
-          tx.payee,
-          tx.payer || null,
-          tx.paymentType || 'cash',
-          tx.note || null,
-          tx.transactionDate,
-          tx.transactionTime || null,
-          tx.tags || null,
+          tx.walletId ?? '',
+          tx.destinationWalletId ?? null,
+          tx.categoryId ?? null,
+          tx.subscriptionId ?? null,
+          amt,
+          tx.type ?? 'expense',
+          tx.payee ?? '',
+          tx.payer ?? null,
+          tx.paymentType ?? 'cash',
+          tx.note ?? null,
+          tx.transactionDate ?? '',
+          tx.transactionTime ?? null,
+          tx.tags ?? null,
           now,
-        ]);
-        stmt.finalizeSync();
+        ]
+      );
 
-        // 2. Adjust wallet balance
-        if (tx.type === 'expense') {
-          const wStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
-          wStmt.executeSync([tx.amount, tx.walletId]);
-          wStmt.finalizeSync();
-        } else if (tx.type === 'income') {
-          const wStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
-          wStmt.executeSync([tx.amount, tx.walletId]);
-          wStmt.finalizeSync();
-        } else if (tx.type === 'transfer' && tx.destinationWalletId) {
-          const deductStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
-          deductStmt.executeSync([tx.amount, tx.walletId]);
-          deductStmt.finalizeSync();
-
-          const addStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
-          addStmt.executeSync([tx.amount, tx.destinationWalletId]);
-          addStmt.finalizeSync();
-        }
-      });
+      // 2. Adjust wallet balance
+      if (tx.type === 'expense') {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [amt, tx.walletId]);
+      } else if (tx.type === 'income') {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [amt, tx.walletId]);
+      } else if (tx.type === 'transfer' && tx.destinationWalletId) {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [amt, tx.walletId]);
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [amt, tx.destinationWalletId]);
+      }
 
       get().fetchTransactions();
       useWalletStore.getState().fetchWallets();
@@ -119,30 +108,19 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const txToDelete = get().transactions.find((t) => t.id === id);
       if (!txToDelete) return;
 
-      db.withTransactionSync(() => {
-        // Reverse wallet balance impact
-        if (txToDelete.type === 'expense') {
-          const wStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
-          wStmt.executeSync([txToDelete.amount, txToDelete.walletId]);
-          wStmt.finalizeSync();
-        } else if (txToDelete.type === 'income') {
-          const wStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
-          wStmt.executeSync([txToDelete.amount, txToDelete.walletId]);
-          wStmt.finalizeSync();
-        } else if (txToDelete.type === 'transfer' && txToDelete.destinationWalletId) {
-          const addBackStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
-          addBackStmt.executeSync([txToDelete.amount, txToDelete.walletId]);
-          addBackStmt.finalizeSync();
+      const amt = Number(txToDelete.amount) || 0;
 
-          const deductBackStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
-          deductBackStmt.executeSync([txToDelete.amount, txToDelete.destinationWalletId]);
-          deductBackStmt.finalizeSync();
-        }
+      // Reverse wallet balance impact
+      if (txToDelete.type === 'expense') {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [amt, txToDelete.walletId]);
+      } else if (txToDelete.type === 'income') {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [amt, txToDelete.walletId]);
+      } else if (txToDelete.type === 'transfer' && txToDelete.destinationWalletId) {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [amt, txToDelete.walletId]);
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [amt, txToDelete.destinationWalletId]);
+      }
 
-        const stmt = db.prepareSync('DELETE FROM transactions WHERE id = ?');
-        stmt.executeSync([id]);
-        stmt.finalizeSync();
-      });
+      db.runSync('DELETE FROM transactions WHERE id = ?;', [id]);
 
       get().fetchTransactions();
       useWalletStore.getState().fetchWallets();
@@ -156,45 +134,39 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const db = SQLite.openDatabaseSync(DATABASE_NAME);
       const now = new Date().toISOString();
 
-      db.withTransactionSync(() => {
-        const stmt = db.prepareSync(
-          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      for (let i = 0; i < txs.length; i++) {
+        const tx = txs[i];
+        const id = `tx_batch_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 5)}`;
+        const amt = Number(tx.amount) || 0;
+
+        db.runSync(
+          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+          [
+            id,
+            tx.walletId ?? '',
+            tx.destinationWalletId ?? null,
+            tx.categoryId ?? null,
+            tx.subscriptionId ?? null,
+            amt,
+            tx.type ?? 'expense',
+            tx.payee ?? '',
+            tx.payer ?? null,
+            tx.paymentType ?? 'cash',
+            tx.note ?? null,
+            tx.transactionDate ?? '',
+            tx.transactionTime ?? null,
+            tx.tags ?? null,
+            now,
+          ]
         );
 
-        for (let i = 0; i < txs.length; i++) {
-          const tx = txs[i];
-          const id = `tx_batch_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 5)}`;
-          stmt.executeSync([
-            id,
-            tx.walletId,
-            tx.destinationWalletId || null,
-            tx.categoryId || null,
-            tx.subscriptionId || null,
-            tx.amount,
-            tx.type,
-            tx.payee,
-            tx.payer || null,
-            tx.paymentType || 'cash',
-            tx.note || null,
-            tx.transactionDate,
-            tx.transactionTime || null,
-            tx.tags || null,
-            now,
-          ]);
-
-          // Update wallet balance
-          if (tx.type === 'expense') {
-            const wStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
-            wStmt.executeSync([tx.amount, tx.walletId]);
-            wStmt.finalizeSync();
-          } else if (tx.type === 'income') {
-            const wStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
-            wStmt.executeSync([tx.amount, tx.walletId]);
-            wStmt.finalizeSync();
-          }
+        // Update wallet balance
+        if (tx.type === 'expense') {
+          db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [amt, tx.walletId]);
+        } else if (tx.type === 'income') {
+          db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [amt, tx.walletId]);
         }
-        stmt.finalizeSync();
-      });
+      }
 
       get().fetchTransactions();
       useWalletStore.getState().fetchWallets();
@@ -217,49 +189,49 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const oldTx = get().transactions.find((t) => t.id === id);
       if (!oldTx) return;
 
-      db.withTransactionSync(() => {
-        // 1. Reverse old effect
-        if (oldTx.type === 'expense') {
-          db.execSync(`UPDATE wallets SET balance = balance + ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
-        } else if (oldTx.type === 'income') {
-          db.execSync(`UPDATE wallets SET balance = balance - ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
-        } else if (oldTx.type === 'transfer' && oldTx.destinationWalletId) {
-          db.execSync(`UPDATE wallets SET balance = balance + ${oldTx.amount} WHERE id = '${oldTx.walletId}'`);
-          db.execSync(`UPDATE wallets SET balance = balance - ${oldTx.amount} WHERE id = '${oldTx.destinationWalletId}'`);
-        }
+      const oldAmt = Number(oldTx.amount) || 0;
+      const newAmt = Number(updatedData.amount) || 0;
 
-        // 2. Apply new effect
-        if (updatedData.type === 'expense') {
-          db.execSync(`UPDATE wallets SET balance = balance - ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
-        } else if (updatedData.type === 'income') {
-          db.execSync(`UPDATE wallets SET balance = balance + ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
-        } else if (updatedData.type === 'transfer' && updatedData.destinationWalletId) {
-          db.execSync(`UPDATE wallets SET balance = balance - ${updatedData.amount} WHERE id = '${updatedData.walletId}'`);
-          db.execSync(`UPDATE wallets SET balance = balance + ${updatedData.amount} WHERE id = '${updatedData.destinationWalletId}'`);
-        }
+      // 1. Reverse old effect
+      if (oldTx.type === 'expense') {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [oldAmt, oldTx.walletId]);
+      } else if (oldTx.type === 'income') {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [oldAmt, oldTx.walletId]);
+      } else if (oldTx.type === 'transfer' && oldTx.destinationWalletId) {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [oldAmt, oldTx.walletId]);
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [oldAmt, oldTx.destinationWalletId]);
+      }
 
-        // 3. Update row
-        const stmt = db.prepareSync(
-          'UPDATE transactions SET wallet_id = ?, destination_wallet_id = ?, category_id = ?, subscription_id = ?, amount = ?, type = ?, payee = ?, payer = ?, payment_type = ?, note = ?, transaction_date = ?, transaction_time = ?, tags = ? WHERE id = ?'
-        );
-        stmt.executeSync([
-          updatedData.walletId,
-          updatedData.destinationWalletId || null,
-          updatedData.categoryId || null,
-          updatedData.subscriptionId || null,
-          updatedData.amount,
-          updatedData.type,
-          updatedData.payee,
-          updatedData.payer || null,
-          updatedData.paymentType || 'cash',
-          updatedData.note || null,
-          updatedData.transactionDate,
-          updatedData.transactionTime || null,
-          updatedData.tags || null,
+      // 2. Apply new effect
+      if (updatedData.type === 'expense') {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [newAmt, updatedData.walletId]);
+      } else if (updatedData.type === 'income') {
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [newAmt, updatedData.walletId]);
+      } else if (updatedData.type === 'transfer' && updatedData.destinationWalletId) {
+        db.runSync('UPDATE wallets SET balance = balance - ? WHERE id = ?;', [newAmt, updatedData.walletId]);
+        db.runSync('UPDATE wallets SET balance = balance + ? WHERE id = ?;', [newAmt, updatedData.destinationWalletId]);
+      }
+
+      // 3. Update row
+      db.runSync(
+        'UPDATE transactions SET wallet_id = ?, destination_wallet_id = ?, category_id = ?, subscription_id = ?, amount = ?, type = ?, payee = ?, payer = ?, payment_type = ?, note = ?, transaction_date = ?, transaction_time = ?, tags = ? WHERE id = ?;',
+        [
+          updatedData.walletId ?? '',
+          updatedData.destinationWalletId ?? null,
+          updatedData.categoryId ?? null,
+          updatedData.subscriptionId ?? null,
+          newAmt,
+          updatedData.type ?? 'expense',
+          updatedData.payee ?? '',
+          updatedData.payer ?? null,
+          updatedData.paymentType ?? 'cash',
+          updatedData.note ?? null,
+          updatedData.transactionDate ?? '',
+          updatedData.transactionTime ?? null,
+          updatedData.tags ?? null,
           id,
-        ]);
-        stmt.finalizeSync();
-      });
+        ]
+      );
 
       get().fetchTransactions();
       useWalletStore.getState().fetchWallets();
