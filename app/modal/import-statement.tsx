@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -10,7 +10,7 @@ import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { parseBankStatementCSV, ParsedCSVRow } from '../../src/services/statementParser';
 import { formatCurrency } from '../../src/services/currency';
 import { triggerHaptic } from '../../src/services/haptics';
-import { X, FileSpreadsheet, Upload, CheckCircle2, AlertCircle, ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
+import { X, FileSpreadsheet, ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
 
 export default function ImportStatementModal() {
   const router = useRouter();
@@ -66,7 +66,6 @@ export default function ImportStatementModal() {
   };
 
   const handleExecuteImport = () => {
-    // Filter out duplicates
     const toImport = parsedRows.filter((r) => !r.isDuplicate);
     if (toImport.length === 0) {
       triggerHaptic.error();
@@ -101,7 +100,7 @@ export default function ImportStatementModal() {
           }}
           className="p-2 -ml-2 rounded-full"
         >
-          <X size={24} color="#94A3B8" />
+          <X size={24} color="#D6CFBF" />
         </TouchableOpacity>
 
         <Text className="text-base font-bold text-content-primary">Import Statement</Text>
@@ -112,7 +111,7 @@ export default function ImportStatementModal() {
       <ScrollView className="flex-1 px-5 pt-3" showsVerticalScrollIndicator={false}>
         {/* Wallet Selection */}
         <View className="mb-4">
-          <Text className="text-content-secondary text-xs font-semibold uppercase mb-2">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">
             Target Destination Wallet
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row -mx-1">
@@ -169,11 +168,11 @@ export default function ImportStatementModal() {
               className="bg-background-card border-2 border-dashed border-background-border rounded-3xl p-8 items-center justify-center my-4"
             >
               {loading ? (
-                <ActivityIndicator color="#10B981" />
+                <ActivityIndicator color="#2A9D60" />
               ) : (
                 <>
-                  <View className="w-14 h-14 rounded-2xl bg-accent-blue/10 items-center justify-center mb-3">
-                    <FileSpreadsheet size={28} color="#3B82F6" />
+                  <View className="w-14 h-14 rounded-2xl bg-accent-blue/15 items-center justify-center mb-3">
+                    <FileSpreadsheet size={28} color="#4338CA" />
                   </View>
                   <Text className="text-content-primary font-bold text-base">Select Bank CSV File</Text>
                   <Text className="text-content-secondary text-xs text-center mt-1">
@@ -191,14 +190,14 @@ export default function ImportStatementModal() {
                 multiline
                 numberOfLines={6}
                 placeholder="Date,Payee,Amount&#10;2026-08-01,Starbucks,180.00&#10;2026-08-02,Salary,45000"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-mono mb-4 h-32"
               />
               <TouchableOpacity
                 onPress={handleParsePasted}
-                className="bg-primary py-3 rounded-xl items-center"
+                className="bg-primary py-3 rounded-xl items-center shadow-lg shadow-primary/20"
               >
-                <Text className="text-background font-bold text-xs">Parse CSV Rows</Text>
+                <Text className="text-content-primary font-bold text-xs">Parse CSV Rows</Text>
               </TouchableOpacity>
             </View>
           )
@@ -241,9 +240,9 @@ export default function ImportStatementModal() {
                       }`}
                     >
                       {row.type === 'income' ? (
-                        <ArrowDownLeft size={16} color="#10B981" />
+                        <ArrowDownLeft size={16} color="#2A9D60" />
                       ) : (
-                        <ArrowUpRight size={16} color="#F43F5E" />
+                        <ArrowUpRight size={16} color="#DC4C38" />
                       )}
                     </View>
                     <View className="flex-1">
@@ -277,11 +276,11 @@ export default function ImportStatementModal() {
             <TouchableOpacity
               onPress={handleExecuteImport}
               disabled={newCount === 0}
-              className={`py-4 rounded-2xl items-center mb-8 ${
+              className={`py-4 rounded-2xl items-center mb-8 shadow-lg shadow-primary/20 ${
                 newCount > 0 ? 'bg-primary' : 'bg-background-card opacity-50'
               }`}
             >
-              <Text className="text-background font-bold text-base">
+              <Text className="text-content-primary font-bold text-base">
                 Import {newCount} Transactions
               </Text>
             </TouchableOpacity>

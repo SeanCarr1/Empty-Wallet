@@ -29,7 +29,6 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
     }
 
     if (key === '.') {
-      // Prevent multiple decimals in the last number operand
       const parts = value.split(/[+\-]/);
       const currentPart = parts[parts.length - 1];
       if (!currentPart.includes('.')) {
@@ -39,21 +38,18 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
     }
 
     if (key === '+' || key === '-') {
-      // Prevent consecutive operators
       if (value.length > 0 && !/[+\-]$/.test(value)) {
         onChange(`${value}${key}`);
       }
       return;
     }
 
-    // Limit decimal precision to 2 digits in current operand
     const parts = value.split(/[+\-]/);
     const currentPart = parts[parts.length - 1];
     if (currentPart.includes('.') && currentPart.split('.')[1].length >= 2) {
       return;
     }
 
-    // Append digit
     if (value === '0' && key !== '.') {
       onChange(key);
     } else {
@@ -87,11 +83,11 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                   disabled={submitDisabled}
                   className={`flex-1 mx-1.5 h-14 rounded-2xl items-center justify-center ${
                     submitDisabled
-                      ? 'bg-content-muted/30 opacity-50'
-                      : 'bg-primary shadow-lg shadow-primary/20'
+                      ? 'bg-background-elevated opacity-40 border border-background-border'
+                      : 'bg-primary shadow-lg shadow-primary/25'
                   }`}
                 >
-                  <Check size={24} color="#090A0F" strokeWidth={3} />
+                  <Check size={22} color="#F5F2EB" strokeWidth={3} />
                 </TouchableOpacity>
               );
             }
@@ -102,9 +98,9 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                   key={key}
                   activeOpacity={0.6}
                   onPress={() => handleKeyPress('backspace')}
-                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background-border rounded-2xl items-center justify-center border border-background-border/50"
+                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background rounded-2xl items-center justify-center border border-background-border"
                 >
-                  <Delete size={20} color="#94A3B8" />
+                  <Delete size={19} color="#D6CFBF" />
                 </TouchableOpacity>
               );
             }
@@ -118,9 +114,9 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                     triggerHaptic.light();
                     onChange('');
                   }}
-                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background-border rounded-2xl items-center justify-center border border-background-border/50"
+                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background rounded-2xl items-center justify-center border border-background-border"
                 >
-                  <Text className="text-content-secondary font-semibold text-base">C</Text>
+                  <Text className="text-content-secondary font-bold text-sm">C</Text>
                 </TouchableOpacity>
               );
             }
@@ -134,12 +130,12 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                 onPress={() => handleKeyPress(key)}
                 className={`flex-1 mx-1.5 h-14 rounded-2xl items-center justify-center border ${
                   isOperator
-                    ? 'bg-background-elevated border-primary/30 active:bg-primary/20'
-                    : 'bg-background-elevated border-background-border/40 active:bg-background-border'
+                    ? 'bg-background-elevated border-primary/40 active:bg-primary/20'
+                    : 'bg-background-elevated border-background-border active:bg-background'
                 }`}
               >
                 <Text
-                  className={`font-semibold text-2xl ${
+                  className={`font-bold text-xl ${
                     isOperator ? 'text-primary' : 'text-content-primary'
                   }`}
                 >

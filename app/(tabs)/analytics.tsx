@@ -29,7 +29,6 @@ export default function AnalyticsScreen() {
   const currentMonthStart = useMemo(() => startOfMonth(targetDate), [targetDate]);
   const currentMonthEnd = useMemo(() => endOfMonth(targetDate), [targetDate]);
 
-  // Filter transactions for target month
   const monthTransactions = useMemo(() => {
     return transactions.filter((tx) => {
       const d = parseISO(tx.transactionDate);
@@ -37,7 +36,6 @@ export default function AnalyticsScreen() {
     });
   }, [transactions, currentMonthStart, currentMonthEnd]);
 
-  // Aggregate stats
   const totalIncome = useMemo(() => {
     return monthTransactions
       .filter((tx) => tx.type === 'income')
@@ -53,7 +51,6 @@ export default function AnalyticsScreen() {
   const netSavings = totalIncome - totalExpense;
   const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
 
-  // Category breakdown
   const categorySpendData: CategorySpendItem[] = useMemo(() => {
     const map = new Map<string, number>();
 
@@ -70,7 +67,7 @@ export default function AnalyticsScreen() {
         id: catId,
         name: 'Other',
         icon: 'MoreHorizontal',
-        color: '#64748B',
+        color: '#948B7E',
         type: 'expense',
       };
       const percentage = totalExpense > 0 ? (amount / totalExpense) * 100 : 0;
@@ -80,7 +77,6 @@ export default function AnalyticsScreen() {
     return items.sort((a, b) => b.amount - a.amount);
   }, [monthTransactions, totalExpense, categoryMap]);
 
-  // 6-Month Cash Flow Trend
   const trendData: MonthlyTrendData[] = useMemo(() => {
     const list: MonthlyTrendData[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -149,7 +145,7 @@ export default function AnalyticsScreen() {
             onPress={handleExportCSV}
             className="flex-row items-center bg-background-card border border-background-border px-3.5 py-2 rounded-2xl"
           >
-            <Download size={16} color="#10B981" />
+            <Download size={15} color="#2A9D60" />
             <Text className="text-content-primary font-semibold text-xs ml-2">Export CSV</Text>
           </TouchableOpacity>
         </View>
@@ -192,8 +188,8 @@ export default function AnalyticsScreen() {
           <View className="flex-row space-x-2.5 mb-5">
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Income</Text>
-                <ArrowDownRight size={14} color="#10B981" />
+                <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Income</Text>
+                <ArrowDownRight size={13} color="#2A9D60" />
               </View>
               <Text className="text-primary font-bold text-base mt-0.5">
                 {formatCurrency(totalIncome, currency)}
@@ -202,8 +198,8 @@ export default function AnalyticsScreen() {
 
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Expense</Text>
-                <ArrowUpRight size={14} color="#F43F5E" />
+                <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Expense</Text>
+                <ArrowUpRight size={13} color="#DC4C38" />
               </View>
               <Text className="text-expense font-bold text-base mt-0.5">
                 {formatCurrency(totalExpense, currency)}
@@ -212,10 +208,10 @@ export default function AnalyticsScreen() {
 
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border">
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Savings %</Text>
-                <Award size={14} color="#8B5CF6" />
+                <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Savings</Text>
+                <Award size={13} color="#C69230" />
               </View>
-              <Text className="text-accent-purple font-bold text-base mt-0.5">
+              <Text className="text-accent-gold font-bold text-base mt-0.5">
                 {savingsRate.toFixed(0)}%
               </Text>
             </View>

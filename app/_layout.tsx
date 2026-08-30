@@ -66,7 +66,7 @@ export default function RootLayout() {
           className="w-16 h-16 rounded-3xl mb-4 border border-background-border"
           resizeMode="cover"
         />
-        <Text className="text-content-secondary font-semibold text-base">Loading Empty-Wallet...</Text>
+        <Text className="text-content-secondary font-semibold text-sm">Opening Empty-Wallet...</Text>
       </View>
     );
   }
@@ -81,14 +81,14 @@ export default function RootLayout() {
         />
         <Text className="text-2xl font-bold text-content-primary mb-1">Empty-Wallet Locked</Text>
         <Text className="text-content-secondary text-center text-xs mb-8">
-          Authenticate with Face ID or Touch ID to access your finances.
+          Authenticate with Face ID or Touch ID to access your ledger.
         </Text>
         <TouchableOpacity
           onPress={handleUnlock}
           className="flex-row items-center bg-primary px-8 py-3.5 rounded-2xl active:opacity-80 shadow-lg shadow-primary/20"
         >
-          <Fingerprint size={20} color="#090A0F" />
-          <Text className="text-background font-bold text-base ml-2">Unlock App</Text>
+          <Fingerprint size={20} color="#F5F2EB" />
+          <Text className="text-content-primary font-bold text-base ml-2">Unlock Ledger</Text>
         </TouchableOpacity>
       </View>
     );
@@ -100,7 +100,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#090A0F' },
+          contentStyle: { backgroundColor: '#141312' },
           animation: 'slide_from_right',
         }}
       >

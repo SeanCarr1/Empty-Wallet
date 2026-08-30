@@ -51,7 +51,7 @@ export default function SettingsScreen() {
 
         {/* Section 1: Financial Preferences */}
         <View className="mb-6">
-          <Text className="text-content-tertiary text-xs font-semibold uppercase tracking-wider mb-2 ml-1">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Financial Preferences
           </Text>
           <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
@@ -65,15 +65,15 @@ export default function SettingsScreen() {
               className="flex-row items-center justify-between p-4 border-b border-background-border/50"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-primary/10 items-center justify-center mr-3">
-                  <Wallet size={18} color="#10B981" />
+                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center mr-3">
+                  <Wallet size={18} color="#2A9D60" />
                 </View>
                 <View>
                   <Text className="text-content-primary font-semibold text-sm">Manage Wallets</Text>
                   <Text className="text-content-tertiary text-xs">Cash, bank accounts, and cards</Text>
                 </View>
               </View>
-              <ChevronRight size={18} color="#64748B" />
+              <ChevronRight size={18} color="#948B7E" />
             </TouchableOpacity>
 
             {/* Currency Picker */}
@@ -86,8 +86,8 @@ export default function SettingsScreen() {
               className="flex-row items-center justify-between p-4"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-accent-amber/10 items-center justify-center mr-3">
-                  <Coins size={18} color="#F59E0B" />
+                <View className="w-9 h-9 rounded-xl bg-accent-amber/15 items-center justify-center mr-3">
+                  <Coins size={18} color="#D97706" />
                 </View>
                 <View>
                   <Text className="text-content-primary font-semibold text-sm">Primary Currency</Text>
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
                       <Text className="text-content-primary font-medium text-xs">
                         {c.symbol} • {c.name} ({c.code})
                       </Text>
-                      {isSelected && <Check size={16} color="#10B981" />}
+                      {isSelected && <Check size={16} color="#2A9D60" />}
                     </TouchableOpacity>
                   );
                 })}
@@ -128,7 +128,7 @@ export default function SettingsScreen() {
 
         {/* Section 2: Data Imports & Statements */}
         <View className="mb-6">
-          <Text className="text-content-tertiary text-xs font-semibold uppercase tracking-wider mb-2 ml-1">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Data Import
           </Text>
           <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
@@ -141,29 +141,29 @@ export default function SettingsScreen() {
               className="flex-row items-center justify-between p-4"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-accent-blue/10 items-center justify-center mr-3">
-                  <Upload size={18} color="#3B82F6" />
+                <View className="w-9 h-9 rounded-xl bg-accent-blue/15 items-center justify-center mr-3">
+                  <Upload size={18} color="#4338CA" />
                 </View>
                 <View>
                   <Text className="text-content-primary font-semibold text-sm">Import Bank CSV Statement</Text>
                   <Text className="text-content-tertiary text-xs">Bulk log transactions with deduplication</Text>
                 </View>
               </View>
-              <ChevronRight size={18} color="#64748B" />
+              <ChevronRight size={18} color="#948B7E" />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Section 3: Security & Privacy */}
         <View className="mb-6">
-          <Text className="text-content-tertiary text-xs font-semibold uppercase tracking-wider mb-2 ml-1">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Security & Privacy
           </Text>
           <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
             <View className="flex-row items-center justify-between p-4">
               <View className="flex-row items-center flex-1 mr-3">
-                <View className="w-9 h-9 rounded-xl bg-accent-purple/10 items-center justify-center mr-3">
-                  <Fingerprint size={18} color="#8B5CF6" />
+                <View className="w-9 h-9 rounded-xl bg-accent-purple/15 items-center justify-center mr-3">
+                  <Fingerprint size={18} color="#7C3AED" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-content-primary font-semibold text-sm">Biometric Lock</Text>
@@ -173,8 +173,8 @@ export default function SettingsScreen() {
               <Switch
                 value={isBiometricsEnabled}
                 onValueChange={handleToggleBiometrics}
-                trackColor={{ false: '#282E42', true: '#10B981' }}
-                thumbColor="#FFFFFF"
+                trackColor={{ false: '#3B3632', true: '#2A9D60' }}
+                thumbColor="#F5F2EB"
               />
             </View>
           </View>

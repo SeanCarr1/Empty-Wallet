@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { formatCurrency, formatCompactCurrency } from '../../services/currency';
+import { formatCurrency } from '../../services/currency';
 import { ArrowDownLeft, ArrowUpRight, Wallet, Percent } from 'lucide-react-native';
 
 interface HorizontalCashFlowChartProps {
@@ -26,9 +26,9 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <Text className="text-content-primary font-bold text-base">Cash Flow Distribution</Text>
-        <View className="flex-row items-center bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
-          <Percent size={11} color="#10B981" />
-          <Text className="text-primary font-semibold text-xs ml-1">
+        <View className="flex-row items-center bg-primary/10 px-2.5 py-1 rounded-full border border-primary/25">
+          <Percent size={11} color="#2A9D60" />
+          <Text className="text-primary font-bold text-xs ml-1">
             {savingsRate.toFixed(0)}% Saved
           </Text>
         </View>
@@ -36,7 +36,7 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
 
       {/* Horizontal Stacked Bar */}
       <View className="my-2">
-        <View className="h-5 w-full bg-background-elevated rounded-full overflow-hidden flex-row border border-background-border/50">
+        <View className="h-4 w-full bg-background-elevated rounded-full overflow-hidden flex-row border border-background-border/50">
           {income > 0 && (
             <View
               className="h-full bg-primary items-center justify-center"
@@ -68,11 +68,11 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
       </View>
 
       {/* Metric Breakdown Cards */}
-      <View className="flex-row items-center justify-between pt-3 mt-2 border-t border-background-border/40">
+      <View className="flex-row items-center justify-between pt-3 mt-2 border-t border-background-border/50">
         <View className="flex-1">
           <View className="flex-row items-center mb-0.5">
-            <ArrowDownLeft size={13} color="#10B981" />
-            <Text className="text-content-tertiary text-[11px] font-semibold uppercase ml-1">Total In</Text>
+            <ArrowDownLeft size={13} color="#2A9D60" />
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Total In</Text>
           </View>
           <Text className="text-primary font-bold text-sm">
             {formatCurrency(income, currency)}
@@ -81,8 +81,8 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
 
         <View className="flex-1 items-center">
           <View className="flex-row items-center mb-0.5">
-            <ArrowUpRight size={13} color="#F43F5E" />
-            <Text className="text-content-tertiary text-[11px] font-semibold uppercase ml-1">Total Out</Text>
+            <ArrowUpRight size={13} color="#DC4C38" />
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Total Out</Text>
           </View>
           <Text className="text-expense font-bold text-sm">
             {formatCurrency(expense, currency)}
@@ -91,8 +91,8 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
 
         <View className="flex-1 items-end">
           <View className="flex-row items-center mb-0.5">
-            <Wallet size={13} color={netSavings >= 0 ? '#10B981' : '#F43F5E'} />
-            <Text className="text-content-tertiary text-[11px] font-semibold uppercase ml-1">Net Cash</Text>
+            <Wallet size={13} color={netSavings >= 0 ? '#2A9D60' : '#DC4C38'} />
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Net Cash</Text>
           </View>
           <Text className={`font-bold text-sm ${netSavings >= 0 ? 'text-primary' : 'text-expense'}`}>
             {formatCurrency(netSavings, currency)}

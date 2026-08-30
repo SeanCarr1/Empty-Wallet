@@ -36,9 +36,9 @@ export const WalletCard: React.FC<WalletCardProps> = ({
           className="w-8 h-8 rounded-xl items-center justify-center"
           style={{ backgroundColor: `${wallet.color}20` }}
         >
-          <Icon name={wallet.icon} size={18} color={wallet.color} />
+          <Icon name={wallet.icon} size={16} color={wallet.color} />
         </View>
-        <Text className="text-[10px] font-semibold uppercase text-content-tertiary tracking-wider">
+        <Text className="text-[10px] font-bold uppercase text-content-tertiary tracking-wider">
           {wallet.type}
         </Text>
       </View>
@@ -48,7 +48,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
       </Text>
 
       <Text
-        className={`text-lg font-bold ${
+        className={`text-base font-bold ${
           isCredit && wallet.balance < 0 ? 'text-expense' : 'text-content-primary'
         }`}
       >

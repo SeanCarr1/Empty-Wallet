@@ -14,15 +14,15 @@ export default function TabLayout() {
           headerShown: false,
           tabBarShowLabel: true,
           tabBarStyle: {
-            backgroundColor: '#131620',
-            borderTopColor: '#202637',
+            backgroundColor: '#1D1B19',
+            borderTopColor: '#3B3632',
             borderTopWidth: 1,
             height: 72,
             paddingBottom: 10,
             paddingTop: 8,
           },
-          tabBarActiveTintColor: '#10B981',
-          tabBarInactiveTintColor: '#64748B',
+          tabBarActiveTintColor: '#2A9D60',
+          tabBarInactiveTintColor: '#948B7E',
           tabBarLabelStyle: {
             fontSize: 10,
             fontWeight: '600',
@@ -94,9 +94,9 @@ export default function TabLayout() {
             triggerHaptic.medium();
             router.push('/modal/quick-add');
           }}
-          className="w-14 h-14 rounded-full bg-primary items-center justify-center shadow-xl shadow-primary/40 border-4 border-background"
+          className="w-14 h-14 rounded-full bg-primary items-center justify-center shadow-xl shadow-primary/30 border-4 border-background"
         >
-          <Plus size={28} color="#090A0F" strokeWidth={2.8} />
+          <Plus size={26} color="#F5F2EB" strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
     </View>

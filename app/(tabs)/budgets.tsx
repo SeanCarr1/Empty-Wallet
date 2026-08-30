@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useBudgetStore } from '../../src/stores/useBudgetStore';
 import { useCategoryStore } from '../../src/stores/useCategoryStore';
@@ -9,7 +9,7 @@ import { useWalletStore } from '../../src/stores/useWalletStore';
 import { formatCurrency } from '../../src/services/currency';
 import { calculateCategoryBudgetStatus } from '../../src/services/budgetEngine';
 import { Icon } from '../../src/components/ui/Icon';
-import { Plus, Target, Calendar, CreditCard, Sparkles, AlertTriangle, Check, Trash2 } from 'lucide-react-native';
+import { Plus, Target, CreditCard, Sparkles, AlertTriangle, Trash2 } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function BudgetsScreen() {
@@ -72,7 +72,7 @@ export default function BudgetsScreen() {
       targetAmount: target,
       targetDate: goalDate || new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
       icon: 'Target',
-      color: '#8B5CF6',
+      color: '#C69230',
     });
     setGoalModalVisible(false);
     setGoalName('');
@@ -137,7 +137,7 @@ export default function BudgetsScreen() {
             }}
             className="w-10 h-10 rounded-2xl bg-primary items-center justify-center shadow-md shadow-primary/20"
           >
-            <Plus size={22} color="#090A0F" strokeWidth={2.5} />
+            <Plus size={22} color="#F5F2EB" strokeWidth={2.6} />
           </TouchableOpacity>
         </View>
 
@@ -145,7 +145,7 @@ export default function BudgetsScreen() {
         <View className="flex-row bg-background-card p-1 rounded-2xl mb-5 border border-background-border">
           {(['budgets', 'goals', 'subscriptions'] as const).map((tab) => {
             const isActive = activeTab === tab;
-            const label = tab === 'budgets' ? 'Category Budgets' : tab === 'goals' ? 'Goals' : 'Subscriptions';
+            const label = tab === 'budgets' ? 'Category Caps' : tab === 'goals' ? 'Savings Goals' : 'Subscriptions';
             return (
               <TouchableOpacity
                 key={tab}
@@ -176,7 +176,7 @@ export default function BudgetsScreen() {
             <View>
               {budgets.length === 0 ? (
                 <View className="bg-background-card rounded-3xl p-8 items-center justify-center border border-background-border">
-                  <Target size={36} color="#64748B" />
+                  <Target size={36} color="#948B7E" />
                   <Text className="text-content-primary font-bold text-base mt-3">No Category Caps Set</Text>
                   <Text className="text-content-secondary text-xs text-center mt-1 mb-4">
                     Set limits for Dining, Groceries, or Transport to prevent overspending.
@@ -185,7 +185,7 @@ export default function BudgetsScreen() {
                     onPress={() => setBudgetModalVisible(true)}
                     className="bg-primary px-5 py-2.5 rounded-xl"
                   >
-                    <Text className="text-background font-bold text-xs">Set Category Limit</Text>
+                    <Text className="text-content-primary font-bold text-xs">Set Category Limit</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -205,9 +205,9 @@ export default function BudgetsScreen() {
                         <View className="flex-row items-center">
                           <View
                             className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                            style={{ backgroundColor: `${cat?.color || '#10B981'}20` }}
+                            style={{ backgroundColor: `${cat?.color || '#2A9D60'}20` }}
                           >
-                            <Icon name={cat?.icon || 'Tag'} size={20} color={cat?.color || '#10B981'} />
+                            <Icon name={cat?.icon || 'Tag'} size={20} color={cat?.color || '#2A9D60'} />
                           </View>
                           <View>
                             <Text className="text-content-primary font-bold text-sm">
@@ -222,7 +222,7 @@ export default function BudgetsScreen() {
                         <View className="flex-row items-center">
                           {isOver && (
                             <View className="flex-row items-center bg-expense/10 px-2 py-1 rounded-full mr-2">
-                              <AlertTriangle size={12} color="#F43F5E" />
+                              <AlertTriangle size={12} color="#DC4C38" />
                               <Text className="text-expense text-[10px] font-bold ml-1">Over Limit</Text>
                             </View>
                           )}
@@ -233,7 +233,7 @@ export default function BudgetsScreen() {
                             }}
                             className="p-1.5"
                           >
-                            <Trash2 size={16} color="#64748B" />
+                            <Trash2 size={16} color="#948B7E" />
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -259,14 +259,14 @@ export default function BudgetsScreen() {
             <View>
               {goals.length === 0 ? (
                 <View className="bg-background-card rounded-3xl p-8 items-center justify-center border border-background-border">
-                  <Sparkles size={36} color="#8B5CF6" />
+                  <Sparkles size={36} color="#C69230" />
                   <Text className="text-content-primary font-bold text-base mt-3">No Sinking Funds</Text>
                   <Text className="text-content-secondary text-xs text-center mt-1 mb-4">
                     Create target buckets for Emergency Funds, Vacations, or new gadgets.
                   </Text>
                   <TouchableOpacity
                     onPress={() => setGoalModalVisible(true)}
-                    className="bg-accent-purple px-5 py-2.5 rounded-xl"
+                    className="bg-accent-gold px-5 py-2.5 rounded-xl"
                   >
                     <Text className="text-content-primary font-bold text-xs">Create Savings Goal</Text>
                   </TouchableOpacity>
@@ -301,9 +301,9 @@ export default function BudgetsScreen() {
                               setSelectedGoalId(g.id);
                               setContribModalVisible(true);
                             }}
-                            className="bg-accent-purple/20 px-3 py-1.5 rounded-xl mr-2"
+                            className="bg-accent-gold/20 px-3 py-1.5 rounded-xl mr-2"
                           >
-                            <Text className="text-accent-purple font-semibold text-xs">+ Save</Text>
+                            <Text className="text-accent-gold font-semibold text-xs">+ Save</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             onPress={() => {
@@ -312,7 +312,7 @@ export default function BudgetsScreen() {
                             }}
                             className="p-1.5"
                           >
-                            <Trash2 size={16} color="#64748B" />
+                            <Trash2 size={16} color="#948B7E" />
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -320,7 +320,7 @@ export default function BudgetsScreen() {
                       {/* Progress Bar */}
                       <View className="h-2 w-full bg-background-elevated rounded-full overflow-hidden">
                         <View
-                          className="h-full rounded-full bg-accent-purple"
+                          className="h-full rounded-full bg-accent-gold"
                           style={{ width: `${percent}%` }}
                         />
                       </View>
@@ -340,7 +340,7 @@ export default function BudgetsScreen() {
             <View>
               {subscriptions.length === 0 ? (
                 <View className="bg-background-card rounded-3xl p-8 items-center justify-center border border-background-border">
-                  <CreditCard size={36} color="#3B82F6" />
+                  <CreditCard size={36} color="#4338CA" />
                   <Text className="text-content-primary font-bold text-base mt-3">No Subscriptions Tracked</Text>
                   <Text className="text-content-secondary text-xs text-center mt-1 mb-4">
                     Track recurring Netflix, Spotify, Gym, or Utility bills in one place.
@@ -363,9 +363,9 @@ export default function BudgetsScreen() {
                       <View className="flex-row items-center flex-1 mr-3">
                         <View
                           className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                          style={{ backgroundColor: `${cat?.color || '#3B82F6'}20` }}
+                          style={{ backgroundColor: `${cat?.color || '#4338CA'}20` }}
                         >
-                          <Icon name={cat?.icon || 'CreditCard'} size={20} color={cat?.color || '#3B82F6'} />
+                          <Icon name={cat?.icon || 'CreditCard'} size={20} color={cat?.color || '#4338CA'} />
                         </View>
                         <View>
                           <Text className="text-content-primary font-bold text-sm">{s.name}</Text>
@@ -389,7 +389,7 @@ export default function BudgetsScreen() {
                         }}
                         className="p-1.5"
                       >
-                        <Trash2 size={16} color="#64748B" />
+                        <Trash2 size={16} color="#948B7E" />
                       </TouchableOpacity>
                     </View>
                   );
@@ -401,13 +401,13 @@ export default function BudgetsScreen() {
 
         {/* MODAL: ADD BUDGET */}
         <Modal visible={budgetModalVisible} animationType="slide" transparent>
-          <View className="flex-1 bg-black/70 justify-end">
+          <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
               <Text className="text-xl font-bold text-content-primary mb-1">Set Category Limit</Text>
               <Text className="text-content-secondary text-xs mb-4">Pick a category and assign a monthly spending limit</Text>
 
               {/* Category Picker */}
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-2">Category</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Category</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-4">
                 {expenseCategories.map((c) => {
                   const isSelected = selectedCatId === c.id;
@@ -419,7 +419,7 @@ export default function BudgetsScreen() {
                         isSelected ? 'bg-primary/20 border-primary' : 'bg-background-elevated border-background-border'
                       }`}
                     >
-                      <Icon name={c.icon} size={16} color={isSelected ? '#10B981' : c.color} />
+                      <Icon name={c.icon} size={16} color={isSelected ? '#2A9D60' : c.color} />
                       <Text className={`text-xs font-semibold ml-2 ${isSelected ? 'text-primary' : 'text-content-primary'}`}>
                         {c.name}
                       </Text>
@@ -428,28 +428,28 @@ export default function BudgetsScreen() {
                 })}
               </ScrollView>
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-2">Monthly Limit ({currency})</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Monthly Limit ({currency})</Text>
               <TextInput
                 value={budgetLimitInput}
                 onChangeText={setBudgetLimitInput}
                 keyboardType="numeric"
                 placeholder="e.g. 5000"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3.5 text-content-primary text-base font-semibold mb-6"
               />
 
               <View className="flex-row space-x-3">
                 <TouchableOpacity
                   onPress={() => setBudgetModalVisible(false)}
-                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2"
+                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
                 >
                   <Text className="text-content-secondary font-semibold">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSaveBudget}
-                  className="flex-1 bg-primary py-3.5 rounded-xl items-center"
+                  className="flex-1 bg-primary py-3.5 rounded-xl items-center shadow-lg shadow-primary/20"
                 >
-                  <Text className="text-background font-bold">Save Budget</Text>
+                  <Text className="text-content-primary font-bold">Save Budget</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -458,40 +458,40 @@ export default function BudgetsScreen() {
 
         {/* MODAL: ADD GOAL */}
         <Modal visible={goalModalVisible} animationType="slide" transparent>
-          <View className="flex-1 bg-black/70 justify-end">
+          <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
               <Text className="text-xl font-bold text-content-primary mb-1">New Savings Target</Text>
               <Text className="text-content-secondary text-xs mb-4">Create a sinking fund bucket</Text>
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Goal Name</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Goal Name</Text>
               <TextInput
                 value={goalName}
                 onChangeText={setGoalName}
                 placeholder="e.g. Vacation to Palawan"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3.5 text-content-primary text-sm font-semibold mb-3"
               />
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Target Amount ({currency})</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Target Amount ({currency})</Text>
               <TextInput
                 value={goalTarget}
                 onChangeText={setGoalTarget}
                 keyboardType="numeric"
                 placeholder="e.g. 25000"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3.5 text-content-primary text-base font-semibold mb-6"
               />
 
               <View className="flex-row space-x-3">
                 <TouchableOpacity
                   onPress={() => setGoalModalVisible(false)}
-                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2"
+                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
                 >
                   <Text className="text-content-secondary font-semibold">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSaveGoal}
-                  className="flex-1 bg-accent-purple py-3.5 rounded-xl items-center"
+                  className="flex-1 bg-accent-gold py-3.5 rounded-xl items-center shadow-lg shadow-accent-gold/20"
                 >
                   <Text className="text-content-primary font-bold">Create Goal</Text>
                 </TouchableOpacity>
@@ -502,31 +502,31 @@ export default function BudgetsScreen() {
 
         {/* MODAL: CONTRIBUTE TO GOAL */}
         <Modal visible={contribModalVisible} animationType="slide" transparent>
-          <View className="flex-1 bg-black/70 justify-end">
+          <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
               <Text className="text-xl font-bold text-content-primary mb-1">Add Savings</Text>
               <Text className="text-content-secondary text-xs mb-4">Deposit funds into this goal</Text>
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Amount to Add ({currency})</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Amount to Add ({currency})</Text>
               <TextInput
                 value={contribAmount}
                 onChangeText={setContribAmount}
                 keyboardType="numeric"
                 placeholder="e.g. 1000"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3.5 text-content-primary text-base font-semibold mb-6"
               />
 
               <View className="flex-row space-x-3">
                 <TouchableOpacity
                   onPress={() => setContribModalVisible(false)}
-                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2"
+                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
                 >
                   <Text className="text-content-secondary font-semibold">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleContribute}
-                  className="flex-1 bg-accent-purple py-3.5 rounded-xl items-center"
+                  className="flex-1 bg-accent-gold py-3.5 rounded-xl items-center shadow-lg shadow-accent-gold/20"
                 >
                   <Text className="text-content-primary font-bold">Add Deposit</Text>
                 </TouchableOpacity>
@@ -537,32 +537,32 @@ export default function BudgetsScreen() {
 
         {/* MODAL: ADD SUBSCRIPTION */}
         <Modal visible={subModalVisible} animationType="slide" transparent>
-          <View className="flex-1 bg-black/70 justify-end">
+          <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
               <Text className="text-xl font-bold text-content-primary mb-1">Track Recurring Bill</Text>
               <Text className="text-content-secondary text-xs mb-4">Add monthly subscription or utility</Text>
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Subscription Name</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Subscription Name</Text>
               <TextInput
                 value={subName}
                 onChangeText={setSubName}
                 placeholder="e.g. Netflix Premium"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-sm font-semibold mb-3"
               />
 
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Monthly Cost ({currency})</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Monthly Cost ({currency})</Text>
               <TextInput
                 value={subAmount}
                 onChangeText={setSubAmount}
                 keyboardType="numeric"
                 placeholder="e.g. 549"
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#948B7E"
                 className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-sm font-semibold mb-3"
               />
 
               {/* Wallet Picker */}
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Charged To Wallet</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Charged To Wallet</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-3">
                 {wallets.map((w) => (
                   <TouchableOpacity
@@ -580,7 +580,7 @@ export default function BudgetsScreen() {
               </ScrollView>
 
               {/* Category Picker */}
-              <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Category</Text>
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Category</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-6">
                 {expenseCategories.map((c) => (
                   <TouchableOpacity
@@ -600,13 +600,13 @@ export default function BudgetsScreen() {
               <View className="flex-row space-x-3">
                 <TouchableOpacity
                   onPress={() => setSubModalVisible(false)}
-                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2"
+                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
                 >
                   <Text className="text-content-secondary font-semibold">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSaveSubscription}
-                  className="flex-1 bg-accent-blue py-3.5 rounded-xl items-center"
+                  className="flex-1 bg-accent-blue py-3.5 rounded-xl items-center shadow-lg shadow-accent-blue/20"
                 >
                   <Text className="text-content-primary font-bold">Track Bill</Text>
                 </TouchableOpacity>

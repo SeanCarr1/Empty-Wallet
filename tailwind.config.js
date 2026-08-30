@@ -6,32 +6,33 @@ module.exports = {
     extend: {
       colors: {
         background: {
-          DEFAULT: "#090A0F",
-          card: "#131620",
-          elevated: "#1C2030",
-          border: "#282E42",
+          DEFAULT: "#141312", // Warm Deep Charcoal
+          card: "#1D1B19",     // Warm Card Surface
+          elevated: "#282522", // Elevated Warm Stone
+          border: "#3B3632",   // Warm Hairline Border
         },
         primary: {
-          DEFAULT: "#10B981", // Emerald 500
+          DEFAULT: "#2A9D60", // Sage Forest Green
           light: "#34D399",
-          dark: "#059669",
+          dark: "#1B6D42",
         },
         expense: {
-          DEFAULT: "#F43F5E", // Rose 500
-          light: "#FB7185",
-          dark: "#E11D48",
+          DEFAULT: "#DC4C38", // Terracotta / Japanese Vermilion
+          light: "#F87171",
+          dark: "#B91C1C",
         },
         accent: {
-          purple: "#8B5CF6",
-          amber: "#F59E0B",
-          cyan: "#06B6D4",
-          blue: "#3B82F6",
+          gold: "#C69230",     // Warm Ochre Gold
+          purple: "#7C3AED",
+          amber: "#D97706",    // Warm Amber
+          blue: "#4338CA",     // Washed Denim / Indigo
+          sand: "#D6CFBF",
         },
         content: {
-          primary: "#F8FAFC",
-          secondary: "#94A3B8",
-          tertiary: "#64748B",
-          muted: "#475569",
+          primary: "#F5F2EB",   // Ivory Parchment
+          secondary: "#D6CFBF", // Warm Sand
+          tertiary: "#948B7E",  // Muted Ochre
+          muted: "#5A5248",     // Dark Warm Muted
         },
       },
     },

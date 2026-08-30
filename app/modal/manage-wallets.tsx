@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useWalletStore } from '../../src/stores/useWalletStore';
@@ -8,7 +8,7 @@ import { WalletType } from '../../src/types';
 import { formatCurrency } from '../../src/services/currency';
 import { Icon } from '../../src/components/ui/Icon';
 import { triggerHaptic } from '../../src/services/haptics';
-import { X, Plus, ArrowRightLeft, Trash2, Check, Banknote, Landmark, CreditCard, PiggyBank } from 'lucide-react-native';
+import { X, Plus, Trash2, Check } from 'lucide-react-native';
 
 export default function ManageWalletsModal() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ManageWalletsModal() {
   const [walletName, setWalletName] = useState('');
   const [walletType, setWalletType] = useState<WalletType>('bank');
   const [walletBalance, setWalletBalance] = useState('');
-  const [walletColor, setWalletColor] = useState('#3B82F6');
+  const [walletColor, setWalletColor] = useState('#2A9D60');
   const [walletIcon, setWalletIcon] = useState('Landmark');
 
   // Transfer State
@@ -31,7 +31,7 @@ export default function ManageWalletsModal() {
   const [transferAmount, setTransferAmount] = useState('');
   const [transferNote, setTransferNote] = useState('');
 
-  const WALLET_COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4', '#64748B'];
+  const WALLET_COLORS = ['#2A9D60', '#4338CA', '#C69230', '#DC4C38', '#7C3AED', '#0D9488', '#948B7E'];
 
   const WALLET_ICONS: { icon: string; label: string; type: WalletType }[] = [
     { icon: 'Banknote', label: 'Cash', type: 'cash' },
@@ -87,7 +87,7 @@ export default function ManageWalletsModal() {
           }}
           className="p-2 -ml-2 rounded-full"
         >
-          <X size={24} color="#94A3B8" />
+          <X size={24} color="#D6CFBF" />
         </TouchableOpacity>
 
         <Text className="text-base font-bold text-content-primary">Wallets & Accounts</Text>
@@ -97,9 +97,9 @@ export default function ManageWalletsModal() {
             triggerHaptic.selection();
             setAddModalVisible(true);
           }}
-          className="w-8 h-8 rounded-full bg-primary items-center justify-center"
+          className="w-8 h-8 rounded-full bg-primary items-center justify-center shadow-md shadow-primary/20"
         >
-          <Plus size={18} color="#090A0F" strokeWidth={2.5} />
+          <Plus size={18} color="#F5F2EB" strokeWidth={2.6} />
         </TouchableOpacity>
       </View>
 
@@ -181,7 +181,7 @@ export default function ManageWalletsModal() {
                     }}
                     className="p-1.5 active:bg-expense/10 rounded-lg"
                   >
-                    <Trash2 size={16} color="#64748B" />
+                    <Trash2 size={16} color="#948B7E" />
                   </TouchableOpacity>
                 )}
               </View>
@@ -195,7 +195,7 @@ export default function ManageWalletsModal() {
             </Text>
 
             {/* From Wallet */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">From Wallet</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">From Wallet</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-3">
               {wallets.map((w) => (
                 <TouchableOpacity
@@ -213,7 +213,7 @@ export default function ManageWalletsModal() {
             </ScrollView>
 
             {/* To Wallet */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">To Destination Wallet</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">To Destination Wallet</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-4">
               {wallets.map((w) => (
                 <TouchableOpacity
@@ -231,31 +231,31 @@ export default function ManageWalletsModal() {
             </ScrollView>
 
             {/* Transfer Amount */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Amount ({currency})</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Amount ({currency})</Text>
             <TextInput
               value={transferAmount}
               onChangeText={setTransferAmount}
               keyboardType="numeric"
               placeholder="e.g. 2000"
-              placeholderTextColor="#64748B"
+              placeholderTextColor="#948B7E"
               className="bg-background-elevated border border-background-border rounded-xl p-3.5 text-content-primary text-base font-semibold mb-3"
             />
 
             {/* Transfer Note */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Note / Reason (Optional)</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Note / Reason (Optional)</Text>
             <TextInput
               value={transferNote}
               onChangeText={setTransferNote}
               placeholder="e.g. ATM Cash Withdrawal"
-              placeholderTextColor="#64748B"
+              placeholderTextColor="#948B7E"
               className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-medium mb-6"
             />
 
             <TouchableOpacity
               onPress={handleExecuteTransfer}
-              className="bg-primary py-3.5 rounded-xl items-center"
+              className="bg-primary py-3.5 rounded-xl items-center shadow-lg shadow-primary/20"
             >
-              <Text className="text-background font-bold text-sm">Confirm Transfer</Text>
+              <Text className="text-content-primary font-bold text-sm">Confirm Transfer</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -263,32 +263,32 @@ export default function ManageWalletsModal() {
 
       {/* MODAL: ADD WALLET */}
       <Modal visible={addModalVisible} animationType="slide" transparent>
-        <View className="flex-1 bg-black/70 justify-end">
+        <View className="flex-1 bg-black/75 justify-end">
           <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
             <Text className="text-xl font-bold text-content-primary mb-1">Add New Wallet</Text>
             <Text className="text-content-secondary text-xs mb-4">Create a new money container</Text>
 
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Wallet Name</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Wallet Name</Text>
             <TextInput
               value={walletName}
               onChangeText={setWalletName}
               placeholder="e.g. Maya Wallet, GCash, BDO Savings"
-              placeholderTextColor="#64748B"
+              placeholderTextColor="#948B7E"
               className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-sm font-semibold mb-3"
             />
 
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Starting Balance ({currency})</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Starting Balance ({currency})</Text>
             <TextInput
               value={walletBalance}
               onChangeText={setWalletBalance}
               keyboardType="numeric"
               placeholder="0.00"
-              placeholderTextColor="#64748B"
+              placeholderTextColor="#948B7E"
               className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-base font-semibold mb-3"
             />
 
             {/* Type Selector */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-1">Wallet Type</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Wallet Type</Text>
             <View className="flex-row mb-4">
               {WALLET_ICONS.map((item) => (
                 <TouchableOpacity
@@ -309,7 +309,7 @@ export default function ManageWalletsModal() {
             </View>
 
             {/* Color Selector */}
-            <Text className="text-content-secondary text-xs font-semibold uppercase mb-2">Accent Color</Text>
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Accent Color</Text>
             <View className="flex-row mb-6">
               {WALLET_COLORS.map((c) => (
                 <TouchableOpacity
@@ -328,15 +328,15 @@ export default function ManageWalletsModal() {
             <View className="flex-row space-x-3">
               <TouchableOpacity
                 onPress={() => setAddModalVisible(false)}
-                className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2"
+                className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
               >
                 <Text className="text-content-secondary font-semibold">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSaveWallet}
-                className="flex-1 bg-primary py-3.5 rounded-xl items-center"
+                className="flex-1 bg-primary py-3.5 rounded-xl items-center shadow-lg shadow-primary/20"
               >
-                <Text className="text-background font-bold">Save Wallet</Text>
+                <Text className="text-content-primary font-bold">Save Wallet</Text>
               </TouchableOpacity>
             </View>
           </View>

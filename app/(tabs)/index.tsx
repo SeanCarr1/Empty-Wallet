@@ -54,7 +54,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 110 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2A9D60" />
         }
       >
         {/* Top Header with App Logo */}
@@ -66,8 +66,8 @@ export default function DashboardScreen() {
               resizeMode="cover"
             />
             <View>
-              <Text className="text-content-secondary font-medium text-[11px] tracking-wider uppercase">
-                Empty-Wallet Total Balance
+              <Text className="text-content-tertiary font-bold text-[10px] tracking-wider uppercase">
+                Empty-Wallet Net Balance
               </Text>
               <Text className="text-2xl font-extrabold text-content-primary tracking-tight mt-0.5">
                 {formatCurrency(totalBalance, currency)}
@@ -83,7 +83,7 @@ export default function DashboardScreen() {
             }}
             className="flex-row items-center bg-background-card border border-background-border px-3.5 py-2 rounded-2xl"
           >
-            <ArrowRightLeft size={16} color="#10B981" />
+            <ArrowRightLeft size={15} color="#2A9D60" />
             <Text className="text-content-primary font-semibold text-xs ml-2">Transfer</Text>
           </TouchableOpacity>
         </View>
@@ -91,7 +91,7 @@ export default function DashboardScreen() {
         {/* Wallets Horizontal Carousel */}
         <View className="mb-5">
           <View className="flex-row items-center justify-between mb-2.5">
-            <Text className="text-content-secondary font-semibold text-xs uppercase tracking-wider">
+            <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
               Wallets & Accounts
             </Text>
             <TouchableOpacity
@@ -117,7 +117,7 @@ export default function DashboardScreen() {
               }}
               className="min-w-[130px] p-4 rounded-2xl border border-dashed border-background-border items-center justify-center bg-background-card/40"
             >
-              <Plus size={20} color="#64748B" />
+              <Plus size={20} color="#948B7E" />
               <Text className="text-content-tertiary font-semibold text-xs mt-2">New Wallet</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -141,7 +141,7 @@ export default function DashboardScreen() {
         {/* Recent Transactions Section */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-content-secondary font-semibold text-xs uppercase tracking-wider">
+            <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
               Recent Transactions
             </Text>
             <TouchableOpacity
@@ -156,16 +156,16 @@ export default function DashboardScreen() {
 
           {recentTransactions.length === 0 ? (
             <View className="bg-background-card rounded-2xl p-8 items-center justify-center border border-background-border">
-              <Sparkles size={32} color="#64748B" />
+              <Sparkles size={32} color="#948B7E" />
               <Text className="text-content-primary font-bold text-base mt-3">No Transactions Yet</Text>
               <Text className="text-content-secondary text-xs text-center mt-1 mb-4">
                 Log your first expense or income to start tracking your wallet pace.
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('/modal/quick-add')}
-                className="bg-primary px-5 py-2.5 rounded-xl"
+                className="bg-primary px-5 py-2.5 rounded-xl shadow-md shadow-primary/20"
               >
-                <Text className="text-background font-bold text-xs">Add First Transaction</Text>
+                <Text className="text-content-primary font-bold text-xs">Add First Transaction</Text>
               </TouchableOpacity>
             </View>
           ) : (
