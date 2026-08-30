@@ -40,8 +40,11 @@ export const transactions = sqliteTable('transactions', {
   amount: real('amount').notNull(),
   type: text('type').$type<'expense' | 'income' | 'transfer'>().notNull(),
   payee: text('payee').notNull(),
+  payer: text('payer'),
+  paymentType: text('payment_type').$type<'cash' | 'debit_card' | 'credit_card' | 'transfer' | 'web_payment'>(),
   note: text('note'),
   transactionDate: text('transaction_date').notNull(),
+  transactionTime: text('transaction_time'),
   tags: text('tags'),
   createdAt: text('created_at').notNull(),
 });

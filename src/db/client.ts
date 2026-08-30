@@ -57,8 +57,11 @@ export async function initializeDatabase(): Promise<void> {
         amount REAL NOT NULL,
         type TEXT NOT NULL,
         payee TEXT NOT NULL,
+        payer TEXT,
+        payment_type TEXT DEFAULT 'cash',
         note TEXT,
         transaction_date TEXT NOT NULL,
+        transaction_time TEXT,
         tags TEXT,
         created_at TEXT NOT NULL,
         FOREIGN KEY (wallet_id) REFERENCES wallets (id)
@@ -88,6 +91,23 @@ export async function initializeDatabase(): Promise<void> {
         color TEXT NOT NULL DEFAULT '#8B5CF6'
       );
     `);
+
+    // Ensure columns exist on existing databases
+    try {
+      const tableInfo = expoDb.getAllSync<{ name: string }>('PRAGMA table_info(transactions);');
+      const columnNames = new Set(tableInfo.map((col) => col.name));
+      if (!columnNames.has('payer')) {
+        expoDb.execSync('ALTER TABLE transactions ADD COLUMN payer TEXT;');
+      }
+      if (!columnNames.has('payment_type')) {
+        expoDb.execSync('ALTER TABLE transactions ADD COLUMN payment_type TEXT DEFAULT "cash";');
+      }
+      if (!columnNames.has('transaction_time')) {
+        expoDb.execSync('ALTER TABLE transactions ADD COLUMN transaction_time TEXT;');
+      }
+    } catch (alterErr) {
+      console.warn('Column check warning:', alterErr);
+    }
 
     // 2. Check if Categories exist, otherwise seed default categories
     const existingCats = expoDb.getAllSync<{ count: number }>('SELECT count(*) as count FROM categories;');
@@ -149,9 +169,9 @@ export async function initializeDatabase(): Promise<void> {
       }
       stmt.finalizeSync();
 
-      // Seed a few initial demo transactions so the app looks alive immediately
+      // Seed initial demo transactions
       const demoTxStmt = expoDb.prepareSync(
-        'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, note, transaction_date, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
       );
       const todayStr = new Date().toISOString().split('T')[0];
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -165,8 +185,11 @@ export async function initializeDatabase(): Promise<void> {
         45000,
         'income',
         'Company Payroll',
+        'Employer Inc.',
+        'transfer',
         'Monthly salary payout',
         yesterday,
+        '09:00',
         'salary,work',
         now,
       ]);
@@ -179,8 +202,11 @@ export async function initializeDatabase(): Promise<void> {
         350,
         'expense',
         'Cafe Latte & Pastry',
+        null,
+        'cash',
         'Morning breakfast',
         todayStr,
+        '08:30',
         'coffee,breakfast',
         now,
       ]);
@@ -193,8 +219,11 @@ export async function initializeDatabase(): Promise<void> {
         2850,
         'expense',
         'Supermarket Weekly Run',
+        null,
+        'debit_card',
         'Produce & pantry essentials',
         yesterday,
+        '17:15',
         'groceries',
         now,
       ]);

@@ -1,32 +1,31 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTransactionStore } from '../../src/stores/useTransactionStore';
 import { useCategoryStore } from '../../src/stores/useCategoryStore';
+import { useWalletStore } from '../../src/stores/useWalletStore';
 import { useSettingsStore } from '../../src/stores/useSettingsStore';
-import { formatCurrency, formatCompactCurrency } from '../../src/services/currency';
+import { formatCurrency } from '../../src/services/currency';
 import { CategoryDonutChart, CategorySpendItem } from '../../src/components/charts/CategoryDonutChart';
 import { MonthlyTrendBarChart, MonthlyTrendData } from '../../src/components/charts/MonthlyTrendBarChart';
-import { Icon } from '../../src/components/ui/Icon';
+import { HorizontalCashFlowChart } from '../../src/components/charts/HorizontalCashFlowChart';
+import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
 import { triggerHaptic } from '../../src/services/haptics';
-import { Download, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Award } from 'lucide-react-native';
+import { Download, ArrowUpRight, ArrowDownRight, Award } from 'lucide-react-native';
 import { format, subMonths, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
 export default function AnalyticsScreen() {
   const { transactions } = useTransactionStore();
   const { categories } = useCategoryStore();
+  const { getTotalBalance } = useWalletStore();
   const currency = useSettingsStore((s) => s.currency);
 
-  const [selectedMonthOffset, setSelectedMonthOffset] = useState<number>(0); // 0 = current, 1 = last month, etc.
+  const [selectedMonthOffset, setSelectedMonthOffset] = useState<number>(0);
 
-  const categoryMap = useMemo(() => {
-    return new Map(categories.map((c) => [c.id, c]));
-  }, [categories]);
+  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const totalNetBalance = getTotalBalance();
 
-  const targetDate = useMemo(() => {
-    return subMonths(new Date(), selectedMonthOffset);
-  }, [selectedMonthOffset]);
-
+  const targetDate = useMemo(() => subMonths(new Date(), selectedMonthOffset), [selectedMonthOffset]);
   const currentMonthStart = useMemo(() => startOfMonth(targetDate), [targetDate]);
   const currentMonthEnd = useMemo(() => endOfMonth(targetDate), [targetDate]);
 
@@ -52,7 +51,7 @@ export default function AnalyticsScreen() {
   }, [monthTransactions]);
 
   const netSavings = totalIncome - totalExpense;
-  const savingsRate = totalIncome > 0 ? ((netSavings / totalIncome) * 100) : 0;
+  const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
 
   // Category breakdown
   const categorySpendData: CategorySpendItem[] = useMemo(() => {
@@ -91,11 +90,19 @@ export default function AnalyticsScreen() {
       const label = format(mDate, 'MMM');
 
       const inc = transactions
-        .filter((tx) => tx.type === 'income' && isWithinInterval(parseISO(tx.transactionDate), { start: mStart, end: mEnd }))
+        .filter(
+          (tx) =>
+            tx.type === 'income' &&
+            isWithinInterval(parseISO(tx.transactionDate), { start: mStart, end: mEnd })
+        )
         .reduce((sum, tx) => sum + tx.amount, 0);
 
       const exp = transactions
-        .filter((tx) => tx.type === 'expense' && isWithinInterval(parseISO(tx.transactionDate), { start: mStart, end: mEnd }))
+        .filter(
+          (tx) =>
+            tx.type === 'expense' &&
+            isWithinInterval(parseISO(tx.transactionDate), { start: mStart, end: mEnd })
+        )
         .reduce((sum, tx) => sum + tx.amount, 0);
 
       list.push({ monthLabel: label, income: inc, expense: exp });
@@ -106,11 +113,11 @@ export default function AnalyticsScreen() {
   const handleExportCSV = async () => {
     try {
       triggerHaptic.selection();
-      const csvHeader = 'ID,Date,Type,Payee,Amount,Category,Wallet,Note\n';
+      const csvHeader = 'ID,Date,Time,Type,PaymentType,Payee,Payer,Amount,Category,Wallet,Note\n';
       const csvRows = transactions
         .map(
           (t) =>
-            `"${t.id}","${t.transactionDate}","${t.type}","${t.payee.replace(/"/g, '""')}","${t.amount}","${t.categoryId || ''}","${t.walletId}","${(t.note || '').replace(/"/g, '""')}"`
+            `"${t.id}","${t.transactionDate}","${t.transactionTime || ''}","${t.type}","${t.paymentType || ''}","${t.payee.replace(/"/g, '""')}","${(t.payer || '').replace(/"/g, '""')}","${t.amount}","${t.categoryId || ''}","${t.walletId}","${(t.note || '').replace(/"/g, '""')}"`
         )
         .join('\n');
 
@@ -133,7 +140,7 @@ export default function AnalyticsScreen() {
           <View>
             <Text className="text-2xl font-bold text-content-primary">Financial Insights</Text>
             <Text className="text-content-secondary text-xs mt-0.5">
-              Spending velocity, category slices & trends
+              Cash flow ratios, balance curves & category slices
             </Text>
           </View>
 
@@ -183,7 +190,6 @@ export default function AnalyticsScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
           {/* Top 3 Summary Cards */}
           <View className="flex-row space-x-2.5 mb-5">
-            {/* Income Card */}
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Income</Text>
@@ -194,7 +200,6 @@ export default function AnalyticsScreen() {
               </Text>
             </View>
 
-            {/* Expense Card */}
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Expense</Text>
@@ -205,7 +210,6 @@ export default function AnalyticsScreen() {
               </Text>
             </View>
 
-            {/* Savings Rate Card */}
             <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-semibold uppercase">Savings %</Text>
@@ -217,7 +221,21 @@ export default function AnalyticsScreen() {
             </View>
           </View>
 
-          {/* Category Breakdown Donut Chart Card */}
+          {/* 1. HORIZONTAL CASH FLOW GRAPH */}
+          <View className="mb-5">
+            <HorizontalCashFlowChart income={totalIncome} expense={totalExpense} currency={currency} />
+          </View>
+
+          {/* 2. BALANCE TREND LINE GRAPH */}
+          <View className="mb-2">
+            <BalanceTrendLineChart
+              transactions={transactions}
+              currentTotalBalance={totalNetBalance}
+              currency={currency}
+            />
+          </View>
+
+          {/* 3. CATEGORY BREAKDOWN DONUT CHART */}
           <View className="bg-background-card p-5 rounded-3xl border border-background-border mb-5">
             <Text className="text-content-primary font-bold text-base mb-1">Spending by Category</Text>
             <Text className="text-content-tertiary text-xs mb-3">
@@ -233,7 +251,7 @@ export default function AnalyticsScreen() {
 
             {/* Category Legend List */}
             <View className="mt-4 border-t border-background-border/50 pt-3">
-              {categorySpendData.slice(0, 5).map((item) => (
+              {categorySpendData.slice(0, 6).map((item) => (
                 <View
                   key={item.category.id}
                   className="flex-row items-center justify-between py-2 border-b border-background-border/20"
@@ -261,7 +279,7 @@ export default function AnalyticsScreen() {
             </View>
           </View>
 
-          {/* Monthly Trend 6-Month Chart */}
+          {/* 4. MONTHLY 6-MONTH COMPARISON BARS */}
           <View className="mb-4">
             <MonthlyTrendBarChart data={trendData} currency={currency} />
           </View>

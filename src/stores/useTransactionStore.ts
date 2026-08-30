@@ -27,7 +27,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     try {
       const db = SQLite.openDatabaseSync(DATABASE_NAME);
       const rows = db.getAllSync<any>(
-        'SELECT * FROM transactions ORDER BY transaction_date DESC, created_at DESC;'
+        'SELECT * FROM transactions ORDER BY transaction_date DESC, transaction_time DESC, created_at DESC;'
       );
       const mapped: Transaction[] = rows.map((r) => ({
         id: r.id,
@@ -38,8 +38,11 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         amount: r.amount,
         type: r.type,
         payee: r.payee,
+        payer: r.payer,
+        paymentType: r.payment_type,
         note: r.note,
         transactionDate: r.transaction_date,
+        transactionTime: r.transaction_time,
         tags: r.tags,
         createdAt: r.created_at,
       }));
@@ -58,7 +61,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       db.withTransactionSync(() => {
         // 1. Insert transaction
         const stmt = db.prepareSync(
-          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, note, transaction_date, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         stmt.executeSync([
           id,
@@ -69,8 +72,11 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
           tx.amount,
           tx.type,
           tx.payee,
+          tx.payer || null,
+          tx.paymentType || 'cash',
           tx.note || null,
           tx.transactionDate,
+          tx.transactionTime || null,
           tx.tags || null,
           now,
         ]);
@@ -85,6 +91,14 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
           const wStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
           wStmt.executeSync([tx.amount, tx.walletId]);
           wStmt.finalizeSync();
+        } else if (tx.type === 'transfer' && tx.destinationWalletId) {
+          const deductStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
+          deductStmt.executeSync([tx.amount, tx.walletId]);
+          deductStmt.finalizeSync();
+
+          const addStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
+          addStmt.executeSync([tx.amount, tx.destinationWalletId]);
+          addStmt.finalizeSync();
         }
       });
 
@@ -111,6 +125,14 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
           const wStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
           wStmt.executeSync([txToDelete.amount, txToDelete.walletId]);
           wStmt.finalizeSync();
+        } else if (txToDelete.type === 'transfer' && txToDelete.destinationWalletId) {
+          const addBackStmt = db.prepareSync('UPDATE wallets SET balance = balance + ? WHERE id = ?');
+          addBackStmt.executeSync([txToDelete.amount, txToDelete.walletId]);
+          addBackStmt.finalizeSync();
+
+          const deductBackStmt = db.prepareSync('UPDATE wallets SET balance = balance - ? WHERE id = ?');
+          deductBackStmt.executeSync([txToDelete.amount, txToDelete.destinationWalletId]);
+          deductBackStmt.finalizeSync();
         }
 
         const stmt = db.prepareSync('DELETE FROM transactions WHERE id = ?');
@@ -132,7 +154,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
       db.withTransactionSync(() => {
         const stmt = db.prepareSync(
-          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, note, transaction_date, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO transactions (id, wallet_id, destination_wallet_id, category_id, subscription_id, amount, type, payee, payer, payment_type, note, transaction_date, transaction_time, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
 
         for (let i = 0; i < txs.length; i++) {
@@ -147,8 +169,11 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
             tx.amount,
             tx.type,
             tx.payee,
+            tx.payer || null,
+            tx.paymentType || 'cash',
             tx.note || null,
             tx.transactionDate,
+            tx.transactionTime || null,
             tx.tags || null,
             now,
           ]);

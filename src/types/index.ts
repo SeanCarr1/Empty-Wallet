@@ -2,6 +2,8 @@ export type TransactionType = 'expense' | 'income' | 'transfer';
 
 export type WalletType = 'cash' | 'bank' | 'credit' | 'savings';
 
+export type PaymentType = 'cash' | 'debit_card' | 'credit_card' | 'transfer' | 'web_payment';
+
 export type BudgetPeriod = 'monthly' | 'weekly' | 'custom';
 
 export type SubscriptionCycle = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -36,8 +38,11 @@ export interface Transaction {
   amount: number;
   type: TransactionType;
   payee: string;
+  payer?: string | null;
+  paymentType?: PaymentType | null;
   note?: string | null;
   transactionDate: string; // ISO string YYYY-MM-DD
+  transactionTime?: string | null; // HH:mm (e.g. 14:30)
   tags?: string | null; // Comma-separated or JSON
   createdAt: string;
 }

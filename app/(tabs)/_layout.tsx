@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { View, TouchableOpacity } from 'react-native';
-import { LayoutGrid, Target, BarChart3, Settings2, Plus } from 'lucide-react-native';
+import { LayoutGrid, Receipt, Target, BarChart3, Settings2, Plus } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function TabLayout() {
@@ -17,14 +17,14 @@ export default function TabLayout() {
             backgroundColor: '#131620',
             borderTopColor: '#202637',
             borderTopWidth: 1,
-            height: 70,
+            height: 72,
             paddingBottom: 10,
             paddingTop: 8,
           },
           tabBarActiveTintColor: '#10B981',
           tabBarInactiveTintColor: '#64748B',
           tabBarLabelStyle: {
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: '600',
             marginTop: 2,
           },
@@ -34,7 +34,18 @@ export default function TabLayout() {
           name="index"
           options={{
             title: 'Today',
-            tabBarIcon: ({ color, size }) => <LayoutGrid color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <LayoutGrid color={color} size={size - 2} />,
+          }}
+          listeners={{
+            tabPress: () => triggerHaptic.selection(),
+          }}
+        />
+
+        <Tabs.Screen
+          name="records"
+          options={{
+            title: 'Records',
+            tabBarIcon: ({ color, size }) => <Receipt color={color} size={size - 2} />,
           }}
           listeners={{
             tabPress: () => triggerHaptic.selection(),
@@ -45,7 +56,7 @@ export default function TabLayout() {
           name="budgets"
           options={{
             title: 'Budgets',
-            tabBarIcon: ({ color, size }) => <Target color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Target color={color} size={size - 2} />,
           }}
           listeners={{
             tabPress: () => triggerHaptic.selection(),
@@ -56,7 +67,7 @@ export default function TabLayout() {
           name="analytics"
           options={{
             title: 'Analytics',
-            tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size - 2} />,
           }}
           listeners={{
             tabPress: () => triggerHaptic.selection(),
@@ -67,7 +78,7 @@ export default function TabLayout() {
           name="settings"
           options={{
             title: 'Settings',
-            tabBarIcon: ({ color, size }) => <Settings2 color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Settings2 color={color} size={size - 2} />,
           }}
           listeners={{
             tabPress: () => triggerHaptic.selection(),
@@ -76,7 +87,7 @@ export default function TabLayout() {
       </Tabs>
 
       {/* Floating Quick Add (+) Action Button */}
-      <View className="absolute bottom-6 self-center z-50">
+      <View className="absolute bottom-6 right-6 z-50">
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => {

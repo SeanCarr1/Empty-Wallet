@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { SUPPORTED_CURRENCIES } from '../../src/services/currency';
 import { AuthService } from '../../src/services/auth';
 import { triggerHaptic } from '../../src/services/haptics';
-import { Wallet, Upload, Fingerprint, Coins, Moon, Shield, Info, ChevronRight, Check } from 'lucide-react-native';
+import { Wallet, Upload, Fingerprint, Coins, ChevronRight, Check } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -180,11 +180,13 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Section 4: App Information */}
-        <View className="bg-background-card rounded-2xl p-4 border border-background-border items-center">
-          <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center mb-2">
-            <Shield size={24} color="#10B981" />
-          </View>
+        {/* Section 4: App Information & Brand Logo */}
+        <View className="bg-background-card rounded-3xl p-5 border border-background-border items-center">
+          <Image
+            source={require('../../assets/logo.jpg')}
+            className="w-14 h-14 rounded-2xl mb-3 border border-background-border"
+            resizeMode="cover"
+          />
           <Text className="text-content-primary font-bold text-base">Empty-Wallet</Text>
           <Text className="text-content-tertiary text-xs">Version 1.0.0 • Local-First Architecture</Text>
           <Text className="text-content-muted text-[11px] mt-1 text-center">

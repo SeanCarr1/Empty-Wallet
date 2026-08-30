@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initializeDatabase } from '../src/db/client';
 import { useWalletStore } from '../src/stores/useWalletStore';
@@ -10,7 +10,7 @@ import { useBudgetStore } from '../src/stores/useBudgetStore';
 import { useCategoryStore } from '../src/stores/useCategoryStore';
 import { useSettingsStore } from '../src/stores/useSettingsStore';
 import { AuthService } from '../src/services/auth';
-import { ShieldAlert, Fingerprint } from 'lucide-react-native';
+import { Fingerprint } from 'lucide-react-native';
 import '../global.css';
 
 export default function RootLayout() {
@@ -61,6 +61,11 @@ export default function RootLayout() {
   if (!isReady) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
+        <Image
+          source={require('../assets/logo.jpg')}
+          className="w-16 h-16 rounded-3xl mb-4 border border-background-border"
+          resizeMode="cover"
+        />
         <Text className="text-content-secondary font-semibold text-base">Loading Empty-Wallet...</Text>
       </View>
     );
@@ -69,18 +74,21 @@ export default function RootLayout() {
   if (isLocked) {
     return (
       <View className="flex-1 bg-background items-center justify-center p-6">
-        <View className="w-20 h-20 bg-background-card rounded-full items-center justify-center mb-6 border border-background-border">
-          <Fingerprint size={44} color="#10B981" />
-        </View>
-        <Text className="text-2xl font-bold text-content-primary mb-2">Empty-Wallet Locked</Text>
-        <Text className="text-content-secondary text-center text-sm mb-8">
+        <Image
+          source={require('../assets/logo.jpg')}
+          className="w-20 h-20 rounded-3xl mb-4 border border-background-border"
+          resizeMode="cover"
+        />
+        <Text className="text-2xl font-bold text-content-primary mb-1">Empty-Wallet Locked</Text>
+        <Text className="text-content-secondary text-center text-xs mb-8">
           Authenticate with Face ID or Touch ID to access your finances.
         </Text>
         <TouchableOpacity
           onPress={handleUnlock}
-          className="bg-primary px-8 py-3.5 rounded-2xl active:opacity-80"
+          className="flex-row items-center bg-primary px-8 py-3.5 rounded-2xl active:opacity-80 shadow-lg shadow-primary/20"
         >
-          <Text className="text-background font-bold text-base">Unlock App</Text>
+          <Fingerprint size={20} color="#090A0F" />
+          <Text className="text-background font-bold text-base ml-2">Unlock App</Text>
         </TouchableOpacity>
       </View>
     );

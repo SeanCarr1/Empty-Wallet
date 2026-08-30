@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useWalletStore } from '../../src/stores/useWalletStore';
@@ -12,7 +12,8 @@ import { formatCurrency } from '../../src/services/currency';
 import { WalletCard } from '../../src/components/wallets/WalletCard';
 import { SafeToSpendGauge } from '../../src/components/velocity/SafeToSpendGauge';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
-import { Plus, Wallet as WalletIcon, ArrowRightLeft, TrendingUp, Sparkles } from 'lucide-react-native';
+import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
+import { Plus, ArrowRightLeft, Sparkles } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function DashboardScreen() {
@@ -36,7 +37,7 @@ export default function DashboardScreen() {
 
   const totalBalance = getTotalBalance();
   const safeToSpendMetrics = calculateSafeToSpend(transactions, budgets);
-  const recentTransactions = transactions.slice(0, 8);
+  const recentTransactions = transactions.slice(0, 6);
 
   const categoryMap = React.useMemo(() => {
     return new Map(categories.map((c) => [c.id, c]));
@@ -56,15 +57,22 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
         }
       >
-        {/* Top Header */}
+        {/* Top Header with App Logo */}
         <View className="flex-row items-center justify-between mb-4">
-          <View>
-            <Text className="text-content-secondary font-medium text-xs tracking-wider uppercase">
-              Total Net Balance
-            </Text>
-            <Text className="text-3xl font-bold text-content-primary tracking-tight mt-0.5">
-              {formatCurrency(totalBalance, currency)}
-            </Text>
+          <View className="flex-row items-center">
+            <Image
+              source={require('../../assets/logo.jpg')}
+              className="w-10 h-10 rounded-2xl mr-3 border border-background-border"
+              resizeMode="cover"
+            />
+            <View>
+              <Text className="text-content-secondary font-medium text-[11px] tracking-wider uppercase">
+                Empty-Wallet Total Balance
+              </Text>
+              <Text className="text-2xl font-extrabold text-content-primary tracking-tight mt-0.5">
+                {formatCurrency(totalBalance, currency)}
+              </Text>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -81,8 +89,8 @@ export default function DashboardScreen() {
         </View>
 
         {/* Wallets Horizontal Carousel */}
-        <View className="mb-6">
-          <View className="flex-row items-center justify-between mb-3">
+        <View className="mb-5">
+          <View className="flex-row items-center justify-between mb-2.5">
             <Text className="text-content-secondary font-semibold text-xs uppercase tracking-wider">
               Wallets & Accounts
             </Text>
@@ -116,8 +124,18 @@ export default function DashboardScreen() {
         </View>
 
         {/* Safe-to-Spend Velocity Gauge */}
-        <View className="mb-6">
+        <View className="mb-5">
           <SafeToSpendGauge metrics={safeToSpendMetrics} currency={currency} />
+        </View>
+
+        {/* Balance Trend Sparkline Graph */}
+        <View className="mb-2">
+          <BalanceTrendLineChart
+            transactions={transactions}
+            currentTotalBalance={totalBalance}
+            currency={currency}
+            isSparkline={true}
+          />
         </View>
 
         {/* Recent Transactions Section */}
@@ -129,10 +147,10 @@ export default function DashboardScreen() {
             <TouchableOpacity
               onPress={() => {
                 triggerHaptic.selection();
-                router.push('/modal/quick-add');
+                router.push('/records');
               }}
             >
-              <Text className="text-primary text-xs font-semibold">+ Add New</Text>
+              <Text className="text-primary text-xs font-semibold">View All Records</Text>
             </TouchableOpacity>
           </View>
 
