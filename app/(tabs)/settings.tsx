@@ -40,21 +40,21 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView className="flex-1 px-5 pt-3" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+      <ScrollView className="flex-1 px-4 pt-2" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Header */}
-        <View className="mb-6">
-          <Text className="text-2xl font-bold text-content-primary">Settings & Data</Text>
+        <View className="mb-5">
+          <Text className="text-xl font-bold text-content-primary">Settings & Data</Text>
           <Text className="text-content-secondary text-xs mt-0.5">
             Manage wallets, currency, statement imports & security
           </Text>
         </View>
 
         {/* Section 1: Financial Preferences */}
-        <View className="mb-6">
+        <View className="mb-5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Financial Preferences
           </Text>
-          <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
+          <View className="bg-background-card rounded-xl border border-background-border overflow-hidden">
             {/* Manage Wallets */}
             <TouchableOpacity
               activeOpacity={0.7}
@@ -62,18 +62,18 @@ export default function SettingsScreen() {
                 triggerHaptic.selection();
                 router.push('/modal/manage-wallets');
               }}
-              className="flex-row items-center justify-between p-4 border-b border-background-border/50"
+              className="flex-row items-center justify-between p-3.5 border-b border-background-border/50"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center mr-3">
-                  <Wallet size={18} color="#2A9D60" />
+                <View className="w-8 h-8 rounded-lg bg-primary/15 items-center justify-center mr-3">
+                  <Wallet size={16} color="#10B981" />
                 </View>
                 <View>
-                  <Text className="text-content-primary font-semibold text-sm">Manage Wallets</Text>
-                  <Text className="text-content-tertiary text-xs">Cash, bank accounts, and cards</Text>
+                  <Text className="text-content-primary font-semibold text-xs">Manage Wallets</Text>
+                  <Text className="text-content-tertiary text-[11px]">Cash, bank accounts, and cards</Text>
                 </View>
               </View>
-              <ChevronRight size={18} color="#948B7E" />
+              <ChevronRight size={16} color="#6B7280" />
             </TouchableOpacity>
 
             {/* Currency Picker */}
@@ -83,20 +83,20 @@ export default function SettingsScreen() {
                 triggerHaptic.selection();
                 setCurrencyModalOpen(!currencyModalOpen);
               }}
-              className="flex-row items-center justify-between p-4"
+              className="flex-row items-center justify-between p-3.5"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-accent-amber/15 items-center justify-center mr-3">
-                  <Coins size={18} color="#D97706" />
+                <View className="w-8 h-8 rounded-lg bg-accent-amber/15 items-center justify-center mr-3">
+                  <Coins size={16} color="#F59E0B" />
                 </View>
                 <View>
-                  <Text className="text-content-primary font-semibold text-sm">Primary Currency</Text>
-                  <Text className="text-content-tertiary text-xs">
+                  <Text className="text-content-primary font-semibold text-xs">Primary Currency</Text>
+                  <Text className="text-content-tertiary text-[11px]">
                     {SUPPORTED_CURRENCIES[currency]?.name || currency} ({SUPPORTED_CURRENCIES[currency]?.symbol || currency})
                   </Text>
                 </View>
               </View>
-              <Text className="text-primary font-bold text-sm">{currency}</Text>
+              <Text className="text-primary font-bold text-xs font-mono">{currency}</Text>
             </TouchableOpacity>
 
             {/* Currency Selection Dropdown List */}
@@ -112,12 +112,12 @@ export default function SettingsScreen() {
                         setCurrency(c.code);
                         setCurrencyModalOpen(false);
                       }}
-                      className="flex-row items-center justify-between p-2.5 rounded-xl active:bg-background-elevated"
+                      className="flex-row items-center justify-between p-2.5 rounded-lg active:bg-background-elevated"
                     >
                       <Text className="text-content-primary font-medium text-xs">
                         {c.symbol} • {c.name} ({c.code})
                       </Text>
-                      {isSelected && <Check size={16} color="#2A9D60" />}
+                      {isSelected && <Check size={15} color="#10B981" />}
                     </TouchableOpacity>
                   );
                 })}
@@ -127,67 +127,67 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section 2: Data Imports & Statements */}
-        <View className="mb-6">
+        <View className="mb-5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Data Import
           </Text>
-          <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
+          <View className="bg-background-card rounded-xl border border-background-border overflow-hidden">
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic.selection();
                 router.push('/modal/import-statement');
               }}
-              className="flex-row items-center justify-between p-4"
+              className="flex-row items-center justify-between p-3.5"
             >
               <View className="flex-row items-center">
-                <View className="w-9 h-9 rounded-xl bg-accent-blue/15 items-center justify-center mr-3">
-                  <Upload size={18} color="#4338CA" />
+                <View className="w-8 h-8 rounded-lg bg-accent-blue/15 items-center justify-center mr-3">
+                  <Upload size={16} color="#3B82F6" />
                 </View>
                 <View>
-                  <Text className="text-content-primary font-semibold text-sm">Import Bank CSV Statement</Text>
-                  <Text className="text-content-tertiary text-xs">Bulk log transactions with deduplication</Text>
+                  <Text className="text-content-primary font-semibold text-xs">Import Bank CSV Statement</Text>
+                  <Text className="text-content-tertiary text-[11px]">Bulk log transactions with deduplication</Text>
                 </View>
               </View>
-              <ChevronRight size={18} color="#948B7E" />
+              <ChevronRight size={16} color="#6B7280" />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Section 3: Security & Privacy */}
-        <View className="mb-6">
+        <View className="mb-5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2 ml-1">
             Security & Privacy
           </Text>
-          <View className="bg-background-card rounded-2xl border border-background-border overflow-hidden">
-            <View className="flex-row items-center justify-between p-4">
+          <View className="bg-background-card rounded-xl border border-background-border overflow-hidden">
+            <View className="flex-row items-center justify-between p-3.5">
               <View className="flex-row items-center flex-1 mr-3">
-                <View className="w-9 h-9 rounded-xl bg-accent-purple/15 items-center justify-center mr-3">
-                  <Fingerprint size={18} color="#7C3AED" />
+                <View className="w-8 h-8 rounded-lg bg-accent-purple/15 items-center justify-center mr-3">
+                  <Fingerprint size={16} color="#8B5CF6" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-content-primary font-semibold text-sm">Biometric Lock</Text>
-                  <Text className="text-content-tertiary text-xs">Require Face ID / Touch ID upon opening</Text>
+                  <Text className="text-content-primary font-semibold text-xs">Biometric Lock</Text>
+                  <Text className="text-content-tertiary text-[11px]">Require Face ID / Touch ID upon opening</Text>
                 </View>
               </View>
               <Switch
                 value={isBiometricsEnabled}
                 onValueChange={handleToggleBiometrics}
-                trackColor={{ false: '#3B3632', true: '#2A9D60' }}
-                thumbColor="#F5F2EB"
+                trackColor={{ false: '#2A2D35', true: '#10B981' }}
+                thumbColor="#F3F4F6"
               />
             </View>
           </View>
         </View>
 
         {/* Section 4: App Information & Brand Logo */}
-        <View className="bg-background-card rounded-3xl p-5 border border-background-border items-center">
+        <View className="bg-background-card rounded-xl p-5 border border-background-border items-center">
           <Image
             source={require('../../assets/logo.jpg')}
-            className="w-14 h-14 rounded-2xl mb-3 border border-background-border"
+            className="w-12 h-12 rounded-lg mb-2.5 border border-background-border"
             resizeMode="cover"
           />
-          <Text className="text-content-primary font-bold text-base">Empty-Wallet</Text>
+          <Text className="text-content-primary font-bold text-sm">Empty-Wallet</Text>
           <Text className="text-content-tertiary text-xs">Version 1.0.0 • Local-First Architecture</Text>
           <Text className="text-content-muted text-[11px] mt-1 text-center">
             Your data is stored 100% locally on your device with high-performance SQLite.

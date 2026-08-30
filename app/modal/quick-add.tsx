@@ -118,25 +118,29 @@ export default function QuickAddModal() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       {/* Header Bar */}
-      <View className="flex-row items-center justify-between px-5 py-3 border-b border-background-border/50">
+      <View className="flex-row items-center justify-between px-4 py-2.5 border-b border-background-border">
         <TouchableOpacity
           onPress={() => {
             triggerHaptic.light();
             router.back();
           }}
-          className="p-2 -ml-2 rounded-full"
+          className="p-1.5 -ml-1 rounded-lg"
         >
-          <X size={24} color="#D6CFBF" />
+          <X size={22} color="#9CA3AF" />
         </TouchableOpacity>
 
         {/* 1. Record Type Switcher */}
-        <View className="flex-row bg-background-card p-1 rounded-2xl border border-background-border">
+        <View className="flex-row bg-background-card p-1 rounded-lg border border-background-border">
           {(['expense', 'income', 'transfer'] as const).map((t) => {
             const isSelected = type === t;
             const label = t === 'expense' ? 'Expense' : t === 'income' ? 'Income' : 'Transfer';
             const bgClass =
               t === 'expense' ? 'bg-expense' : t === 'income' ? 'bg-primary' : 'bg-accent-blue';
-            const textClass = isSelected ? 'text-content-primary' : 'text-content-secondary';
+            const textClass = isSelected
+              ? t === 'income'
+                ? 'text-[#0F1012] font-bold'
+                : 'text-content-primary font-bold'
+              : 'text-content-secondary';
 
             return (
               <TouchableOpacity
@@ -145,9 +149,9 @@ export default function QuickAddModal() {
                   triggerHaptic.selection();
                   setType(t);
                 }}
-                className={`px-3 py-1.5 rounded-xl ${isSelected ? bgClass : ''}`}
+                className={`px-3 py-1 rounded-md ${isSelected ? bgClass : ''}`}
               >
-                <Text className={`text-xs font-bold ${textClass}`}>{label}</Text>
+                <Text className={`text-xs font-semibold ${textClass}`}>{label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -156,10 +160,10 @@ export default function QuickAddModal() {
         <View className="w-8" />
       </View>
 
-      <ScrollView className="flex-1 px-5 pt-2" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-4 pt-1" showsVerticalScrollIndicator={false}>
         {/* 2. Amount Display */}
-        <View className="items-center justify-center my-3">
-          <Text className="text-content-tertiary text-xs font-semibold uppercase tracking-wider mb-1">
+        <View className="items-center justify-center my-2.5">
+          <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
             {type === 'expense'
               ? 'Amount to Spend'
               : type === 'income'
@@ -168,7 +172,7 @@ export default function QuickAddModal() {
           </Text>
           <View className="flex-row items-baseline">
             <Text
-              className={`text-4xl font-extrabold tracking-tight ${
+              className={`text-4xl font-extrabold tracking-tight font-mono ${
                 type === 'expense'
                   ? 'text-expense'
                   : type === 'income'
@@ -180,48 +184,48 @@ export default function QuickAddModal() {
                 ? `${type === 'expense' ? '-' : type === 'income' ? '+' : ''}${amountStr}`
                 : '0.00'}
             </Text>
-            <Text className="text-content-secondary text-base font-semibold ml-2">{currency}</Text>
+            <Text className="text-content-secondary text-sm font-semibold ml-2 font-mono">{currency}</Text>
           </View>
           {amountStr.includes('+') || amountStr.includes('-') ? (
-            <Text className="text-content-secondary text-xs mt-1">
+            <Text className="text-content-secondary text-xs mt-0.5 font-mono">
               Evaluates to: {formatCurrency(evaluatedAmount, currency)}
             </Text>
           ) : null}
         </View>
 
         {/* 3. Wallet Dropdown / Selector */}
-        <View className="mb-3">
+        <View className="mb-2.5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
             {type === 'transfer' ? 'From Source Wallet' : 'Wallet / Account'}
           </Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setWalletDropdownOpen(!walletDropdownOpen)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-2xl p-3"
+            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
           >
             <View className="flex-row items-center">
               <View
-                className="w-8 h-8 rounded-xl items-center justify-center mr-2.5"
-                style={{ backgroundColor: `${selectedWallet?.color || '#2A9D60'}20` }}
+                className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                style={{ backgroundColor: `${selectedWallet?.color || '#10B981'}20` }}
               >
                 <Icon
                   name={selectedWallet?.icon || 'Wallet'}
-                  size={16}
-                  color={selectedWallet?.color || '#2A9D60'}
+                  size={15}
+                  color={selectedWallet?.color || '#10B981'}
                 />
               </View>
               <Text className="text-content-primary font-bold text-xs">
                 {selectedWallet?.name || 'Select Wallet'}
               </Text>
-              <Text className="text-content-tertiary text-[11px] ml-2">
+              <Text className="text-content-tertiary text-[11px] ml-2 font-mono">
                 ({formatCurrency(selectedWallet?.balance || 0, selectedWallet?.currency)})
               </Text>
             </View>
-            <ChevronDown size={16} color="#948B7E" />
+            <ChevronDown size={15} color="#6B7280" />
           </TouchableOpacity>
 
           {walletDropdownOpen && (
-            <View className="bg-background-elevated border border-background-border rounded-2xl p-2 mt-1">
+            <View className="bg-background-elevated border border-background-border rounded-xl p-1.5 mt-1">
               {wallets.map((w) => (
                 <TouchableOpacity
                   key={w.id}
@@ -230,13 +234,13 @@ export default function QuickAddModal() {
                     setSelectedWalletId(w.id);
                     setWalletDropdownOpen(false);
                   }}
-                  className="flex-row items-center justify-between p-2.5 rounded-xl active:bg-background-card"
+                  className="flex-row items-center justify-between p-2 rounded-lg active:bg-background-card"
                 >
                   <View className="flex-row items-center">
-                    <Icon name={w.icon} size={16} color={w.color} />
+                    <Icon name={w.icon} size={15} color={w.color} />
                     <Text className="text-content-primary text-xs font-semibold ml-2">{w.name}</Text>
                   </View>
-                  <Text className="text-content-tertiary text-xs">
+                  <Text className="text-content-tertiary text-xs font-mono">
                     {formatCurrency(w.balance, w.currency)}
                   </Text>
                 </TouchableOpacity>
@@ -247,35 +251,35 @@ export default function QuickAddModal() {
 
         {/* 3b. Destination Wallet (If Transfer) */}
         {type === 'transfer' && (
-          <View className="mb-3">
+          <View className="mb-2.5">
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
               To Destination Wallet
             </Text>
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => setDestDropdownOpen(!destDropdownOpen)}
-              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-2xl p-3"
+              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
             >
               <View className="flex-row items-center">
                 <View
-                  className="w-8 h-8 rounded-xl items-center justify-center mr-2.5"
-                  style={{ backgroundColor: `${destWallet?.color || '#4338CA'}20` }}
+                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                  style={{ backgroundColor: `${destWallet?.color || '#3B82F6'}20` }}
                 >
                   <Icon
                     name={destWallet?.icon || 'Landmark'}
-                    size={16}
-                    color={destWallet?.color || '#4338CA'}
+                    size={15}
+                    color={destWallet?.color || '#3B82F6'}
                   />
                 </View>
                 <Text className="text-content-primary font-bold text-xs">
                   {destWallet?.name || 'Select Destination Wallet'}
                 </Text>
               </View>
-              <ChevronDown size={16} color="#948B7E" />
+              <ChevronDown size={15} color="#6B7280" />
             </TouchableOpacity>
 
             {destDropdownOpen && (
-              <View className="bg-background-elevated border border-background-border rounded-2xl p-2 mt-1">
+              <View className="bg-background-elevated border border-background-border rounded-xl p-1.5 mt-1">
                 {wallets
                   .filter((w) => w.id !== selectedWalletId)
                   .map((w) => (
@@ -286,13 +290,13 @@ export default function QuickAddModal() {
                         setDestinationWalletId(w.id);
                         setDestDropdownOpen(false);
                       }}
-                      className="flex-row items-center justify-between p-2.5 rounded-xl active:bg-background-card"
+                      className="flex-row items-center justify-between p-2 rounded-lg active:bg-background-card"
                     >
                       <View className="flex-row items-center">
-                        <Icon name={w.icon} size={16} color={w.color} />
+                        <Icon name={w.icon} size={15} color={w.color} />
                         <Text className="text-content-primary text-xs font-semibold ml-2">{w.name}</Text>
                       </View>
-                      <Text className="text-content-tertiary text-xs">
+                      <Text className="text-content-tertiary text-xs font-mono">
                         {formatCurrency(w.balance, w.currency)}
                       </Text>
                     </TouchableOpacity>
@@ -304,58 +308,58 @@ export default function QuickAddModal() {
 
         {/* 4. Category Dropdown / Selector */}
         {type !== 'transfer' && (
-          <View className="mb-3">
+          <View className="mb-2.5">
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
               Category
             </Text>
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => setCategoryModalOpen(true)}
-              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-2xl p-3"
+              className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
             >
               <View className="flex-row items-center">
                 <View
-                  className="w-8 h-8 rounded-xl items-center justify-center mr-2.5"
-                  style={{ backgroundColor: `${selectedCategory?.color || '#2A9D60'}20` }}
+                  className="w-7 h-7 rounded-lg items-center justify-center mr-2"
+                  style={{ backgroundColor: `${selectedCategory?.color || '#10B981'}20` }}
                 >
                   <Icon
                     name={selectedCategory?.icon || 'Tag'}
-                    size={16}
-                    color={selectedCategory?.color || '#2A9D60'}
+                    size={15}
+                    color={selectedCategory?.color || '#10B981'}
                   />
                 </View>
                 <Text className="text-content-primary font-bold text-xs">
                   {selectedCategory?.name || 'Choose Category'}
                 </Text>
               </View>
-              <ChevronDown size={16} color="#948B7E" />
+              <ChevronDown size={15} color="#6B7280" />
             </TouchableOpacity>
           </View>
         )}
 
         {/* 5. Date & Time Calendar Selector */}
-        <View className="mb-3">
+        <View className="mb-2.5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
             Date & Time
           </Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setDateTimeModalOpen(true)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-2xl p-3"
+            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-xl p-2.5"
           >
             <View className="flex-row items-center">
-              <Calendar size={16} color="#2A9D60" />
-              <Text className="text-content-primary font-bold text-xs ml-2">{dateStr}</Text>
+              <Calendar size={15} color="#10B981" />
+              <Text className="text-content-primary font-bold text-xs ml-2 font-mono">{dateStr}</Text>
               <Text className="text-content-muted mx-2">•</Text>
-              <Clock size={16} color="#D6CFBF" />
-              <Text className="text-content-primary font-bold text-xs ml-2">{timeStr}</Text>
+              <Clock size={15} color="#9CA3AF" />
+              <Text className="text-content-primary font-bold text-xs ml-2 font-mono">{timeStr}</Text>
             </View>
-            <Edit3 size={15} color="#948B7E" />
+            <Edit3 size={14} color="#6B7280" />
           </TouchableOpacity>
         </View>
 
         {/* 6. Other Details (Payer, Payee, Payment Type, Note) */}
-        <View className="mb-3">
+        <View className="mb-2.5">
           <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">
             Payment Type & Merchant Details
           </Text>
@@ -364,19 +368,19 @@ export default function QuickAddModal() {
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setPaymentDropdownOpen(!paymentDropdownOpen)}
-            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-2xl p-3 mb-2"
+            className="flex-row items-center justify-between bg-background-card border border-background-border rounded-lg p-2.5 mb-1.5"
           >
             <View className="flex-row items-center">
-              <CreditCard size={16} color="#C69230" />
+              <CreditCard size={15} color="#F59E0B" />
               <Text className="text-content-primary font-semibold text-xs ml-2">
-                Payment Type: {PAYMENT_OPTIONS.find((p) => p.type === paymentType)?.label || 'Cash'}
+                Payment: {PAYMENT_OPTIONS.find((p) => p.type === paymentType)?.label || 'Cash'}
               </Text>
             </View>
-            <ChevronDown size={16} color="#948B7E" />
+            <ChevronDown size={15} color="#6B7280" />
           </TouchableOpacity>
 
           {paymentDropdownOpen && (
-            <View className="bg-background-elevated border border-background-border rounded-2xl p-2 mb-2">
+            <View className="bg-background-elevated border border-background-border rounded-lg p-1.5 mb-1.5">
               {PAYMENT_OPTIONS.map((opt) => (
                 <TouchableOpacity
                   key={opt.type}
@@ -385,46 +389,46 @@ export default function QuickAddModal() {
                     setPaymentType(opt.type);
                     setPaymentDropdownOpen(false);
                   }}
-                  className="flex-row items-center justify-between p-2.5 rounded-xl active:bg-background-card"
+                  className="flex-row items-center justify-between p-2 rounded-md active:bg-background-card"
                 >
                   <Text className="text-content-primary text-xs font-semibold">{opt.label}</Text>
-                  {paymentType === opt.type && <Check size={16} color="#2A9D60" />}
+                  {paymentType === opt.type && <Check size={15} color="#10B981" />}
                 </TouchableOpacity>
               ))}
             </View>
           )}
 
           {/* Payee / Merchant */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-2xl px-3.5 py-2.5 mb-2">
-            <Edit3 size={16} color="#948B7E" />
+          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
+            <Edit3 size={15} color="#6B7280" />
             <TextInput
               value={payee}
               onChangeText={setPayee}
               placeholder={type === 'expense' ? 'Payee / Merchant (e.g. Starbucks, Shell)' : 'Income Source'}
-              placeholderTextColor="#948B7E"
+              placeholderTextColor="#6B7280"
               className="flex-1 ml-2 text-content-primary text-xs font-medium"
             />
           </View>
 
           {/* Payer (Optional) */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-2xl px-3.5 py-2.5 mb-2">
-            <User size={16} color="#948B7E" />
+          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
+            <User size={15} color="#6B7280" />
             <TextInput
               value={payer}
               onChangeText={setPayer}
               placeholder="Payer / Spender (Optional)"
-              placeholderTextColor="#948B7E"
+              placeholderTextColor="#6B7280"
               className="flex-1 ml-2 text-content-primary text-xs font-medium"
             />
           </View>
 
           {/* Note / Memo */}
-          <View className="flex-row items-center bg-background-card border border-background-border rounded-2xl px-3.5 py-2.5 mb-2">
+          <View className="flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mb-1.5">
             <TextInput
               value={note}
               onChangeText={setNote}
               placeholder="Add note, receipt tags, or memo (Optional)..."
-              placeholderTextColor="#948B7E"
+              placeholderTextColor="#6B7280"
               className="flex-1 text-content-primary text-xs font-medium"
             />
           </View>
@@ -442,11 +446,11 @@ export default function QuickAddModal() {
       {/* CATEGORY PICKER MODAL */}
       <Modal visible={categoryModalOpen} animationType="slide" transparent>
         <View className="flex-1 bg-black/75 justify-end">
-          <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border max-h-[75%]">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-content-primary">Choose Category</Text>
+          <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border max-h-[75%]">
+            <View className="flex-row items-center justify-between mb-3.5">
+              <Text className="text-base font-bold text-content-primary">Choose Category</Text>
               <TouchableOpacity onPress={() => setCategoryModalOpen(false)}>
-                <X size={20} color="#D6CFBF" />
+                <X size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
@@ -462,13 +466,13 @@ export default function QuickAddModal() {
                         setSelectedCategoryId(c.id);
                         setCategoryModalOpen(false);
                       }}
-                      className={`flex-row items-center w-[48%] p-3 rounded-2xl mr-2 mb-2.5 border ${
+                      className={`flex-row items-center w-[48%] p-2.5 rounded-lg mr-2 mb-2 border ${
                         isSelected
                           ? 'bg-primary/20 border-primary'
                           : 'bg-background-elevated border-background-border'
                       }`}
                     >
-                      <Icon name={c.icon} size={18} color={isSelected ? '#2A9D60' : c.color} />
+                      <Icon name={c.icon} size={16} color={isSelected ? '#10B981' : c.color} />
                       <Text
                         className={`text-xs font-semibold ml-2 ${
                           isSelected ? 'text-primary' : 'text-content-primary'
@@ -489,20 +493,20 @@ export default function QuickAddModal() {
       {/* DATE & TIME PICKER MODAL */}
       <Modal visible={dateTimeModalOpen} animationType="slide" transparent>
         <View className="flex-1 bg-black/75 justify-end">
-          <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-content-primary">Select Date & Time</Text>
+          <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border">
+            <View className="flex-row items-center justify-between mb-3.5">
+              <Text className="text-base font-bold text-content-primary">Select Date & Time</Text>
               <TouchableOpacity onPress={() => setDateTimeModalOpen(false)}>
-                <X size={20} color="#D6CFBF" />
+                <X size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
             {/* Quick Presets */}
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Quick Date</Text>
-            <View className="flex-row mb-4">
+            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1.5">Quick Date</Text>
+            <View className="flex-row mb-3.5">
               <TouchableOpacity
                 onPress={() => setDateStr(format(new Date(), 'yyyy-MM-dd'))}
-                className="flex-1 bg-background-elevated py-2.5 rounded-xl items-center mr-2 border border-background-border"
+                className="flex-1 bg-background-elevated py-2 rounded-lg items-center mr-2 border border-background-border"
               >
                 <Text className="text-content-primary font-bold text-xs">Today</Text>
               </TouchableOpacity>
@@ -510,7 +514,7 @@ export default function QuickAddModal() {
                 onPress={() =>
                   setDateStr(format(new Date(Date.now() - 86400000), 'yyyy-MM-dd'))
                 }
-                className="flex-1 bg-background-elevated py-2.5 rounded-xl items-center mr-2 border border-background-border"
+                className="flex-1 bg-background-elevated py-2 rounded-lg items-center mr-2 border border-background-border"
               >
                 <Text className="text-content-primary font-bold text-xs">Yesterday</Text>
               </TouchableOpacity>
@@ -522,8 +526,8 @@ export default function QuickAddModal() {
               value={dateStr}
               onChangeText={setDateStr}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor="#948B7E"
-              className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-semibold mb-3"
+              placeholderTextColor="#6B7280"
+              className="bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold mb-2.5 font-mono"
             />
 
             {/* Time Input */}
@@ -532,8 +536,8 @@ export default function QuickAddModal() {
               value={timeStr}
               onChangeText={setTimeStr}
               placeholder="HH:mm (e.g. 14:30)"
-              placeholderTextColor="#948B7E"
-              className="bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-semibold mb-6"
+              placeholderTextColor="#6B7280"
+              className="bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold mb-5 font-mono"
             />
 
             <TouchableOpacity
@@ -541,9 +545,9 @@ export default function QuickAddModal() {
                 triggerHaptic.selection();
                 setDateTimeModalOpen(false);
               }}
-              className="bg-primary py-3.5 rounded-xl items-center shadow-lg shadow-primary/20"
+              className="bg-primary py-2.5 rounded-lg items-center active:opacity-80"
             >
-              <Text className="text-content-primary font-bold text-xs">Done</Text>
+              <Text className="text-[#0F1012] font-bold text-xs">Done</Text>
             </TouchableOpacity>
           </View>
         </View>

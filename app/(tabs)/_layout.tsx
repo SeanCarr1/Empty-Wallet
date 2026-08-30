@@ -1,12 +1,10 @@
 import React from 'react';
-import { Tabs, useRouter } from 'expo-router';
-import { View, TouchableOpacity } from 'react-native';
-import { LayoutGrid, Receipt, Target, BarChart3, Settings2, Plus } from 'lucide-react-native';
+import { Tabs } from 'expo-router';
+import { View } from 'react-native';
+import { LayoutGrid, Receipt, Target, BarChart3, Settings2 } from 'lucide-react-native';
 import { triggerHaptic } from '../../src/services/haptics';
 
 export default function TabLayout() {
-  const router = useRouter();
-
   return (
     <View className="flex-1 bg-background">
       <Tabs
@@ -14,15 +12,15 @@ export default function TabLayout() {
           headerShown: false,
           tabBarShowLabel: true,
           tabBarStyle: {
-            backgroundColor: '#1D1B19',
-            borderTopColor: '#3B3632',
+            backgroundColor: '#17181C',
+            borderTopColor: '#2A2D35',
             borderTopWidth: 1,
-            height: 72,
-            paddingBottom: 10,
-            paddingTop: 8,
+            height: 68,
+            paddingBottom: 8,
+            paddingTop: 6,
           },
-          tabBarActiveTintColor: '#2A9D60',
-          tabBarInactiveTintColor: '#948B7E',
+          tabBarActiveTintColor: '#10B981',
+          tabBarInactiveTintColor: '#6B7280',
           tabBarLabelStyle: {
             fontSize: 10,
             fontWeight: '600',
@@ -85,20 +83,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-
-      {/* Floating Quick Add (+) Action Button */}
-      <View className="absolute bottom-6 right-6 z-50">
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => {
-            triggerHaptic.medium();
-            router.push('/modal/quick-add');
-          }}
-          className="w-14 h-14 rounded-full bg-primary items-center justify-center shadow-xl shadow-primary/30 border-4 border-background"
-        >
-          <Plus size={26} color="#F5F2EB" strokeWidth={2.6} />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

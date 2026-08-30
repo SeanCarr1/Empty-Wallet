@@ -22,13 +22,13 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
   const savingsRate = income > 0 ? Math.max(0, (netSavings / income) * 100) : 0;
 
   return (
-    <View className="w-full bg-background-card p-5 rounded-3xl border border-background-border">
+    <View className="w-full bg-background-card p-4 rounded-xl border border-background-border">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-content-primary font-bold text-base">Cash Flow Distribution</Text>
-        <View className="flex-row items-center bg-primary/10 px-2.5 py-1 rounded-full border border-primary/25">
-          <Percent size={11} color="#2A9D60" />
-          <Text className="text-primary font-bold text-xs ml-1">
+        <Text className="text-content-primary font-bold text-sm">Cash Flow Distribution</Text>
+        <View className="flex-row items-center bg-[#10B981]/10 px-2 py-0.5 rounded-md border border-[#10B981]/25">
+          <Percent size={11} color="#10B981" />
+          <Text className="text-[#10B981] font-bold text-[11px] ml-1">
             {savingsRate.toFixed(0)}% Saved
           </Text>
         </View>
@@ -36,16 +36,16 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
 
       {/* Horizontal Stacked Bar */}
       <View className="my-2">
-        <View className="h-4 w-full bg-background-elevated rounded-full overflow-hidden flex-row border border-background-border/50">
+        <View className="h-3.5 w-full bg-background-elevated rounded-md overflow-hidden flex-row border border-background-border">
           {income > 0 && (
             <View
-              className="h-full bg-primary items-center justify-center"
+              className="h-full bg-[#10B981]"
               style={{ width: `${incomePercent}%` }}
             />
           )}
           {expense > 0 && (
             <View
-              className="h-full bg-expense items-center justify-center"
+              className="h-full bg-[#EF4444]"
               style={{ width: `${expensePercent}%` }}
             />
           )}
@@ -58,43 +58,43 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
 
         {/* Percentage Marks Under Bar */}
         <View className="flex-row justify-between mt-1.5 px-0.5">
-          <Text className="text-primary text-xs font-semibold">
+          <Text className="text-[#10B981] text-xs font-semibold">
             {income > 0 ? `${incomePercent.toFixed(0)}% Inflow` : ''}
           </Text>
-          <Text className="text-expense text-xs font-semibold">
+          <Text className="text-[#EF4444] text-xs font-semibold">
             {expense > 0 ? `${expensePercent.toFixed(0)}% Outflow` : ''}
           </Text>
         </View>
       </View>
 
       {/* Metric Breakdown Cards */}
-      <View className="flex-row items-center justify-between pt-3 mt-2 border-t border-background-border/50">
+      <View className="flex-row items-center justify-between pt-3 mt-2 border-t border-background-border">
         <View className="flex-1">
           <View className="flex-row items-center mb-0.5">
-            <ArrowDownLeft size={13} color="#2A9D60" />
+            <ArrowDownLeft size={13} color="#10B981" />
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Total In</Text>
           </View>
-          <Text className="text-primary font-bold text-sm">
+          <Text className="text-[#10B981] font-bold text-sm">
             {formatCurrency(income, currency)}
           </Text>
         </View>
 
         <View className="flex-1 items-center">
           <View className="flex-row items-center mb-0.5">
-            <ArrowUpRight size={13} color="#DC4C38" />
+            <ArrowUpRight size={13} color="#EF4444" />
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Total Out</Text>
           </View>
-          <Text className="text-expense font-bold text-sm">
+          <Text className="text-[#EF4444] font-bold text-sm">
             {formatCurrency(expense, currency)}
           </Text>
         </View>
 
         <View className="flex-1 items-end">
           <View className="flex-row items-center mb-0.5">
-            <Wallet size={13} color={netSavings >= 0 ? '#2A9D60' : '#DC4C38'} />
+            <Wallet size={13} color={netSavings >= 0 ? '#10B981' : '#EF4444'} />
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider ml-1">Net Cash</Text>
           </View>
-          <Text className={`font-bold text-sm ${netSavings >= 0 ? 'text-primary' : 'text-expense'}`}>
+          <Text className={`font-bold text-sm ${netSavings >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
             {formatCurrency(netSavings, currency)}
           </Text>
         </View>
@@ -102,3 +102,4 @@ export const HorizontalCashFlowChart: React.FC<HorizontalCashFlowChartProps> = (
     </View>
   );
 };
+

@@ -1,64 +1,70 @@
 export const Colors = {
   dark: {
-    background: '#141312',
-    card: '#1D1B19',
-    cardElevated: '#282522',
-    cardBorder: '#3B3632',
-    border: '#3B3632',
+    background: '#0F1012',
+    card: '#17181C',
+    cardElevated: '#212329',
+    cardBorder: '#2A2D35',
+    border: '#2A2D35',
     
     // Status & Accents
-    primary: '#2A9D60', // Sage Forest
+    primary: '#10B981', // Electric Precision Emerald
     primaryLight: '#34D399',
-    primaryDark: '#1B6D42',
-    primaryMuted: 'rgba(42, 157, 96, 0.15)',
+    primaryDark: '#059669',
+    primaryMuted: 'rgba(16, 185, 129, 0.15)',
 
-    expense: '#DC4C38', // Terracotta Vermilion
+    expense: '#EF4444', // Precision Crimson
     expenseLight: '#F87171',
-    expenseMuted: 'rgba(220, 76, 56, 0.15)',
+    expenseMuted: 'rgba(239, 68, 68, 0.15)',
 
-    warning: '#D97706', // Warm Amber
-    warningMuted: 'rgba(217, 119, 6, 0.15)',
+    warning: '#F59E0B', // Precision Amber
+    warningMuted: 'rgba(245, 158, 11, 0.15)',
 
-    gold: '#C69230',
-    goldMuted: 'rgba(198, 146, 48, 0.15)',
+    gold: '#F59E0B',
+    goldMuted: 'rgba(245, 158, 11, 0.15)',
 
-    blue: '#4338CA',
-    blueMuted: 'rgba(67, 56, 202, 0.15)',
+    blue: '#3B82F6', // Precision Ice Blue
+    blueMuted: 'rgba(59, 130, 246, 0.15)',
+
+    purple: '#8B5CF6', // Precision Violet
+    purpleMuted: 'rgba(139, 92, 246, 0.15)',
 
     // Text & Content
-    textPrimary: '#F5F2EB',   // Ivory Parchment
-    textSecondary: '#D6CFBF', // Warm Sand
-    textTertiary: '#948B7E',  // Muted Ochre
-    textMuted: '#5A5248',
+    textPrimary: '#F3F4F6',   // High-contrast pure text
+    textSecondary: '#9CA3AF', // Secondary values & subheaders
+    textTertiary: '#6B7280',  // Overlines, labels, timestamps
+    textMuted: '#4B5563',     // Dividers, disabled states
   },
   light: {
-    background: '#F7F4EC',
+    background: '#F9FAFB',
     card: '#FFFFFF',
-    cardElevated: '#EFECE2',
-    cardBorder: '#DDD7CA',
-    border: '#DDD7CA',
+    cardElevated: '#F3F4F6',
+    cardBorder: '#E5E7EB',
+    border: '#E5E7EB',
 
-    primary: '#1B6D42',
-    primaryLight: '#2A9D60',
-    primaryDark: '#14532D',
-    primaryMuted: 'rgba(27, 109, 66, 0.1)',
+    primary: '#10B981',
+    primaryLight: '#34D399',
+    primaryDark: '#059669',
+    primaryMuted: 'rgba(16, 185, 129, 0.1)',
 
-    expense: '#B91C1C',
-    expenseLight: '#DC4C38',
-    expenseMuted: 'rgba(185, 28, 28, 0.1)',
+    expense: '#EF4444',
+    expenseLight: '#F87171',
+    expenseMuted: 'rgba(239, 68, 68, 0.1)',
 
-    warning: '#B45309',
-    warningMuted: 'rgba(180, 83, 9, 0.1)',
+    warning: '#F59E0B',
+    warningMuted: 'rgba(245, 158, 11, 0.1)',
 
-    gold: '#A16207',
-    goldMuted: 'rgba(161, 98, 7, 0.1)',
+    gold: '#F59E0B',
+    goldMuted: 'rgba(245, 158, 11, 0.1)',
 
-    blue: '#3730A3',
-    blueMuted: 'rgba(55, 48, 163, 0.1)',
+    blue: '#3B82F6',
+    blueMuted: 'rgba(59, 130, 246, 0.1)',
 
-    textPrimary: '#1F1D1A',
-    textSecondary: '#4B463E',
-    textTertiary: '#787064',
-    textMuted: '#A39C90',
+    purple: '#8B5CF6',
+    purpleMuted: 'rgba(139, 92, 246, 0.1)',
+
+    textPrimary: '#111827',
+    textSecondary: '#4B5563',
+    textTertiary: '#6B7280',
+    textMuted: '#9CA3AF',
   }
 };

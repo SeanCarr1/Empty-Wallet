@@ -23,20 +23,20 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
   currency,
   size = 200,
 }) => {
-  const strokeWidth = 24;
+  const strokeWidth = 22;
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
 
   // If no spending data, show empty state ring
   if (data.length === 0 || totalSpent === 0) {
     return (
-      <View className="items-center justify-center my-4">
+      <View className="items-center justify-center my-3">
         <Svg width={size} height={size}>
           <Circle
             cx={center}
             cy={center}
             r={radius}
-            stroke="#1E2230"
+            stroke="#212329"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -83,7 +83,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
   });
 
   return (
-    <View className="items-center justify-center my-4">
+    <View className="items-center justify-center my-3">
       <Svg width={size} height={size}>
         <G>
           {slices.map((slice, index) => (
@@ -101,7 +101,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
 
       {/* Center Value */}
       <View className="absolute items-center">
-        <Text className="text-content-tertiary text-xs font-semibold uppercase tracking-wider">
+        <Text className="text-content-tertiary text-[11px] font-semibold uppercase tracking-wider">
           Total Spent
         </Text>
         <Text className="text-content-primary font-bold text-xl mt-0.5">
@@ -111,3 +111,4 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
     </View>
   );
 };
+

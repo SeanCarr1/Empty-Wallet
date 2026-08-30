@@ -6,33 +6,33 @@ module.exports = {
     extend: {
       colors: {
         background: {
-          DEFAULT: "#141312", // Warm Deep Charcoal
-          card: "#1D1B19",     // Warm Card Surface
-          elevated: "#282522", // Elevated Warm Stone
-          border: "#3B3632",   // Warm Hairline Border
+          DEFAULT: "#0F1012", // Cool Dark Slate Ground
+          card: "#17181C",     // Dark Charcoal Step 1
+          elevated: "#212329", // Muted Slate Step 2
+          border: "#2A2D35",   // Ultra-subtle rule
         },
         primary: {
-          DEFAULT: "#2A9D60", // Sage Forest Green
+          DEFAULT: "#10B981", // Electric Precision Emerald
           light: "#34D399",
-          dark: "#1B6D42",
+          dark: "#059669",
         },
         expense: {
-          DEFAULT: "#DC4C38", // Terracotta / Japanese Vermilion
+          DEFAULT: "#EF4444", // Precision Crimson
           light: "#F87171",
-          dark: "#B91C1C",
+          dark: "#DC2626",
         },
         accent: {
-          gold: "#C69230",     // Warm Ochre Gold
-          purple: "#7C3AED",
-          amber: "#D97706",    // Warm Amber
-          blue: "#4338CA",     // Washed Denim / Indigo
-          sand: "#D6CFBF",
+          gold: "#F59E0B",     // Precision Amber
+          amber: "#F59E0B",
+          purple: "#8B5CF6",   // Precision Violet
+          blue: "#3B82F6",     // Precision Ice Blue
+          emerald: "#10B981",
         },
         content: {
-          primary: "#F5F2EB",   // Ivory Parchment
-          secondary: "#D6CFBF", // Warm Sand
-          tertiary: "#948B7E",  // Muted Ochre
-          muted: "#5A5248",     // Dark Warm Muted
+          primary: "#F3F4F6",   // High-contrast pure text
+          secondary: "#9CA3AF", // Secondary values & subheaders
+          tertiary: "#6B7280",  // Overlines, labels, timestamps
+          muted: "#4B5563",     // Dividers, disabled states
         },
       },
     },

@@ -1,45 +1,49 @@
-# Design System: Warm Archival & Monocle Editorial
+# Design System: Precision Dark Gray
 
 <!-- impeccable:design-schema 1 -->
 
 ## 1. Visual Identity & Aesthetic Thesis
 
-**Empty-Wallet** is styled in the **Warm Archival / Monocle Editorial** visual world: an organic, warm charcoal and ivory aesthetic that evokes high-grade Japanese stationery, precision horology ledgers, and physical brass-and-leather pocket notebooks. It rejects cold, sterile crypto-black and neon glow clichés in favor of tactile warmth, serene typography, and high contrast legibility.
+**Empty-Wallet** is styled in the **Precision Dark Gray** visual world: a high-density, Linear/Raycast-inspired slate-and-charcoal aesthetic that emphasizes geometric precision, flat borderless surface steps, pure contrast typography, and vibrant precision accents. It delivers a fast, tactile, finance-first experience with zero visual fluff.
 
 ---
 
 ## 2. Color Palette & Semantic Tokens
 
 ### 2.1 Surfaces & Grounds
-- **Ground (`bg-background`)**: Deep Warm Charcoal `#141312`
-- **Primary Card (`bg-background-card`)**: Warm Dark Slate/Leather `#1D1B19`
-- **Elevated Card (`bg-background-elevated`)**: Warm Stone `#282522`
-- **Hairline Border (`border-background-border`)**: Warm Ochre Rule `#3B3632`
+- **Ground (`bg-background`)**: Cool Dark Slate Ground `#0F1012`
+- **Primary Card (`bg-background-card`)**: Dark Charcoal Step 1 `#17181C`
+- **Elevated Card (`bg-background-elevated`)**: Muted Slate Step 2 `#212329`
+- **Hairline Border (`border-background-border`)**: Ultra-subtle Hairline `#2A2D35`
 
 ### 2.2 Typography & Ink
-- **Primary Content (`text-content-primary`)**: Ivory Parchment `#F5F2EB` (Hero numbers, titles, primary labels)
-- **Secondary Content (`text-content-secondary`)**: Warm Sand `#D6CFBF` (Subheadings, values, descriptions)
-- **Tertiary Content (`text-content-tertiary`)**: Muted Ochre `#948B7E` (Overlines, timestamps, captions)
-- **Muted Rules (`text-content-muted`)**: Dark Warm Muted `#5A5248` (Inactive states, bullet dividers)
+- **Primary Content (`text-content-primary`)**: High-contrast Pure Text `#F3F4F6` (Hero numbers, titles, primary labels)
+- **Secondary Content (`text-content-secondary`)**: Secondary Text `#9CA3AF` (Subheadings, values, descriptions)
+- **Tertiary Content (`text-content-tertiary`)**: Muted Slates `#6B7280` (Overlines, timestamps, captions)
+- **Muted Rules (`text-content-muted`)**: Dark Muted `#4B5563` (Inactive states, bullet dividers)
 
 ### 2.3 Semantic Status & Accents
-- **Sage Forest (`#2A9D60` / `#34D399`)**: Inflow, positive savings, healthy velocity status, safe daily allowance.
-- **Terracotta Vermilion (`#DC4C38` / `#F87171`)**: Outflow, expenses, over-budget warnings, negative cashflow.
-- **Warm Amber (`#D97706` / `#FBBF24`)**: Cautionary velocity pace, alerts, secondary badges.
-- **Warm Ochre Gold (`#C69230`)**: Sinking funds, savings goals, milestones.
-- **Washed Indigo / Denim (`#4338CA` / `#6366F1`)**: Bank transfers, inter-wallet accounts, subscriptions.
+- **Precision Emerald (`#10B981` / `#34D399`)**: Inflow, positive savings, healthy velocity status, safe daily allowance.
+- **Precision Crimson (`#EF4444` / `#F87171`)**: Outflow, expenses, over-budget warnings, negative cashflow.
+- **Precision Amber (`#F59E0B`)**: Cautionary velocity pace, alerts, secondary badges.
+- **Precision Violet (`#8B5CF6`)**: Goals, milestones, sinking funds.
+- **Precision Ice Blue (`#3B82F6`)**: Bank transfers, inter-wallet accounts, subscriptions.
 
 ---
 
-## 3. Typography & Spacing Rhythm
+## 3. Typography & Geometric Hierarchy
 
 - **Scale**:
-  - `Hero Display`: 36–40pt bold (`tabular-nums` for currency values)
-  - `Screen Title`: 24pt bold (`text-2xl`)
-  - `Section Header`: 16pt bold (`text-base`)
-  - `Ledger Item Title`: 14pt bold (`text-sm`)
-  - `Metadata & Tags`: 11–12pt medium (`text-xs`)
-  - `Overline / Tracking`: 10pt uppercase bold (`text-[10px] uppercase tracking-wider`)
+  - `Hero Display`: 28–32pt bold (`tabular-nums` for currency values)
+  - `Screen Title`: 20pt bold (`text-xl`)
+  - `Section Header`: 14–15pt bold (`text-sm`)
+  - `Body / Ledger Item`: 13–14pt medium / bold (`text-xs` to `text-sm`)
+  - `Metadata & Tags`: 10–11pt medium (`text-[10px]` to `text-[11px]`)
+  - `Overline / Tracking`: 9–10pt uppercase bold (`text-[9px]` to `text-[10px] uppercase tracking-wider`)
+- **Rounding**:
+  - Cards & Modals: `rounded-xl` (12px)
+  - Keypad Buttons, Inputs & List Items: `rounded-lg` (8px - 10px)
+  - Badges, Filter Pills & Status Tags: `rounded-md` (6px)
 - **Touch Target Floor**:
   - Minimum 44×44pt for all buttons, tabs, category chips, and keypad keys.
 
@@ -47,11 +51,11 @@
 
 ## 4. Component Craft & Micro-Interactions
 
-- **Cards**: `rounded-2xl` and `rounded-3xl` with warm `border border-background-border` (`#3B3632`).
-- **Tactile Keypad**: Debossed `#282522` keys with haptic feedback on every number strike and operator evaluation.
-- **Charts**: Smooth cubic Bezier curves in SVG with soft sage green gradient fills and minimal hairline gridlines.
+- **Cards**: Flat surface step contrast (`#0F1012` ground -> `#17181C` card -> `#212329` elevated inner components) with `rounded-xl` and single hairline dividers.
+- **Tactile Keypad**: Precision `#212329` keys with `rounded-lg` geometry and emerald `#10B981` submit button.
+- **Charts**: Crisp SVG sparklines and donuts with precision emerald `#10B981` and ice blue `#3B82F6` data series.
 - **Haptics**:
   - `triggerHaptic.selection()` on tab navigation, timeframe switches, and category selection.
-  - `triggerHaptic.medium()` on floating Quick Add open.
+  - `triggerHaptic.medium()` on modal open and segmented control changes.
   - `triggerHaptic.success()` on transaction save and budget configuration.
   - `triggerHaptic.error()` on invalid zero amounts or transfer loops.

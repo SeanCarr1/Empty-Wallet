@@ -63,10 +63,12 @@ export default function RootLayout() {
       <View className="flex-1 bg-background items-center justify-center">
         <Image
           source={require('../assets/logo.jpg')}
-          className="w-16 h-16 rounded-3xl mb-4 border border-background-border"
+          className="w-16 h-16 rounded-xl mb-4 border border-background-border"
           resizeMode="cover"
         />
-        <Text className="text-content-secondary font-semibold text-sm">Opening Empty-Wallet...</Text>
+        <Text className="text-content-secondary font-medium text-xs tracking-wider uppercase">
+          Opening Empty-Wallet...
+        </Text>
       </View>
     );
   }
@@ -76,19 +78,19 @@ export default function RootLayout() {
       <View className="flex-1 bg-background items-center justify-center p-6">
         <Image
           source={require('../assets/logo.jpg')}
-          className="w-20 h-20 rounded-3xl mb-4 border border-background-border"
+          className="w-20 h-20 rounded-xl mb-4 border border-background-border"
           resizeMode="cover"
         />
-        <Text className="text-2xl font-bold text-content-primary mb-1">Empty-Wallet Locked</Text>
+        <Text className="text-xl font-bold text-content-primary mb-1">Empty-Wallet Locked</Text>
         <Text className="text-content-secondary text-center text-xs mb-8">
           Authenticate with Face ID or Touch ID to access your ledger.
         </Text>
         <TouchableOpacity
           onPress={handleUnlock}
-          className="flex-row items-center bg-primary px-8 py-3.5 rounded-2xl active:opacity-80 shadow-lg shadow-primary/20"
+          className="flex-row items-center bg-primary px-7 py-3 rounded-lg active:opacity-80"
         >
-          <Fingerprint size={20} color="#F5F2EB" />
-          <Text className="text-content-primary font-bold text-base ml-2">Unlock Ledger</Text>
+          <Fingerprint size={18} color="#0F1012" strokeWidth={2.4} />
+          <Text className="text-[#0F1012] font-bold text-sm ml-2">Unlock Ledger</Text>
         </TouchableOpacity>
       </View>
     );
@@ -100,7 +102,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#141312' },
+          contentStyle: { backgroundColor: '#0F1012' },
           animation: 'slide_from_right',
         }}
       >

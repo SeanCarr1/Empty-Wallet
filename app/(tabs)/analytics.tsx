@@ -130,11 +130,11 @@ export default function AnalyticsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="flex-1 px-5 pt-3">
+      <View className="flex-1 px-4 pt-2">
         {/* Header */}
-        <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center justify-between mb-3.5">
           <View>
-            <Text className="text-2xl font-bold text-content-primary">Financial Insights</Text>
+            <Text className="text-xl font-bold text-content-primary">Financial Insights</Text>
             <Text className="text-content-secondary text-xs mt-0.5">
               Cash flow ratios, balance curves & category slices
             </Text>
@@ -143,15 +143,15 @@ export default function AnalyticsScreen() {
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={handleExportCSV}
-            className="flex-row items-center bg-background-card border border-background-border px-3.5 py-2 rounded-2xl"
+            className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg"
           >
-            <Download size={15} color="#2A9D60" />
-            <Text className="text-content-primary font-semibold text-xs ml-2">Export CSV</Text>
+            <Download size={14} color="#10B981" />
+            <Text className="text-content-primary font-semibold text-xs ml-1.5">Export CSV</Text>
           </TouchableOpacity>
         </View>
 
         {/* Month Selector Pills */}
-        <View className="flex-row mb-4">
+        <View className="flex-row mb-3.5">
           {[0, 1, 2].map((offset) => {
             const mDate = subMonths(new Date(), offset);
             const isSelected = selectedMonthOffset === offset;
@@ -165,7 +165,7 @@ export default function AnalyticsScreen() {
                   triggerHaptic.selection();
                   setSelectedMonthOffset(offset);
                 }}
-                className={`px-3.5 py-2 rounded-xl mr-2 border ${
+                className={`px-3 py-1.5 rounded-lg mr-2 border ${
                   isSelected
                     ? 'bg-primary/20 border-primary'
                     : 'bg-background-card border-background-border'
@@ -183,42 +183,42 @@ export default function AnalyticsScreen() {
           })}
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Top 3 Summary Cards */}
-          <View className="flex-row space-x-2.5 mb-5">
-            <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
+          <View className="flex-row space-x-2 mb-4">
+            <View className="flex-1 bg-background-card p-3 rounded-xl border border-background-border mr-1.5">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Income</Text>
-                <ArrowDownRight size={13} color="#2A9D60" />
+                <ArrowDownRight size={13} color="#10B981" />
               </View>
-              <Text className="text-primary font-bold text-base mt-0.5">
+              <Text className="text-primary font-bold text-sm mt-0.5 font-mono">
                 {formatCurrency(totalIncome, currency)}
               </Text>
             </View>
 
-            <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border mr-2">
+            <View className="flex-1 bg-background-card p-3 rounded-xl border border-background-border mr-1.5">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Expense</Text>
-                <ArrowUpRight size={13} color="#DC4C38" />
+                <ArrowUpRight size={13} color="#EF4444" />
               </View>
-              <Text className="text-expense font-bold text-base mt-0.5">
+              <Text className="text-expense font-bold text-sm mt-0.5 font-mono">
                 {formatCurrency(totalExpense, currency)}
               </Text>
             </View>
 
-            <View className="flex-1 bg-background-card p-3.5 rounded-2xl border border-background-border">
+            <View className="flex-1 bg-background-card p-3 rounded-xl border border-background-border">
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">Savings</Text>
-                <Award size={13} color="#C69230" />
+                <Award size={13} color="#F59E0B" />
               </View>
-              <Text className="text-accent-gold font-bold text-base mt-0.5">
+              <Text className="text-accent-gold font-bold text-sm mt-0.5 font-mono">
                 {savingsRate.toFixed(0)}%
               </Text>
             </View>
           </View>
 
           {/* 1. HORIZONTAL CASH FLOW GRAPH */}
-          <View className="mb-5">
+          <View className="mb-4">
             <HorizontalCashFlowChart income={totalIncome} expense={totalExpense} currency={currency} />
           </View>
 
@@ -232,9 +232,9 @@ export default function AnalyticsScreen() {
           </View>
 
           {/* 3. CATEGORY BREAKDOWN DONUT CHART */}
-          <View className="bg-background-card p-5 rounded-3xl border border-background-border mb-5">
-            <Text className="text-content-primary font-bold text-base mb-1">Spending by Category</Text>
-            <Text className="text-content-tertiary text-xs mb-3">
+          <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
+            <Text className="text-content-primary font-bold text-sm mb-0.5">Spending by Category</Text>
+            <Text className="text-content-tertiary text-xs mb-2.5">
               Distribution for {format(targetDate, 'MMMM yyyy')}
             </Text>
 
@@ -242,31 +242,31 @@ export default function AnalyticsScreen() {
               data={categorySpendData}
               totalSpent={totalExpense}
               currency={currency}
-              size={190}
+              size={180}
             />
 
             {/* Category Legend List */}
-            <View className="mt-4 border-t border-background-border/50 pt-3">
+            <View className="mt-3 border-t border-background-border pt-2.5">
               {categorySpendData.slice(0, 6).map((item) => (
                 <View
                   key={item.category.id}
-                  className="flex-row items-center justify-between py-2 border-b border-background-border/20"
+                  className="flex-row items-center justify-between py-1.5 border-b border-background-border/30"
                 >
                   <View className="flex-row items-center">
                     <View
-                      className="w-3 h-3 rounded-full mr-2.5"
+                      className="w-2.5 h-2.5 rounded-full mr-2"
                       style={{ backgroundColor: item.category.color }}
                     />
-                    <Text className="text-content-primary text-xs font-semibold">
+                    <Text className="text-content-primary text-xs font-medium">
                       {item.category.name}
                     </Text>
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="text-content-primary font-bold text-xs mr-2">
+                    <Text className="text-content-primary font-bold text-xs mr-2 font-mono">
                       {formatCurrency(item.amount, currency)}
                     </Text>
-                    <Text className="text-content-tertiary text-[11px] w-10 text-right">
+                    <Text className="text-content-tertiary text-[11px] w-10 text-right font-mono">
                       {item.percentage.toFixed(1)}%
                     </Text>
                   </View>

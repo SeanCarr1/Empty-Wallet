@@ -25,30 +25,30 @@ export const WalletCard: React.FC<WalletCardProps> = ({
         triggerHaptic.selection();
         onPress?.();
       }}
-      className={`min-w-[155px] p-4 rounded-2xl mr-3 border ${
+      className={`min-w-[145px] p-3.5 rounded-xl mr-2.5 border ${
         isSelected
           ? 'bg-background-elevated border-primary'
           : 'bg-background-card border-background-border'
       }`}
     >
-      <View className="flex-row items-center justify-between mb-3">
+      <View className="flex-row items-center justify-between mb-2.5">
         <View
-          className="w-8 h-8 rounded-xl items-center justify-center"
+          className="w-7 h-7 rounded-lg items-center justify-center"
           style={{ backgroundColor: `${wallet.color}20` }}
         >
-          <Icon name={wallet.icon} size={16} color={wallet.color} />
+          <Icon name={wallet.icon} size={15} color={wallet.color} />
         </View>
-        <Text className="text-[10px] font-bold uppercase text-content-tertiary tracking-wider">
+        <Text className="text-[9px] font-bold uppercase text-content-tertiary tracking-wider">
           {wallet.type}
         </Text>
       </View>
 
-      <Text className="text-content-secondary font-medium text-xs truncate mb-1">
+      <Text className="text-content-secondary font-medium text-xs truncate mb-0.5" numberOfLines={1}>
         {wallet.name}
       </Text>
 
       <Text
-        className={`text-base font-bold ${
+        className={`text-sm font-bold tabular-nums ${
           isCredit && wallet.balance < 0 ? 'text-expense' : 'text-content-primary'
         }`}
       >

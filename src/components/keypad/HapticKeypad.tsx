@@ -65,7 +65,7 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
   ];
 
   return (
-    <View className="w-full px-4 pb-2 pt-2 bg-background-card rounded-t-3xl border-t border-background-border">
+    <View className="w-full px-3 pb-2 pt-2 bg-background-card rounded-t-2xl border-t border-background-border">
       {keys.map((row, rowIndex) => (
         <View key={`row-${rowIndex}`} className="flex-row justify-between mb-2">
           {row.map((key) => {
@@ -81,13 +81,13 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                     }
                   }}
                   disabled={submitDisabled}
-                  className={`flex-1 mx-1.5 h-14 rounded-2xl items-center justify-center ${
+                  className={`flex-1 mx-1 h-[52px] rounded-lg items-center justify-center ${
                     submitDisabled
                       ? 'bg-background-elevated opacity-40 border border-background-border'
-                      : 'bg-primary shadow-lg shadow-primary/25'
+                      : 'bg-primary shadow-sm shadow-primary/25'
                   }`}
                 >
-                  <Check size={22} color="#F5F2EB" strokeWidth={3} />
+                  <Check size={20} color="#0F1012" strokeWidth={3} />
                 </TouchableOpacity>
               );
             }
@@ -98,9 +98,9 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                   key={key}
                   activeOpacity={0.6}
                   onPress={() => handleKeyPress('backspace')}
-                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background rounded-2xl items-center justify-center border border-background-border"
+                  className="flex-1 mx-1 h-[52px] bg-background-elevated active:bg-background rounded-lg items-center justify-center border border-background-border"
                 >
-                  <Delete size={19} color="#D6CFBF" />
+                  <Delete size={18} color="#9CA3AF" />
                 </TouchableOpacity>
               );
             }
@@ -114,7 +114,7 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                     triggerHaptic.light();
                     onChange('');
                   }}
-                  className="flex-1 mx-1.5 h-14 bg-background-elevated active:bg-background rounded-2xl items-center justify-center border border-background-border"
+                  className="flex-1 mx-1 h-[52px] bg-background-elevated active:bg-background rounded-lg items-center justify-center border border-background-border"
                 >
                   <Text className="text-content-secondary font-bold text-sm">C</Text>
                 </TouchableOpacity>
@@ -128,14 +128,14 @@ export const HapticKeypad: React.FC<HapticKeypadProps> = ({
                 key={key}
                 activeOpacity={0.6}
                 onPress={() => handleKeyPress(key)}
-                className={`flex-1 mx-1.5 h-14 rounded-2xl items-center justify-center border ${
+                className={`flex-1 mx-1 h-[52px] rounded-lg items-center justify-center border ${
                   isOperator
                     ? 'bg-background-elevated border-primary/40 active:bg-primary/20'
                     : 'bg-background-elevated border-background-border active:bg-background'
                 }`}
               >
                 <Text
-                  className={`font-bold text-xl ${
+                  className={`font-bold text-lg tabular-nums ${
                     isOperator ? 'text-primary' : 'text-content-primary'
                   }`}
                 >

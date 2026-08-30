@@ -143,11 +143,11 @@ export default function RecordsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="flex-1 px-5 pt-3">
+      <View className="flex-1 px-4 pt-2">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-3">
           <View>
-            <Text className="text-2xl font-bold text-content-primary">Ledger Records</Text>
+            <Text className="text-xl font-bold text-content-primary">Ledger Records</Text>
             <Text className="text-content-secondary text-xs mt-0.5">
               {filteredTransactions.length} entries indexed
             </Text>
@@ -159,26 +159,27 @@ export default function RecordsScreen() {
               triggerHaptic.medium();
               router.push('/modal/quick-add');
             }}
-            className="w-10 h-10 rounded-2xl bg-primary items-center justify-center shadow-md shadow-primary/20"
+            className="flex-row items-center bg-primary px-3 py-1.5 rounded-lg active:opacity-80"
           >
-            <Plus size={22} color="#F5F2EB" strokeWidth={2.6} />
+            <Plus size={15} color="#0F1012" strokeWidth={2.8} />
+            <Text className="text-[#0F1012] font-bold text-xs ml-1">Add</Text>
           </TouchableOpacity>
         </View>
 
         {/* Search Bar & Filter Button */}
         <View className="flex-row items-center space-x-2 mb-3">
-          <View className="flex-1 flex-row items-center bg-background-card border border-background-border rounded-2xl px-3.5 py-2.5 mr-2">
-            <Search size={16} color="#948B7E" />
+          <View className="flex-1 flex-row items-center bg-background-card border border-background-border rounded-lg px-3 py-2 mr-2">
+            <Search size={15} color="#6B7280" />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search payee, note, category..."
-              placeholderTextColor="#948B7E"
+              placeholderTextColor="#6B7280"
               className="flex-1 ml-2 text-content-primary text-xs font-medium"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <X size={16} color="#948B7E" />
+                <X size={15} color="#6B7280" />
               </TouchableOpacity>
             )}
           </View>
@@ -189,55 +190,55 @@ export default function RecordsScreen() {
               triggerHaptic.selection();
               setFilterModalOpen(true);
             }}
-            className={`flex-row items-center px-3.5 py-2.5 rounded-2xl border ${
+            className={`flex-row items-center px-3 py-2 rounded-lg border ${
               activeFilterCount > 0
-                ? 'bg-primary/20 border-primary'
+                ? 'bg-primary/15 border-primary'
                 : 'bg-background-card border-background-border'
             }`}
           >
-            <SlidersHorizontal size={16} color={activeFilterCount > 0 ? '#2A9D60' : '#D6CFBF'} />
+            <SlidersHorizontal size={15} color={activeFilterCount > 0 ? '#10B981' : '#9CA3AF'} />
             {activeFilterCount > 0 && (
               <View className="w-4 h-4 rounded-full bg-primary items-center justify-center ml-1.5">
-                <Text className="text-[10px] font-bold text-content-primary">{activeFilterCount}</Text>
+                <Text className="text-[9px] font-bold text-[#0F1012]">{activeFilterCount}</Text>
               </View>
             )}
           </TouchableOpacity>
         </View>
 
         {/* Quick Summary Pill Bar */}
-        <View className="flex-row items-center justify-between bg-background-card p-3 rounded-2xl border border-background-border mb-3">
+        <View className="flex-row items-center justify-between bg-background-card px-3.5 py-2.5 rounded-xl border border-background-border mb-3">
           <View className="flex-row items-center">
-            <Text className="text-content-tertiary text-xs font-semibold">In: </Text>
-            <Text className="text-primary text-xs font-bold mr-3">
+            <Text className="text-content-tertiary text-xs font-medium">In: </Text>
+            <Text className="text-primary text-xs font-bold mr-3 font-mono">
               +{formatCurrency(totalFilteredIncome, currency)}
             </Text>
-            <Text className="text-content-tertiary text-xs font-semibold">Out: </Text>
-            <Text className="text-expense text-xs font-bold">
+            <Text className="text-content-tertiary text-xs font-medium">Out: </Text>
+            <Text className="text-expense text-xs font-bold font-mono">
               -{formatCurrency(totalFilteredExpense, currency)}
             </Text>
           </View>
 
           {activeFilterCount > 0 && (
             <TouchableOpacity onPress={handleClearFilters}>
-              <Text className="text-primary text-xs font-semibold">Reset Filters</Text>
+              <Text className="text-primary text-xs font-semibold">Reset</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Records List */}
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           {filteredTransactions.length === 0 ? (
-            <View className="bg-background-card rounded-3xl p-8 items-center justify-center border border-background-border my-6">
-              <Sparkles size={36} color="#948B7E" />
-              <Text className="text-content-primary font-bold text-base mt-3">No Records Found</Text>
-              <Text className="text-content-secondary text-xs text-center mt-1 mb-4">
+            <View className="bg-background-card rounded-xl p-6 items-center justify-center border border-background-border my-4">
+              <Sparkles size={32} color="#6B7280" />
+              <Text className="text-content-primary font-bold text-sm mt-2.5">No Records Found</Text>
+              <Text className="text-content-secondary text-xs text-center mt-1 mb-3.5">
                 Try adjusting your search keywords or filter criteria.
               </Text>
               <TouchableOpacity
                 onPress={handleClearFilters}
-                className="bg-background-elevated px-4 py-2 rounded-xl border border-background-border"
+                className="bg-background-elevated px-3.5 py-1.5 rounded-lg border border-background-border"
               >
-                <Text className="text-primary font-bold text-xs">Clear All Filters</Text>
+                <Text className="text-primary font-semibold text-xs">Clear All Filters</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -257,18 +258,18 @@ export default function RecordsScreen() {
         {/* FILTER & SORT MODAL */}
         <Modal visible={filterModalOpen} animationType="slide" transparent>
           <View className="flex-1 bg-black/75 justify-end">
-            <View className="bg-background-card rounded-t-3xl p-6 border-t border-background-border max-h-[85%]">
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-xl font-bold text-content-primary">Filter & Sort Records</Text>
+            <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border max-h-[85%]">
+              <View className="flex-row items-center justify-between mb-3.5">
+                <Text className="text-lg font-bold text-content-primary">Filter & Sort Records</Text>
                 <TouchableOpacity onPress={() => setFilterModalOpen(false)}>
-                  <X size={22} color="#D6CFBF" />
+                  <X size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false}>
                 {/* 1. Sort Order */}
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Sort By</Text>
-                <View className="flex-row flex-wrap mb-4">
+                <View className="flex-row flex-wrap mb-3.5">
                   {[
                     { id: 'newest', label: 'Newest Time' },
                     { id: 'oldest', label: 'Oldest Time' },
@@ -278,7 +279,7 @@ export default function RecordsScreen() {
                     <TouchableOpacity
                       key={s.id}
                       onPress={() => setSortOption(s.id as SortOption)}
-                      className={`px-3 py-2 rounded-xl mr-2 mb-2 border ${
+                      className={`px-3 py-1.5 rounded-lg mr-2 mb-2 border ${
                         sortOption === s.id
                           ? 'bg-primary/20 border-primary'
                           : 'bg-background-elevated border-background-border'
@@ -297,7 +298,7 @@ export default function RecordsScreen() {
 
                 {/* 2. Record Type */}
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Record Type</Text>
-                <View className="flex-row mb-4">
+                <View className="flex-row mb-3.5">
                   {[
                     { id: 'all', label: 'All' },
                     { id: 'expense', label: 'Expense' },
@@ -307,7 +308,7 @@ export default function RecordsScreen() {
                     <TouchableOpacity
                       key={t.id}
                       onPress={() => setSelectedType(t.id as any)}
-                      className={`flex-1 py-2 rounded-xl mr-1.5 items-center border ${
+                      className={`flex-1 py-2 rounded-lg mr-1.5 items-center border ${
                         selectedType === t.id
                           ? 'bg-primary/20 border-primary'
                           : 'bg-background-elevated border-background-border'
@@ -326,10 +327,10 @@ export default function RecordsScreen() {
 
                 {/* 3. Payment Method */}
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Payment Method</Text>
-                <View className="flex-row flex-wrap mb-4">
+                <View className="flex-row flex-wrap mb-3.5">
                   <TouchableOpacity
                     onPress={() => setSelectedPaymentType('all')}
-                    className={`px-3 py-2 rounded-xl mr-2 mb-2 border ${
+                    className={`px-3 py-1.5 rounded-lg mr-2 mb-2 border ${
                       selectedPaymentType === 'all'
                         ? 'bg-primary/20 border-primary'
                         : 'bg-background-elevated border-background-border'
@@ -346,7 +347,7 @@ export default function RecordsScreen() {
                       <TouchableOpacity
                         key={pt}
                         onPress={() => setSelectedPaymentType(pt)}
-                        className={`px-3 py-2 rounded-xl mr-2 mb-2 border ${
+                        className={`px-3 py-1.5 rounded-lg mr-2 mb-2 border ${
                           isSelected
                             ? 'bg-primary/20 border-primary'
                             : 'bg-background-elevated border-background-border'
@@ -362,20 +363,20 @@ export default function RecordsScreen() {
 
                 {/* 4. Category Filter Chips */}
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Categories</Text>
-                <View className="flex-row flex-wrap mb-4">
+                <View className="flex-row flex-wrap mb-3.5">
                   {categories.map((c) => {
                     const isSelected = selectedCategories.includes(c.id);
                     return (
                       <TouchableOpacity
                         key={c.id}
                         onPress={() => toggleCategory(c.id)}
-                        className={`flex-row items-center px-2.5 py-1.5 rounded-xl mr-2 mb-2 border ${
+                        className={`flex-row items-center px-2.5 py-1.5 rounded-lg mr-2 mb-2 border ${
                           isSelected
                             ? 'bg-primary/20 border-primary'
                             : 'bg-background-elevated border-background-border'
                         }`}
                       >
-                        <Icon name={c.icon} size={14} color={isSelected ? '#2A9D60' : c.color} />
+                        <Icon name={c.icon} size={13} color={isSelected ? '#10B981' : c.color} />
                         <Text
                           className={`text-xs font-semibold ml-1.5 ${
                             isSelected ? 'text-primary' : 'text-content-primary'
@@ -390,31 +391,31 @@ export default function RecordsScreen() {
 
                 {/* 5. Amount Range */}
                 <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Amount Range ({currency})</Text>
-                <View className="flex-row space-x-2 mb-6">
+                <View className="flex-row space-x-2 mb-5">
                   <TextInput
                     value={minAmount}
                     onChangeText={setMinAmount}
                     keyboardType="numeric"
                     placeholder="Min ₱"
-                    placeholderTextColor="#948B7E"
-                    className="flex-1 bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-semibold mr-2"
+                    placeholderTextColor="#6B7280"
+                    className="flex-1 bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold mr-2"
                   />
                   <TextInput
                     value={maxAmount}
                     onChangeText={setMaxAmount}
                     keyboardType="numeric"
                     placeholder="Max ₱"
-                    placeholderTextColor="#948B7E"
-                    className="flex-1 bg-background-elevated border border-background-border rounded-xl p-3 text-content-primary text-xs font-semibold"
+                    placeholderTextColor="#6B7280"
+                    className="flex-1 bg-background-elevated border border-background-border rounded-lg p-2.5 text-content-primary text-xs font-semibold"
                   />
                 </View>
               </ScrollView>
 
               {/* Action Buttons */}
-              <View className="flex-row space-x-3 pt-3 border-t border-background-border/50">
+              <View className="flex-row space-x-3 pt-3 border-t border-background-border">
                 <TouchableOpacity
                   onPress={handleClearFilters}
-                  className="flex-1 bg-background-elevated py-3.5 rounded-xl items-center mr-2 border border-background-border"
+                  className="flex-1 bg-background-elevated py-2.5 rounded-lg items-center mr-2 border border-background-border"
                 >
                   <Text className="text-content-secondary font-semibold text-xs">Reset</Text>
                 </TouchableOpacity>
@@ -423,9 +424,9 @@ export default function RecordsScreen() {
                     triggerHaptic.success();
                     setFilterModalOpen(false);
                   }}
-                  className="flex-1 bg-primary py-3.5 rounded-xl items-center shadow-lg shadow-primary/20"
+                  className="flex-1 bg-primary py-2.5 rounded-lg items-center active:opacity-80"
                 >
-                  <Text className="text-content-primary font-bold text-xs">Apply Filters</Text>
+                  <Text className="text-[#0F1012] font-bold text-xs">Apply Filters</Text>
                 </TouchableOpacity>
               </View>
             </View>

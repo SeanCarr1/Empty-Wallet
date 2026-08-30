@@ -97,7 +97,7 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
 
   if (isSparkline) {
     return (
-      <View className="bg-background-card p-4 rounded-3xl border border-background-border mb-4">
+      <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
         <View className="flex-row items-center justify-between mb-2">
           <View>
             <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">30-Day Balance Trajectory</Text>
@@ -106,8 +106,8 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
                 {formatCurrency(currentTotalBalance, currency)}
               </Text>
               <View className="flex-row items-center ml-2">
-                {isPositive ? <TrendingUp size={13} color="#2A9D60" /> : <TrendingDown size={13} color="#DC4C38" />}
-                <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-primary' : 'text-expense'}`}>
+                {isPositive ? <TrendingUp size={13} color="#10B981" /> : <TrendingDown size={13} color="#EF4444" />}
+                <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                   {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)}
                 </Text>
               </View>
@@ -118,33 +118,33 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
         <Svg width={width} height={height}>
           <Defs>
             <LinearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#2A9D60" stopOpacity="0.25" />
-              <Stop offset="100%" stopColor="#2A9D60" stopOpacity="0.0" />
+              <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+              <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
             </LinearGradient>
           </Defs>
           <Path d={fillD} fill="url(#sparkGradient)" />
-          <Path d={pathD} stroke="#2A9D60" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
         </Svg>
       </View>
     );
   }
 
   return (
-    <View className="w-full bg-background-card p-5 rounded-3xl border border-background-border mb-5">
+    <View className="w-full bg-background-card p-4 rounded-xl border border-background-border mb-4">
       {/* Header & Timeframe Switcher */}
       <View className="flex-row items-center justify-between mb-3">
         <View>
-          <Text className="text-content-primary font-bold text-base">Net Balance Progression</Text>
+          <Text className="text-content-primary font-bold text-sm">Net Balance Progression</Text>
           <View className="flex-row items-center mt-0.5">
-            {isPositive ? <TrendingUp size={13} color="#2A9D60" /> : <TrendingDown size={13} color="#DC4C38" />}
-            <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-primary' : 'text-expense'}`}>
+            {isPositive ? <TrendingUp size={13} color="#10B981" /> : <TrendingDown size={13} color="#EF4444" />}
+            <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
               {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)} ({timeframe})
             </Text>
           </View>
         </View>
 
         {/* Timeframe Chips */}
-        <View className="flex-row bg-background-elevated p-1 rounded-xl border border-background-border">
+        <View className="flex-row bg-background-elevated p-0.5 rounded-md border border-background-border">
           {(['7D', '30D', '90D', 'ALL'] as const).map((tf) => (
             <TouchableOpacity
               key={tf}
@@ -152,13 +152,13 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
                 triggerHaptic.selection();
                 setTimeframe(tf);
               }}
-              className={`px-2.5 py-1 rounded-lg ${
-                timeframe === tf ? 'bg-primary' : ''
+              className={`px-2.5 py-1 rounded-md ${
+                timeframe === tf ? 'bg-[#10B981]' : ''
               }`}
             >
               <Text
                 className={`text-[10px] font-bold ${
-                  timeframe === tf ? 'text-content-primary' : 'text-content-secondary'
+                  timeframe === tf ? 'text-white' : 'text-content-tertiary'
                 }`}
               >
                 {tf}
@@ -173,18 +173,18 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
         <Svg width={width} height={height}>
           <Defs>
             <LinearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#2A9D60" stopOpacity="0.3" />
-              <Stop offset="100%" stopColor="#2A9D60" stopOpacity="0.0" />
+              <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+              <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
             </LinearGradient>
           </Defs>
 
           {/* Grid lines */}
-          <Line x1="0" y1={height - 20} x2={width} y2={height - 20} stroke="#3B3632" strokeDasharray="3 3" />
-          <Line x1="0" y1={20} x2={width} y2={20} stroke="#3B3632" strokeDasharray="3 3" />
+          <Line x1="0" y1={height - 20} x2={width} y2={height - 20} stroke="#2A2D35" strokeDasharray="3 3" />
+          <Line x1="0" y1={20} x2={width} y2={20} stroke="#2A2D35" strokeDasharray="3 3" />
 
           {/* Area Fill & Line */}
           <Path d={fillD} fill="url(#balanceGradient)" />
-          <Path d={pathD} stroke="#2A9D60" strokeWidth={2.8} fill="none" strokeLinecap="round" />
+          <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
 
           {/* End Dot */}
           {svgPoints.length > 0 && (
@@ -192,8 +192,8 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
               cx={svgPoints[svgPoints.length - 1].x}
               cy={svgPoints[svgPoints.length - 1].y}
               r={4.5}
-              fill="#2A9D60"
-              stroke="#1D1B19"
+              fill="#10B981"
+              stroke="#17181C"
               strokeWidth={2}
             />
           )}
@@ -209,3 +209,4 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
     </View>
   );
 };
+

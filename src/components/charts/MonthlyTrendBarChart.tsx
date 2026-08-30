@@ -17,7 +17,7 @@ interface MonthlyTrendBarChartProps {
 export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
   data,
   currency,
-  height = 160,
+  height = 150,
 }) => {
   const maxVal = Math.max(
     1,
@@ -25,17 +25,17 @@ export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
   );
 
   return (
-    <View className="w-full bg-background-card p-5 rounded-3xl border border-background-border/70">
+    <View className="w-full bg-background-card p-4 rounded-xl border border-background-border">
       {/* Header & Legend */}
-      <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-content-primary font-bold text-base">Monthly Cash Flow</Text>
+      <View className="flex-row items-center justify-between mb-3">
+        <Text className="text-content-primary font-bold text-sm">Monthly Cash Flow</Text>
         <View className="flex-row items-center space-x-3">
           <View className="flex-row items-center mr-3">
-            <View className="w-2.5 h-2.5 rounded-full bg-primary mr-1.5" />
+            <View className="w-2 h-2 rounded-sm bg-[#10B981] mr-1.5" />
             <Text className="text-content-tertiary text-xs">Income</Text>
           </View>
           <View className="flex-row items-center">
-            <View className="w-2.5 h-2.5 rounded-full bg-expense mr-1.5" />
+            <View className="w-2 h-2 rounded-sm bg-[#EF4444] mr-1.5" />
             <Text className="text-content-tertiary text-xs">Expense</Text>
           </View>
         </View>
@@ -52,12 +52,12 @@ export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
               <View className="flex-row items-end justify-center w-full" style={{ height: height - 30 }}>
                 {/* Income Bar */}
                 <View
-                  className="w-2.5 bg-primary rounded-t-md mx-0.5"
+                  className="w-2.5 bg-[#10B981] rounded-t-sm mx-0.5"
                   style={{ height: Math.max(4, incomeHeight) }}
                 />
                 {/* Expense Bar */}
                 <View
-                  className="w-2.5 bg-expense rounded-t-md mx-0.5"
+                  className="w-2.5 bg-[#EF4444] rounded-t-sm mx-0.5"
                   style={{ height: Math.max(4, expenseHeight) }}
                 />
               </View>
@@ -72,3 +72,4 @@ export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
     </View>
   );
 };
+
