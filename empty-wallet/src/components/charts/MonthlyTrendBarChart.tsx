@@ -24,9 +24,10 @@ export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
     ...data.map((d) => Math.max(d.income, d.expense))
   );
 
+  const gridLines = [maxVal, maxVal / 2, 0];
+
   return (
     <View className="w-full bg-background-card p-4 rounded-xl border border-background-border">
-      {/* Header & Legend */}
       <View className="flex-row items-center justify-between mb-3">
         <Text className="text-content-primary font-bold text-sm">Monthly Cash Flow</Text>
         <View className="flex-row items-center space-x-3">
@@ -41,30 +42,25 @@ export const MonthlyTrendBarChart: React.FC<MonthlyTrendBarChartProps> = ({
         </View>
       </View>
 
-      {/* Bar Chart Area */}
       <View className="flex-row items-end justify-between pt-2" style={{ height }}>
+        {gridLines.map((val, i) => (
+           <View key={i} className="absolute w-full border-t border-background-border" style={{ top: (i / 2) * (height - 30) }} />
+        ))}
         {data.map((item, index) => {
-          const incomeHeight = (item.income / maxVal) * (height - 30);
-          const expenseHeight = (item.expense / maxVal) * (height - 30);
+          const incomeHeight = (item.income / maxVal) * (height - 40);
+          const expenseHeight = (item.expense / maxVal) * (height - 40);
 
           return (
             <View key={`month-${index}`} className="flex-1 items-center px-1">
-              <View className="flex-row items-end justify-center w-full" style={{ height: height - 30 }}>
-                {/* Income Bar */}
-                <View
-                  className="w-2.5 bg-[#10B981] rounded-t-sm mx-0.5"
-                  style={{ height: Math.max(4, incomeHeight) }}
-                />
-                {/* Expense Bar */}
-                <View
-                  className="w-2.5 bg-[#EF4444] rounded-t-sm mx-0.5"
-                  style={{ height: Math.max(4, expenseHeight) }}
-                />
+              <View className="items-center mb-1">
+                 <Text className="text-[8px] text-content-tertiary">{formatCompactCurrency(item.income, currency)}</Text>
+                 <Text className="text-[8px] text-content-tertiary">{formatCompactCurrency(item.expense, currency)}</Text>
               </View>
-              {/* Month Label */}
-              <Text className="text-content-tertiary text-[11px] font-medium mt-2">
-                {item.monthLabel}
-              </Text>
+              <View className="flex-row items-end justify-center w-full" style={{ height: height - 40 }}>
+                <View className="w-2.5 bg-[#10B981] rounded-t-sm mx-0.5" style={{ height: Math.max(2, incomeHeight) }} />
+                <View className="w-2.5 bg-[#EF4444] rounded-t-sm mx-0.5" style={{ height: Math.max(2, expenseHeight) }} />
+              </View>
+              <Text className="text-content-tertiary text-[11px] font-medium mt-2">{item.monthLabel}</Text>
             </View>
           );
         })}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -100,28 +100,20 @@ export default function QuickAddModal() {
     return map;
   }, [filteredCategories]);
 
-  const handleKeyPress = (val: string) => {
+  const handleKeyPress = useCallback((val: string) => {
     triggerHaptic.selection();
     if (val === 'C') {
       setAmountStr('');
-      return;
-    }
-    if (val === 'BACK') {
+    } else if (val === 'BACK') {
       setAmountStr((prev) => prev.slice(0, -1));
-      return;
+    } else if (val === '.') {
+      setAmountStr((prev) => (prev.includes('.') ? prev : prev ? prev + '.' : '0.'));
+    } else if (val === '+' || val === '-') {
+      setAmountStr((prev) => (prev && !/[+-]$/.test(prev) ? prev + val : prev));
+    } else {
+      setAmountStr((prev) => prev + val);
     }
-    if (val === '.') {
-      if (!amountStr.includes('.')) setAmountStr((prev) => (prev ? prev + '.' : '0.'));
-      return;
-    }
-    if (val === '+' || val === '-') {
-      if (amountStr && !amountStr.endsWith('+') && !amountStr.endsWith('-')) {
-        setAmountStr((prev) => prev + val);
-      }
-      return;
-    }
-    setAmountStr((prev) => prev + val);
-  };
+  }, []);
 
   const handleSave = () => {
     if (evaluatedAmount <= 0) {
@@ -566,64 +558,66 @@ export default function QuickAddModal() {
             </View>
 
             {/* Sectioned Group Grid */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {MACRO_CATEGORY_GROUPS.filter((g) => (type === 'income' ? g.type === 'income' : g.type === 'expense')).map((grp) => {
-                const groupCats = categoriesByGroup.get(grp.id) || [];
-                if (groupCats.length === 0) return null;
+            {useMemo(() => (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {MACRO_CATEGORY_GROUPS.filter((g) => (type === 'income' ? g.type === 'income' : g.type === 'expense')).map((grp) => {
+                  const groupCats = categoriesByGroup.get(grp.id) || [];
+                  if (groupCats.length === 0) return null;
 
-                return (
-                  <View key={grp.id} className="mb-4">
-                    <View className="flex-row items-center mb-2">
-                      <View
-                        className="w-5 h-5 rounded-md items-center justify-center mr-2"
-                        style={{ backgroundColor: `${grp.color}20` }}
-                      >
-                        <Icon name={grp.icon} size={12} color={grp.color} />
+                  return (
+                    <View key={grp.id} className="mb-4">
+                      <View className="flex-row items-center mb-2">
+                        <View
+                          className="w-5 h-5 rounded-md items-center justify-center mr-2"
+                          style={{ backgroundColor: `${grp.color}20` }}
+                        >
+                          <Icon name={grp.icon} size={12} color={grp.color} />
+                        </View>
+                        <Text className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                          {grp.label}
+                        </Text>
                       </View>
-                      <Text className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
-                        {grp.label}
-                      </Text>
-                    </View>
 
-                    <View className="flex-row flex-wrap justify-between">
-                      {groupCats.map((cat) => {
-                        const isSelected = selectedCategoryId === cat.id;
-                        return (
-                          <TouchableOpacity
-                            key={cat.id}
-                            onPress={() => {
-                              triggerHaptic.selection();
-                              setSelectedCategoryId(cat.id);
-                              setCategoryModalOpen(false);
-                            }}
-                            className={`w-[48%] mb-2 p-2.5 rounded-lg flex-row items-center border ${
-                              isSelected
-                                ? 'bg-[#10B981]/20 border-[#10B981]'
-                                : 'bg-[#212329] border-[#2A2D35]'
-                            }`}
-                          >
-                            <View
-                              className="w-6 h-6 rounded-md items-center justify-center mr-2"
-                              style={{ backgroundColor: `${cat.color}20` }}
-                            >
-                              <Icon name={cat.icon} size={13} color={cat.color} />
-                            </View>
-                            <Text
-                              className={`text-xs font-semibold flex-1 truncate ${
-                                isSelected ? 'text-[#10B981]' : 'text-[#F3F4F6]'
+                      <View className="flex-row flex-wrap justify-between">
+                        {groupCats.map((cat) => {
+                          const isSelected = selectedCategoryId === cat.id;
+                          return (
+                            <TouchableOpacity
+                              key={cat.id}
+                              onPress={() => {
+                                triggerHaptic.selection();
+                                setSelectedCategoryId(cat.id);
+                                setCategoryModalOpen(false);
+                              }}
+                              className={`w-[48%] mb-2 p-2.5 rounded-lg flex-row items-center border ${
+                                isSelected
+                                  ? 'bg-[#10B981]/20 border-[#10B981]'
+                                  : 'bg-[#212329] border-[#2A2D35]'
                               }`}
-                              numberOfLines={1}
                             >
-                              {cat.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                              <View
+                                className="w-6 h-6 rounded-md items-center justify-center mr-2"
+                                style={{ backgroundColor: `${cat.color}20` }}
+                              >
+                                <Icon name={cat.icon} size={13} color={cat.color} />
+                              </View>
+                              <Text
+                                className={`text-xs font-semibold flex-1 truncate ${
+                                  isSelected ? 'text-[#10B981]' : 'text-[#F3F4F6]'
+                                }`}
+                                numberOfLines={1}
+                              >
+                                {cat.name}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
                     </View>
-                  </View>
-                );
-              })}
-            </ScrollView>
+                  );
+                })}
+              </ScrollView>
+            ), [type, categoriesByGroup, selectedCategoryId])}
           </View>
         </View>
       </Modal>

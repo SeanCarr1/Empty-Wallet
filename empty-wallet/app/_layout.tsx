@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { initializeDatabase } from '../src/db/client';
 import { useWalletStore } from '../src/stores/useWalletStore';
 import { useTransactionStore } from '../src/stores/useTransactionStore';
@@ -12,6 +13,17 @@ import { useSettingsStore } from '../src/stores/useSettingsStore';
 import { AuthService } from '../src/services/auth';
 import { Fingerprint } from 'lucide-react-native';
 import '../global.css';
+
+const DarkNavTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: '#0F1012',
+    card: '#17181C',
+    text: '#F3F4F6',
+    border: '#2A2D35',
+  },
+};
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
@@ -98,37 +110,42 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#0F1012' },
-          animation: 'slide_from_right',
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal/quick-add"
-          options={{
-            presentation: 'modal',
-            animation: 'slide_from_bottom',
+      <ThemeProvider value={DarkNavTheme}>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#0F1012' },
+            animation: 'slide_from_right',
           }}
-        />
-        <Stack.Screen
-          name="modal/manage-wallets"
-          options={{
-            presentation: 'modal',
-            animation: 'slide_from_bottom',
-          }}
-        />
-        <Stack.Screen
-          name="modal/import-statement"
-          options={{
-            presentation: 'modal',
-            animation: 'slide_from_bottom',
-          }}
-        />
-      </Stack>
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal/quick-add"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              contentStyle: { backgroundColor: '#0F1012' },
+            }}
+          />
+          <Stack.Screen
+            name="modal/manage-wallets"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              contentStyle: { backgroundColor: '#0F1012' },
+            }}
+          />
+          <Stack.Screen
+            name="modal/import-statement"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              contentStyle: { backgroundColor: '#0F1012' },
+            }}
+          />
+        </Stack>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

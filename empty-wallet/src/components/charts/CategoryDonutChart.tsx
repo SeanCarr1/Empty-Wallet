@@ -99,7 +99,6 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
         </G>
       </Svg>
 
-      {/* Center Value */}
       <View className="absolute items-center">
         <Text className="text-content-tertiary text-[11px] font-semibold uppercase tracking-wider">
           Total Spent
@@ -111,4 +110,21 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
     </View>
   );
 };
+
+export const CategoryLegend: React.FC<{ data: CategorySpendItem[], currency: string }> = ({ data, currency }) => (
+  <View className="mt-4 w-full px-4">
+    {data.map((item, index) => (
+      <View key={index} className="flex-row items-center justify-between mb-2">
+        <View className="flex-row items-center">
+          <View className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: item.category.color }} />
+          <Text className="text-content-primary font-medium text-sm">{item.category.name}</Text>
+        </View>
+        <View className="flex-row items-center">
+          <Text className="text-content-secondary font-bold text-sm mr-3">{item.percentage.toFixed(1)}%</Text>
+          <Text className="text-content-primary font-bold text-sm">{formatCurrency(item.amount, currency)}</Text>
+        </View>
+      </View>
+    ))}
+  </View>
+);
 

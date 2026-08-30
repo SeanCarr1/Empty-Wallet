@@ -6,13 +6,15 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "emptywallet",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0F1012",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#090A0F"
+      "backgroundColor": "#0F1012"
     },
+    "androidStatusBar": { "backgroundColor": "#0F1012", "barStyle": "light-content" },
+    "androidNavigationBar": { "backgroundColor": "#0F1012", "barStyle": "light-content" },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.emptywallet.app",
@@ -23,7 +25,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#090A0F"
+        "backgroundColor": "#0F1012"
       },
       "package": "com.emptywallet.app",
       "permissions": [

@@ -95,6 +95,8 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   const netDelta = currentTotalBalance - startBalance;
   const isPositive = netDelta >= 0;
 
+  const yLabels = [maxVal, (maxVal + minVal) / 2, minVal].map((v) => formatCurrency(v, currency));
+
   if (isSparkline) {
     return (
       <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
@@ -108,7 +110,7 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
               <View className="flex-row items-center ml-2">
                 {isPositive ? <TrendingUp size={13} color="#10B981" /> : <TrendingDown size={13} color="#EF4444" />}
                 <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                  {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)}
+                  {isPositive ? '+' : ''}{((netDelta / (startBalance || 1)) * 100).toFixed(1)}%
                 </Text>
               </View>
             </View>
@@ -131,15 +133,14 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
 
   return (
     <View className="w-full bg-background-card p-4 rounded-xl border border-background-border mb-4">
-      {/* Header & Timeframe Switcher */}
       <View className="flex-row items-center justify-between mb-3 gap-2">
-        <View className="flex-1 mr-2">
-          <Text className="text-content-primary font-bold text-xs uppercase tracking-wider" numberOfLines={1}>
-            Net Balance Progression
+        <View className="flex-1">
+          <Text className="text-content-primary font-bold text-xs uppercase tracking-wider">Net Balance</Text>
+          <Text className={`text-sm font-bold ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+             {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)} ({( (netDelta / (startBalance || 1)) * 100).toFixed(1)}%)
           </Text>
         </View>
 
-        {/* Timeframe Chips */}
         <View className="flex-row bg-background-elevated p-0.5 rounded-md border border-background-border shrink-0">
           {(['7D', '30D', '90D', 'ALL'] as const).map((tf) => (
             <TouchableOpacity
@@ -148,15 +149,9 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
                 triggerHaptic.selection();
                 setTimeframe(tf);
               }}
-              className={`px-2 py-1 rounded-md ${
-                timeframe === tf ? 'bg-[#10B981]' : ''
-              }`}
+              className={`px-2 py-1 rounded-md ${timeframe === tf ? 'bg-[#10B981]' : ''}`}
             >
-              <Text
-                className={`text-[10px] font-bold ${
-                  timeframe === tf ? 'text-white' : 'text-content-tertiary'
-                }`}
-              >
+              <Text className={`text-[10px] font-bold ${timeframe === tf ? 'text-white' : 'text-content-tertiary'}`}>
                 {tf}
               </Text>
             </TouchableOpacity>
@@ -164,42 +159,45 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
         </View>
       </View>
 
-      {/* SVG Interactive Line Chart */}
-      <View className="my-2">
-        <Svg width={width} height={height}>
-          <Defs>
-            <LinearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
-              <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-            </LinearGradient>
-          </Defs>
+      <View className="my-2 flex-row">
+        <View className="flex-col justify-between py-1 mr-2" style={{ height: height - 10 }}>
+          {yLabels.map((l, i) => (
+            <Text key={i} className="text-content-tertiary text-[9px]">{l}</Text>
+          ))}
+        </View>
+        <View>
+          <Svg width={width} height={height}>
+            <Defs>
+              <LinearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+                <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+              </LinearGradient>
+            </Defs>
 
-          {/* Grid lines */}
-          <Line x1="0" y1={height - 20} x2={width} y2={height - 20} stroke="#2A2D35" strokeDasharray="3 3" />
-          <Line x1="0" y1={20} x2={width} y2={20} stroke="#2A2D35" strokeDasharray="3 3" />
+            {[0, 0.5, 1].map((pos, i) => (
+               <Line key={i} x1="0" y1={height * pos} x2={width} y2={height * pos} stroke="#2A2D35" strokeDasharray="3 3" />
+            ))}
 
-          {/* Area Fill & Line */}
-          <Path d={fillD} fill="url(#balanceGradient)" />
-          <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+            <Path d={fillD} fill="url(#balanceGradient)" />
+            <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
 
-          {/* End Dot */}
-          {svgPoints.length > 0 && (
-            <Circle
-              cx={svgPoints[svgPoints.length - 1].x}
-              cy={svgPoints[svgPoints.length - 1].y}
-              r={4.5}
-              fill="#10B981"
-              stroke="#17181C"
-              strokeWidth={2}
-            />
-          )}
-        </Svg>
+            {svgPoints.length > 0 && (
+              <Circle
+                cx={svgPoints[svgPoints.length - 1].x}
+                cy={svgPoints[svgPoints.length - 1].y}
+                r={4.5}
+                fill="#10B981"
+                stroke="#17181C"
+                strokeWidth={2}
+              />
+            )}
+          </Svg>
 
-        {/* X-Axis Date Labels */}
-        <View className="flex-row justify-between mt-2 px-1">
-          <Text className="text-content-tertiary text-[10px]">{points[0]?.label}</Text>
-          <Text className="text-content-tertiary text-[10px]">{points[Math.floor(points.length / 2)]?.label}</Text>
-          <Text className="text-content-tertiary text-[10px]">{points[points.length - 1]?.label}</Text>
+          <View className="flex-row justify-between mt-2 px-1">
+            <Text className="text-content-tertiary text-[10px]">{points[0]?.label}</Text>
+            <Text className="text-content-tertiary text-[10px]">{points[Math.floor(points.length / 2)]?.label}</Text>
+            <Text className="text-content-tertiary text-[10px]">{points[points.length - 1]?.label}</Text>
+          </View>
         </View>
       </View>
     </View>
