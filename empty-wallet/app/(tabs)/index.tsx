@@ -65,7 +65,7 @@ export default function DashboardScreen() {
         }
       >
         {/* Top Header with App Logo, Net Balance & Quick Actions */}
-        <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center justify-between mb-6">
           <View className="flex-1 mr-3 flex-row items-center">
             <Image
               source={require('../../assets/logo.jpg')}
@@ -82,22 +82,14 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-2 shrink-0">
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setCustomizeModalVisible(true)}
-              className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg"
-            >
-              <Text className="text-content-primary font-semibold text-xs">Customize</Text>
-            </TouchableOpacity>
-
+          <View className="flex-row items-center shrink-0">
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic.selection();
                 router.push('/modal/manage-wallets?tab=transfer');
               }}
-              className="flex-row items-center bg-background-card border border-background-border px-2.5 py-1.5 rounded-lg mr-1.5"
+              className="flex-row items-center bg-background-card border border-background-border px-3 py-1.5 rounded-lg mr-2"
             >
               <ArrowRightLeft size={14} color="#10B981" />
               <Text className="text-content-primary font-semibold text-xs ml-1.5">Transfer</Text>
@@ -146,6 +138,19 @@ export default function DashboardScreen() {
         {/* Balance Trend Sparkline Graph */}
         {dashboardWidgets.sparklineTrend && (
           <View className="mb-2">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
+                Graphs & Charts
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  triggerHaptic.selection();
+                  setCustomizeModalVisible(true);
+                }}
+              >
+                <Text className="text-primary text-xs font-semibold">Manage</Text>
+              </TouchableOpacity>
+            </View>
             <BalanceTrendLineChart
               transactions={transactions}
               currentTotalBalance={totalBalance}

@@ -539,7 +539,7 @@ export default function BudgetsScreen() {
                         <Text className="text-xs font-bold text-content-tertiary uppercase tracking-wider">{group.label}</Text>
                       </View>
 
-                      <View className="flex-row flex-wrap -mx-1">
+                      <View className="flex-row flex-wrap justify-between">
                         {filteredItems.map((cat) => {
                           const isSel = selectedCatId === cat.id;
                           return (
@@ -550,7 +550,7 @@ export default function BudgetsScreen() {
                                 setSelectedCatId(cat.id);
                                 setBudgetCatPickerOpen(false);
                               }}
-                              className={`w-[48%] m-1 p-2 rounded-lg flex-row items-center border ${
+                              className={`w-[48%] mb-2 p-2 rounded-lg flex-row items-center border ${
                                 isSel ? 'bg-primary/20 border-primary' : 'bg-background-elevated border-background-border'
                               }`}
                             >
@@ -696,13 +696,13 @@ export default function BudgetsScreen() {
               </ScrollView>
 
               {/* Category Picker */}
-              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1">Category</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-5">
+              <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-1.5">Category</Text>
+              <View className="flex-row flex-wrap justify-between mb-5">
                 {expenseCategories.map((c) => (
                   <TouchableOpacity
                     key={c.id}
                     onPress={() => setSubCatId(c.id)}
-                    className={`px-3 py-1.5 rounded-lg mr-2 border ${
+                    className={`w-[48%] mb-2 px-3 py-2 rounded-lg border ${
                       subCatId === c.id ? 'bg-accent-blue/20 border-accent-blue' : 'bg-background-elevated border-background-border'
                     }`}
                   >
@@ -711,7 +711,7 @@ export default function BudgetsScreen() {
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </ScrollView>
+              </View>
 
               <View className="flex-row space-x-2.5">
                 <TouchableOpacity
