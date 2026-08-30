@@ -32,6 +32,7 @@ export default function RecordsScreen() {
   const [selectedPaymentType, setSelectedPaymentType] = useState<PaymentType | 'all'>('all');
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
+  const [selectedTxForDetail, setSelectedTxForDetail] = useState<any | null>(null);
 
   // Modal State
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -173,6 +174,25 @@ export default function RecordsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      {selectedTxForDetail && (
+        <TransactionDetailModal
+          visible={!!selectedTxForDetail}
+          transaction={selectedTxForDetail}
+          category={selectedTxForDetail?.categoryId ? categoryMap.get(selectedTxForDetail.categoryId) : undefined}
+          wallet={selectedTxForDetail ? walletMap.get(selectedTxForDetail.walletId) : undefined}
+          destinationWallet={selectedTxForDetail?.destinationWalletId ? walletMap.get(selectedTxForDetail.destinationWalletId) : undefined}
+          currency={currency}
+          onClose={() => setSelectedTxForDetail(null)}
+          onEdit={(id) => {
+            setSelectedTxForDetail(null);
+            router.push({ pathname: '/modal/quick-add', params: { id } });
+          }}
+          onDelete={(id) => {
+            deleteTransaction(id);
+            setSelectedTxForDetail(null);
+          }}
+        />
+      )}
       <View className="flex-1 px-4 pt-2">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-3">
@@ -276,6 +296,7 @@ export default function RecordsScreen() {
                 category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
                 wallet={walletMap.get(tx.walletId)}
                 currency={currency}
+                onPress={() => setSelectedTxForDetail(tx)}
                 onDelete={deleteTransaction}
               />
             ))

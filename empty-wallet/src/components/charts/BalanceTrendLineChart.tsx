@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Line, Circle } from 'react-native-svg';
 import { Transaction } from '../../types';
 import { formatCurrency } from '../../services/currency';
@@ -23,16 +23,12 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   isSparkline = false,
 }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>('30D');
+  const [selectedPoint, setSelectedPoint] = useState<{ date: string; balance: number; x: number; y: number } | null>(null);
 
   const daysCount = timeframe === '7D' ? 7 : timeframe === '30D' ? 30 : timeframe === '90D' ? 90 : 365;
   const cutoffDate = subDays(new Date(), daysCount);
 
-  // Compute daily balance trend points
   const points = useMemo(() => {
-    const sorted = [...transactions]
-      .filter((t) => timeframe === 'ALL' || isAfter(parseISO(t.transactionDate), cutoffDate))
-      .sort((a, b) => new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime());
-
     const allSortedDesc = [...transactions].sort(
       (a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
     );
@@ -47,12 +43,13 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
     const dayStep = Math.max(1, Math.floor(daysCount / intervals));
 
     let runningBack = currentTotalBalance;
-    const historyPoints: { label: string; balance: number }[] = [];
+    const historyPoints: { date: string; label: string; balance: number }[] = [];
 
     for (let i = 0; i <= daysCount; i += dayStep) {
       const d = subDays(new Date(), i);
       const dStr = format(d, 'yyyy-MM-dd');
       historyPoints.push({
+        date: format(d, 'MMM dd, yyyy'),
         label: format(d, daysCount <= 7 ? 'EEE' : 'MMM d'),
         balance: runningBack,
       });
@@ -64,18 +61,19 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
     return historyPoints.reverse();
   }, [transactions, currentTotalBalance, timeframe]);
 
-  const height = isSparkline ? 90 : 160;
-  const width = Dimensions.get('window').width - (isSparkline ? 60 : 64);
+  const height = isSparkline ? 90 : 200;
+  const screenWidth = Dimensions.get('window').width;
+  const width = Math.min(screenWidth - 48, 400);
 
   const values = points.map((p) => p.balance);
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
-  const range = maxVal - minVal || 1;
+  const range = (maxVal - minVal) || 1;
 
   const svgPoints = points.map((p, index) => {
     const x = (index / (points.length - 1 || 1)) * width;
-    const y = height - ((p.balance - minVal) / range) * (height - 30) - 15;
-    return { x, y, label: p.label, balance: p.balance };
+    const y = height - ((p.balance - minVal) / range) * (height - 60) - 40;
+    return { x, y, label: p.label, balance: p.balance, date: p.date };
   });
 
   let pathD = '';
@@ -95,28 +93,14 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   const netDelta = currentTotalBalance - startBalance;
   const isPositive = netDelta >= 0;
 
-  const yLabels = [maxVal, (maxVal + minVal) / 2, minVal].map((v) => formatCurrency(v, currency));
+  const handlePointPress = (point: typeof svgPoints[0]) => {
+    triggerHaptic.selection();
+    setSelectedPoint(point);
+  };
 
   if (isSparkline) {
     return (
-      <View className="bg-background-card p-4 rounded-xl border border-background-border mb-4">
-        <View className="flex-row items-center justify-between mb-2">
-          <View>
-            <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">30-Day Balance Trajectory</Text>
-            <View className="flex-row items-center mt-0.5">
-              <Text className="text-content-primary font-bold text-lg">
-                {formatCurrency(currentTotalBalance, currency)}
-              </Text>
-              <View className="flex-row items-center ml-2">
-                {isPositive ? <TrendingUp size={13} color="#10B981" /> : <TrendingDown size={13} color="#EF4444" />}
-                <Text className={`text-xs font-bold ml-1 ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                  {isPositive ? '+' : ''}{((netDelta / (startBalance || 1)) * 100).toFixed(1)}%
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
+      <View className="bg-[#17181C] p-4 rounded-xl border border-[#2A2D35] mb-4">
         <Svg width={width} height={height}>
           <Defs>
             <LinearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">
@@ -132,73 +116,67 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   }
 
   return (
-    <View className="w-full bg-background-card p-4 rounded-xl border border-background-border mb-4">
-      <View className="flex-row items-center justify-between mb-3 gap-2">
-        <View className="flex-1">
-          <Text className="text-content-primary font-bold text-xs uppercase tracking-wider">Net Balance</Text>
-          <Text className={`text-sm font-bold ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-             {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)} ({( (netDelta / (startBalance || 1)) * 100).toFixed(1)}%)
+    <View className="w-full bg-[#0F1012] p-4 rounded-xl border border-[#212329] mb-4" onStartShouldSetResponder={() => true} onResponderRelease={() => setSelectedPoint(null)}>
+      <View className="flex-row items-center justify-between mb-6">
+        <View>
+          <Text className="text-[#A1A1AA] font-bold text-xs uppercase tracking-wider">Net Balance</Text>
+          <Text className={`text-xl font-bold ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+             {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)}
           </Text>
         </View>
-
-        <View className="flex-row bg-background-elevated p-0.5 rounded-md border border-background-border shrink-0">
+        <View className="flex-row bg-[#17181C] p-0.5 rounded-lg border border-[#2A2D35]">
           {(['7D', '30D', '90D', 'ALL'] as const).map((tf) => (
-            <TouchableOpacity
-              key={tf}
-              onPress={() => {
-                triggerHaptic.selection();
-                setTimeframe(tf);
-              }}
-              className={`px-2 py-1 rounded-md ${timeframe === tf ? 'bg-[#10B981]' : ''}`}
-            >
-              <Text className={`text-[10px] font-bold ${timeframe === tf ? 'text-white' : 'text-content-tertiary'}`}>
-                {tf}
-              </Text>
+            <TouchableOpacity key={tf} onPress={() => { triggerHaptic.selection(); setTimeframe(tf); }} className={`px-3 py-1.5 rounded-md ${timeframe === tf ? 'bg-[#2A2D35]' : ''}`}>
+              <Text className={`text-xs font-bold ${timeframe === tf ? 'text-white' : 'text-[#71717A]'}`}>{tf}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      <View className="my-2 flex-row">
-        <View className="flex-col justify-between py-1 mr-2" style={{ height: height - 10 }}>
-          {yLabels.map((l, i) => (
-            <Text key={i} className="text-content-tertiary text-[9px]">{l}</Text>
-          ))}
-        </View>
-        <View>
-          <Svg width={width} height={height}>
-            <Defs>
-              <LinearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
-                <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-              </LinearGradient>
-            </Defs>
-
-            {[0, 0.5, 1].map((pos, i) => (
-               <Line key={i} x1="0" y1={height * pos} x2={width} y2={height * pos} stroke="#2A2D35" strokeDasharray="3 3" />
-            ))}
-
-            <Path d={fillD} fill="url(#balanceGradient)" />
-            <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
-
-            {svgPoints.length > 0 && (
-              <Circle
-                cx={svgPoints[svgPoints.length - 1].x}
-                cy={svgPoints[svgPoints.length - 1].y}
-                r={4.5}
-                fill="#10B981"
-                stroke="#17181C"
-                strokeWidth={2}
-              />
-            )}
-          </Svg>
-
-          <View className="flex-row justify-between mt-2 px-1">
-            <Text className="text-content-tertiary text-[10px]">{points[0]?.label}</Text>
-            <Text className="text-content-tertiary text-[10px]">{points[Math.floor(points.length / 2)]?.label}</Text>
-            <Text className="text-content-tertiary text-[10px]">{points[points.length - 1]?.label}</Text>
+      <View className="relative">
+        {selectedPoint && (
+          <View style={{ position: 'absolute', left: selectedPoint.x - 50, top: selectedPoint.y - 60, zIndex: 10 }} className="bg-[#212329] p-2 rounded-lg border border-[#2A2D35] shadow-lg">
+            <Text className="text-[10px] text-[#A1A1AA]">{selectedPoint.date}</Text>
+            <Text className="text-sm font-bold text-white">{formatCurrency(selectedPoint.balance, currency)}</Text>
           </View>
-        </View>
+        )}
+
+        <Svg width={width} height={height}>
+          <Defs>
+            <LinearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
+              <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+            </LinearGradient>
+          </Defs>
+
+          {[0, 0.5, 1].map((pos, i) => (
+             <Line key={i} x1="0" y1={(height - 40) * pos + 20} x2={width} y2={(height - 40) * pos + 20} stroke="#17181C" strokeDasharray="4 4" />
+          ))}
+
+          <Path d={fillD} fill="url(#balanceGradient)" />
+          <Path d={pathD} stroke="#10B981" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
+          {svgPoints.map((p, i) => (
+            <Circle key={i} cx={p.x} cy={p.y} r={6} fill="transparent" onPress={() => handlePointPress(p)} />
+          ))}
+
+          {svgPoints.length > 0 && (
+            <Circle
+              cx={svgPoints[svgPoints.length - 1].x}
+              cy={svgPoints[svgPoints.length - 1].y}
+              r={5}
+              fill="#10B981"
+              stroke="#0F1012"
+              strokeWidth={3}
+            />
+          )}
+        </Svg>
+      </View>
+
+      <View className="flex-row justify-between mt-4 px-2">
+        <Text className="text-[#71717A] text-[10px]">{points[0]?.label}</Text>
+        <Text className="text-[#71717A] text-[10px]">{points[Math.floor(points.length / 2)]?.label}</Text>
+        <Text className="text-[#71717A] text-[10px]">{points[points.length - 1]?.label}</Text>
       </View>
     </View>
   );

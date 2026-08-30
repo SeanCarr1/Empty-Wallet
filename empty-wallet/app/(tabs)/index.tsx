@@ -63,12 +63,19 @@ export default function DashboardScreen() {
         <TransactionDetailModal
           visible={!!selectedTxForDetail}
           transaction={selectedTxForDetail}
-          category={selectedTxForDetail.categoryId ? categoryMap.get(selectedTxForDetail.categoryId) : undefined}
-          wallet={walletMap.get(selectedTxForDetail.walletId)}
+          category={selectedTxForDetail?.categoryId ? categoryMap.get(selectedTxForDetail.categoryId) : undefined}
+          wallet={selectedTxForDetail ? walletMap.get(selectedTxForDetail.walletId) : undefined}
+          destinationWallet={selectedTxForDetail?.destinationWalletId ? walletMap.get(selectedTxForDetail.destinationWalletId) : undefined}
           currency={currency}
           onClose={() => setSelectedTxForDetail(null)}
-          onEdit={(id) => { setSelectedTxForDetail(null); router.push({ pathname: '/modal/quick-add', params: { id } }); }}
-          onDelete={(id) => { deleteTransaction(id); setSelectedTxForDetail(null); }}
+          onEdit={(id) => {
+            setSelectedTxForDetail(null);
+            router.push({ pathname: '/modal/quick-add', params: { id } });
+          }}
+          onDelete={(id) => {
+            deleteTransaction(id);
+            setSelectedTxForDetail(null);
+          }}
         />
       )}
 
@@ -207,19 +214,15 @@ export default function DashboardScreen() {
             </View>
           ) : (
             recentTransactions.map((tx) => (
-              <TouchableOpacity
+              <TransactionItem
                 key={tx.id}
-                activeOpacity={0.7}
+                transaction={tx}
+                category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
+                wallet={walletMap.get(tx.walletId)}
+                currency={currency}
                 onPress={() => setSelectedTxForDetail(tx)}
-              >
-                <TransactionItem
-                  transaction={tx}
-                  category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
-                  wallet={walletMap.get(tx.walletId)}
-                  currency={currency}
-                  onDelete={deleteTransaction}
-                />
-              </TouchableOpacity>
+                onDelete={deleteTransaction}
+              />
             ))
           )}
         </View>
