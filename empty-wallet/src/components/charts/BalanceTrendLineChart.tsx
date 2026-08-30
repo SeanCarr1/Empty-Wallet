@@ -92,6 +92,7 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
   const startBalance = points[0]?.balance || currentTotalBalance;
   const netDelta = currentTotalBalance - startBalance;
   const isPositive = netDelta >= 0;
+  const deltaPercent = startBalance !== 0 ? (netDelta / startBalance) * 100 : 0;
 
   const handlePointPress = (point: typeof svgPoints[0]) => {
     triggerHaptic.selection();
@@ -100,17 +101,35 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
 
   if (isSparkline) {
     return (
-      <View className="bg-[#17181C] p-4 rounded-xl border border-[#2A2D35] mb-4">
-        <Svg width={width} height={height}>
-          <Defs>
-            <LinearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
-              <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-            </LinearGradient>
-          </Defs>
-          <Path d={fillD} fill="url(#sparkGradient)" />
-          <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
-        </Svg>
+      <View className="bg-[#17181C] p-4 rounded-xl border border-[#2A2D35] mb-4 w-full">
+        <View className="flex-row items-center justify-between mb-4">
+          <View>
+            <Text className="text-[#A1A1AA] font-bold text-[10px] uppercase tracking-wider">30-Day Balance Trajectory</Text>
+            <Text className={`text-[10px] font-bold ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+              {isPositive ? '+' : ''}{deltaPercent.toFixed(1)}%
+            </Text>
+          </View>
+          <Text className="text-[#E4E4E7] font-bold text-sm font-mono">{formatCurrency(currentTotalBalance, currency)}</Text>
+        </View>
+
+        <View className="relative h-[90px]">
+          <Svg width={width} height={90}>
+            <Defs>
+              <LinearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+                <Stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+              </LinearGradient>
+            </Defs>
+            <Path d={fillD} fill="url(#sparkGradient)" />
+            <Path d={pathD} stroke="#10B981" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+            <Circle cx={svgPoints[svgPoints.length - 1].x} cy={svgPoints[svgPoints.length - 1].y} r={4} fill="#10B981" />
+          </Svg>
+        </View>
+        
+        <View className="flex-row justify-between mt-2">
+            <Text className="text-[#71717A] text-[9px]">30 days ago</Text>
+            <Text className="text-[#71717A] text-[9px]">Today</Text>
+        </View>
       </View>
     );
   }
@@ -119,7 +138,7 @@ export const BalanceTrendLineChart: React.FC<BalanceTrendLineChartProps> = ({
     <View className="w-full bg-[#0F1012] p-4 rounded-xl border border-[#212329] mb-4" onStartShouldSetResponder={() => true} onResponderRelease={() => setSelectedPoint(null)}>
       <View className="flex-row items-center justify-between mb-6">
         <View>
-          <Text className="text-[#A1A1AA] font-bold text-xs uppercase tracking-wider">Net Balance</Text>
+          <Text className="text-[#A1A1AA] font-bold text-xs uppercase tracking-wider">Net Balance Progression</Text>
           <Text className={`text-xl font-bold ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
              {isPositive ? '+' : ''}{formatCurrency(netDelta, currency)}
           </Text>

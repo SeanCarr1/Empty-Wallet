@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
-import { ChevronLeft, ChevronRight, X, Calendar as CalendarIcon, Check } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, X, Calendar as CalendarIcon, Check, ChevronDown } from 'lucide-react-native';
 import {
   format,
   addMonths,
@@ -100,13 +100,16 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
           {viewMode === 'calendar' ? (
             <>
-              <TouchableOpacity onPress={() => setViewMode('select')} className="flex-row items-center justify-between mb-3 px-1">
-                <Text className="text-white font-bold text-base">{format(currentMonth, 'MMMM yyyy')}</Text>
-                <View className="flex-row items-center space-x-1">
+              <View className="flex-row items-center justify-between mb-4">
+                <TouchableOpacity onPress={() => setViewMode('select')} className="flex-row items-center bg-[#212329] border border-[#2A2D35] px-3 py-1.5 rounded-lg active:opacity-80">
+                  <Text className="text-white font-bold text-base mr-2">{format(currentMonth, 'MMMM yyyy')}</Text>
+                  <ChevronDown size={14} color="#10B981" />
+                </TouchableOpacity>
+                <View className="flex-row items-center">
                   <TouchableOpacity onPress={handlePrevMonth} className="w-8 h-8 rounded-lg bg-[#212329] items-center justify-center border border-[#2A2D35] mr-1.5"><ChevronLeft size={16} color="#F3F4F6" /></TouchableOpacity>
                   <TouchableOpacity onPress={handleNextMonth} className="w-8 h-8 rounded-lg bg-[#212329] items-center justify-center border border-[#2A2D35]"><ChevronRight size={16} color="#F3F4F6" /></TouchableOpacity>
                 </View>
-              </TouchableOpacity>
+              </View>
               <View className="flex-row justify-between mb-2">
                 {weekdays.map((day, idx) => <View key={idx} className="w-10 items-center justify-center"><Text className="text-[11px] font-bold text-[#9CA3AF] uppercase">{day}</Text></View>)}
               </View>

@@ -214,13 +214,13 @@ export default function QuickAddModal() {
       >
 
         {/* Type Switcher Pill Group */}
-        <View className="flex-row bg-[#17181C] p-1 rounded-xl border border-[#2A2D35] mb-4">
+        <View className="flex-row bg-background-card p-1.5 rounded-xl border border-background-border mb-4 gap-x-2.5">
           <TouchableOpacity
             onPress={() => {
               triggerHaptic.selection();
               setType('expense');
             }}
-            className={`flex-1 py-2 rounded-lg items-center ${type === 'expense' ? 'bg-[#EF4444] border border-[#EF4444]' : 'bg-[#212329]'}`}
+            className={`flex-1 py-2.5 rounded-lg items-center justify-center ${type === 'expense' ? 'bg-[#EF4444] border border-[#EF4444]' : ''}`}
           >
             <Text className={`text-xs font-bold ${type === 'expense' ? 'text-white' : 'text-gray-400'}`}>
               Expense
@@ -232,7 +232,7 @@ export default function QuickAddModal() {
               triggerHaptic.selection();
               setType('income');
             }}
-            className={`flex-1 py-2 rounded-lg items-center ${type === 'income' ? 'bg-[#10B981] border border-[#10B981]' : 'bg-[#212329]'}`}
+            className={`flex-1 py-2.5 rounded-lg items-center justify-center ${type === 'income' ? 'bg-[#10B981] border border-[#10B981]' : ''}`}
           >
             <Text className={`text-xs font-bold ${type === 'income' ? 'text-[#0F1012]' : 'text-gray-400'}`}>
               Income
@@ -244,7 +244,7 @@ export default function QuickAddModal() {
               triggerHaptic.selection();
               setType('transfer');
             }}
-            className={`flex-1 py-2 rounded-lg items-center ${type === 'transfer' ? 'bg-[#3B82F6] border border-[#3B82F6]' : 'bg-[#212329]'}`}
+            className={`flex-1 py-2.5 rounded-lg items-center justify-center ${type === 'transfer' ? 'bg-[#3B82F6] border border-[#3B82F6]' : ''}`}
           >
             <Text className={`text-xs font-bold ${type === 'transfer' ? 'text-white' : 'text-gray-400'}`}>
               Transfer

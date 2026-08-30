@@ -97,9 +97,9 @@ export const TransactionDetailModal: React.FC<Props> = ({
   );
 };
 
-const DetailRow = ({ icon: Icon, label, value }: { icon: any, label: string, value: string }) => (
+const DetailRow = ({ icon: IconComponent, label, value }: { icon: any, label: string, value: string }) => (
   <View style={styles.detailRow}>
-    <Icon color="#6B7280" size={18} />
+    <IconComponent size={18} color="#6B7280" />
     <Text style={styles.detailLabel}>{label}</Text>
     <Text style={styles.detailValue}>{value}</Text>
   </View>

@@ -20,4 +20,9 @@
      - **Task / Role**: Exact purpose and scope of work.
      - **Model Used**: (e.g. Gemini 3.7 Flash High `pro`, Gemini 3.7 Flash Medium `flash`, or Gemini 3.7 Flash Low `flash_lite`).
      - **Expected Runtime**: Estimated execution time.
-     - **Skills Used**: (e.g. `research`, `impeccable`, or default toolset).
+     - **Skills Used**: (e.g. `mobile-ui`, `impeccable`, `research`, or default toolset).
+
+5. **Comprehensive Systemic Scope Protocol**:
+   - **Whenever any feature, component, or UI block is mentioned**:
+     - The agent MUST determine whether the change applies only to that specific block or to all related blocks/features across the application.
+     - Systemic design changes (e.g. date/time pickers, transaction cards, button spacing, chart text, form inputs) must be audited and applied consistently across all screens.
