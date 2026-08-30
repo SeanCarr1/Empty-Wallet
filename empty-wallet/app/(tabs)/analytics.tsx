@@ -317,7 +317,7 @@ export default function AnalyticsScreen() {
         </ScrollView>
       </View>
 
-      <Modal visible={showCustomizeModal} transparent animationType="fade">
+      <Modal visible={showCustomizeModal} transparent animationType="fade" statusBarTranslucent>
         <View className="flex-1 bg-black/60 items-center justify-center p-4">
           <View className="bg-background w-full rounded-xl p-4 border border-background-border">
             <View className="flex-row items-center justify-between mb-4">

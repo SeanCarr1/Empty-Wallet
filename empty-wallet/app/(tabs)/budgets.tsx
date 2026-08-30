@@ -419,7 +419,7 @@ export default function BudgetsScreen() {
         </ScrollView>
 
         {/* MODAL: ADD BUDGET */}
-        <Modal visible={budgetModalVisible} animationType="slide" transparent>
+        <Modal visible={budgetModalVisible} animationType="slide" transparent statusBarTranslucent={true}>
           <View className="flex-1 bg-black/80 justify-end">
             <View className="bg-background-card rounded-t-2xl p-5 border-t border-background-border max-h-[85%]">
               <View className="flex-row items-center justify-between mb-1">
@@ -496,7 +496,7 @@ export default function BudgetsScreen() {
         </Modal>
 
         {/* MODAL: BUDGET CATEGORY SEARCH PICKER */}
-        <Modal visible={budgetCatPickerOpen} animationType="slide" transparent>
+        <Modal visible={budgetCatPickerOpen} animationType="slide" transparent statusBarTranslucent>
           <View className="flex-1 bg-black/85 justify-end">
             <View className="bg-background-card rounded-t-2xl max-h-[80%] p-5 border-t border-background-border">
               <View className="flex-row items-center justify-between mb-3">
@@ -573,7 +573,7 @@ export default function BudgetsScreen() {
         </Modal>
 
         {/* MODAL: ADD GOAL */}
-        <Modal visible={goalModalVisible} animationType="slide" transparent>
+        <Modal visible={goalModalVisible} animationType="slide" transparent statusBarTranslucent>
           <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border">
               <Text className="text-lg font-bold text-content-primary mb-1">New Savings Target</Text>

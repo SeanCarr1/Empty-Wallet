@@ -283,7 +283,7 @@ export default function RecordsScreen() {
         </ScrollView>
 
         {/* FILTER & SORT MODAL */}
-        <Modal visible={filterModalOpen} animationType="slide" transparent>
+        <Modal visible={filterModalOpen} animationType="slide" transparent statusBarTranslucent>
           <View className="flex-1 bg-black/75 justify-end">
             <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border max-h-[85%]">
               <View className="flex-row items-center justify-between mb-3.5">

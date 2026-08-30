@@ -17,7 +17,7 @@ export const DashboardWidgetModal: React.FC<Props> = ({ visible, onClose }) => {
   ];
 
   return (
-    <Modal visible={visible} animationType='slide' transparent>
+    <Modal visible={visible} animationType='slide' transparent statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>

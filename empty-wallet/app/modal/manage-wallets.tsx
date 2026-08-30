@@ -263,7 +263,7 @@ export default function ManageWalletsModal() {
       </ScrollView>
 
       {/* MODAL: ADD WALLET */}
-      <Modal visible={addModalVisible} animationType="slide" transparent>
+      <Modal visible={addModalVisible} animationType="slide" transparent statusBarTranslucent>
         <View className="flex-1 bg-black/75 justify-end">
           <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border">
             <Text className="text-base font-bold text-content-primary mb-1">Add New Wallet</Text>
