@@ -6,8 +6,10 @@
    - Always plan using **Gemini 3.7 Flash High** (Parent Coordinator).
    - Generates full chronological plans in `plans/` before execution.
 
-2. **Subagent Spawning & Tier Allocation**:
-   - **Small Individual Tasks** (Modular code edits, types, specific UI components, test runners, JSX fixes, script runs):
-     -> Use **Gemini 3.7 Flash Low** (`Model: 'flash_lite'`).
-   - **Bigger Tasks & Decisioning** (Complex component refactors, multi-file architectural transitions, domain evaluation, heuristic scoring):
+2. **Simple Tasks, Reading Files & Basic Execution**:
+   - **Reading files, inspection, search, modular code edits, type definitions, specific UI tweaks, tests, syntax fixes, and anything simple that does not require a powerful model**:
+     -> Delegate and run using **Gemini 3.7 Flash Low** (`Model: 'flash_lite'`).
+
+3. **Complex Tasks & Decisioning**:
+   - **Bigger tasks that require high-level decisioning, complex component refactors, multi-system architectural transitions, domain heuristics**:
      -> Use **Gemini 3.7 Flash Medium** (`Model: 'flash'`).
