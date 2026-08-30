@@ -13,8 +13,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F1012"
     },
-    "androidStatusBar": { "backgroundColor": "#0F1012", "barStyle": "light-content" },
-    "androidNavigationBar": { "backgroundColor": "#0F1012", "barStyle": "light-content" },
+    "androidStatusBar": {
+      "backgroundColor": "#0F1012",
+      "barStyle": "light-content"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#0F1012",
+      "barStyle": "light-content"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.emptywallet.app",
@@ -48,7 +54,8 @@
       ],
       "expo-secure-store",
       "expo-font",
-      "expo-sqlite"
+      "expo-sqlite",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

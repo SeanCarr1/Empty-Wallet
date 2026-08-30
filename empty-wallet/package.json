@@ -13,6 +13,7 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "8.4.4",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.39.3",
     "expo": "^54.0.0",
