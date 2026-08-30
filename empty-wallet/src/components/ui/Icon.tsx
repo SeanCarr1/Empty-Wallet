@@ -6,6 +6,15 @@ interface DynamicIconProps extends LucideProps {
   name: string;
 }
 
+const ICON_ALIASES: Record<string, string> = {
+  Home: 'House',
+  Train: 'TrainFront',
+  MoreHorizontal: 'Ellipsis',
+  PlusCircle: 'CirclePlus',
+  Edit: 'Pencil',
+  Edit3: 'Pencil',
+};
+
 export const Icon: React.FC<DynamicIconProps> = ({ name, ...props }) => {
   // Normalize string to PascalCase matching Lucide component names
   const formattedName = name
@@ -13,8 +22,14 @@ export const Icon: React.FC<DynamicIconProps> = ({ name, ...props }) => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('');
 
+  const resolvedName = ICON_ALIASES[formattedName] || ICON_ALIASES[name] || formattedName;
+
   const iconsMap = LucideIcons as unknown as Record<string, React.FC<LucideProps>>;
-  const IconComponent = iconsMap[formattedName] || iconsMap[name] || LucideIcons.CircleHelp;
+  const IconComponent =
+    iconsMap[resolvedName] ||
+    iconsMap[formattedName] ||
+    iconsMap[name] ||
+    LucideIcons.CircleHelp;
 
   return <IconComponent {...props} />;
 };

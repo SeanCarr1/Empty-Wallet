@@ -11,6 +11,7 @@ import { formatCurrency } from '../../src/services/currency';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
 import { Icon } from '../../src/components/ui/Icon';
 import { triggerHaptic } from '../../src/services/haptics';
+import { MACRO_CATEGORY_GROUPS } from '../../src/constants/categories';
 import { Search, SlidersHorizontal, X, Sparkles, Plus } from 'lucide-react-native';
 
 type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest';
@@ -139,6 +140,34 @@ export default function RecordsScreen() {
     setSelectedCategories((prev) =>
       prev.includes(catId) ? prev.filter((id) => id !== catId) : [...prev, catId]
     );
+  };
+
+  const groupedCategories = useMemo(() => {
+    const groups: { group: (typeof MACRO_CATEGORY_GROUPS)[number]; items: typeof categories }[] = [];
+    for (const macroGroup of MACRO_CATEGORY_GROUPS) {
+      if (selectedType !== 'all' && macroGroup.type !== 'both' && macroGroup.type !== selectedType) {
+        continue;
+      }
+      const items = categories.filter(
+        (c) =>
+          (c.group || (c.type === 'income' ? 'income' : 'others')) === macroGroup.id &&
+          (selectedType === 'all' || c.type === selectedType)
+      );
+      if (items.length > 0) {
+        groups.push({ group: macroGroup, items });
+      }
+    }
+    return groups;
+  }, [categories, selectedType]);
+
+  const toggleGroup = (groupCatIds: string[]) => {
+    triggerHaptic.selection();
+    const allSelected = groupCatIds.every((id) => selectedCategories.includes(id));
+    if (allSelected) {
+      setSelectedCategories((prev) => prev.filter((id) => !groupCatIds.includes(id)));
+    } else {
+      setSelectedCategories((prev) => Array.from(new Set([...prev, ...groupCatIds])));
+    }
   };
 
   return (
@@ -361,30 +390,93 @@ export default function RecordsScreen() {
                   })}
                 </View>
 
-                {/* 4. Category Filter Chips */}
-                <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider mb-2">Categories</Text>
-                <View className="flex-row flex-wrap mb-3.5">
-                  {categories.map((c) => {
-                    const isSelected = selectedCategories.includes(c.id);
+                {/* 4. Category Filter Chips Organized by Macro Groups */}
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-content-tertiary text-[10px] font-bold uppercase tracking-wider">
+                    Categories ({selectedCategories.length} selected)
+                  </Text>
+                  {selectedCategories.length > 0 && (
+                    <TouchableOpacity onPress={() => setSelectedCategories([])}>
+                      <Text className="text-primary text-[11px] font-semibold">Clear</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <View className="mb-3.5">
+                  {groupedCategories.map(({ group, items }) => {
+                    const groupCatIds = items.map((i) => i.id);
+                    const selectedInGroupCount = items.filter((i) =>
+                      selectedCategories.includes(i.id)
+                    ).length;
+                    const allGroupSelected =
+                      items.length > 0 && selectedInGroupCount === items.length;
+
                     return (
-                      <TouchableOpacity
-                        key={c.id}
-                        onPress={() => toggleCategory(c.id)}
-                        className={`flex-row items-center px-2.5 py-1.5 rounded-lg mr-2 mb-2 border ${
-                          isSelected
-                            ? 'bg-primary/20 border-primary'
-                            : 'bg-background-elevated border-background-border'
-                        }`}
-                      >
-                        <Icon name={c.icon} size={13} color={isSelected ? '#10B981' : c.color} />
-                        <Text
-                          className={`text-xs font-semibold ml-1.5 ${
-                            isSelected ? 'text-primary' : 'text-content-primary'
-                          }`}
+                      <View key={group.id} className="mb-3 bg-background-elevated/40 p-2.5 rounded-xl border border-background-border/60">
+                        {/* Group Header */}
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          onPress={() => toggleGroup(groupCatIds)}
+                          className="flex-row items-center justify-between mb-2 pb-1.5 border-b border-background-border/40"
                         >
-                          {c.name}
-                        </Text>
-                      </TouchableOpacity>
+                          <View className="flex-row items-center">
+                            <View
+                              className="w-5 h-5 rounded-md items-center justify-center mr-1.5"
+                              style={{ backgroundColor: `${group.color}20` }}
+                            >
+                              <Icon name={group.icon} size={12} color={group.color} />
+                            </View>
+                            <Text className="text-xs font-bold text-content-secondary">
+                              {group.name}
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center">
+                            <Text className="text-[10px] text-content-tertiary font-mono mr-1.5">
+                              {selectedInGroupCount > 0
+                                ? `${selectedInGroupCount}/${items.length}`
+                                : `${items.length}`}
+                            </Text>
+                            <Text
+                              className={`text-[10px] font-bold ${
+                                allGroupSelected ? 'text-primary' : 'text-content-tertiary'
+                              }`}
+                            >
+                              {allGroupSelected ? 'All' : 'Select'}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+
+                        {/* Category Chips */}
+                        <View className="flex-row flex-wrap">
+                          {items.map((c) => {
+                            const isSelected = selectedCategories.includes(c.id);
+                            return (
+                              <TouchableOpacity
+                                key={c.id}
+                                onPress={() => toggleCategory(c.id)}
+                                className={`flex-row items-center px-2.5 py-1.5 rounded-lg mr-1.5 mb-1.5 border ${
+                                  isSelected
+                                    ? 'bg-primary/20 border-primary'
+                                    : 'bg-background-elevated border-background-border'
+                                }`}
+                              >
+                                <Icon
+                                  name={c.icon}
+                                  size={12}
+                                  color={isSelected ? '#10B981' : c.color}
+                                />
+                                <Text
+                                  className={`text-xs font-semibold ml-1.5 ${
+                                    isSelected ? 'text-primary' : 'text-content-primary'
+                                  }`}
+                                >
+                                  {c.name}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      </View>
                     );
                   })}
                 </View>

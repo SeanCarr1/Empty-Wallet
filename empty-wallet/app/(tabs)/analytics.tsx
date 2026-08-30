@@ -13,6 +13,7 @@ import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendL
 import { triggerHaptic } from '../../src/services/haptics';
 import { Download, ArrowUpRight, ArrowDownRight, Award } from 'lucide-react-native';
 import { format, subMonths, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { Category } from '../../src/types';
 
 export default function AnalyticsScreen() {
   const { transactions } = useTransactionStore();
@@ -63,12 +64,13 @@ export default function AnalyticsScreen() {
 
     const items: CategorySpendItem[] = [];
     map.forEach((amount, catId) => {
-      const cat = categoryMap.get(catId) || {
+      const cat: Category = categoryMap.get(catId) || {
         id: catId,
         name: 'Other',
         icon: 'MoreHorizontal',
         color: '#948B7E',
         type: 'expense',
+        group: 'others',
       };
       const percentage = totalExpense > 0 ? (amount / totalExpense) * 100 : 0;
       items.push({ category: cat, amount, percentage });

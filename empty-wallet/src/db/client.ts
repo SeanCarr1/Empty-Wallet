@@ -34,6 +34,7 @@ export async function initializeDatabase(): Promise<void> {
         icon TEXT NOT NULL,
         color TEXT NOT NULL,
         type TEXT NOT NULL DEFAULT 'expense',
+        [group] TEXT NOT NULL DEFAULT 'others',
         is_default INTEGER NOT NULL DEFAULT 0
       );
 
@@ -94,31 +95,56 @@ export async function initializeDatabase(): Promise<void> {
 
     // Ensure columns exist on existing databases
     try {
-      const tableInfo = expoDb.getAllSync<{ name: string }>('PRAGMA table_info(transactions);');
-      const columnNames = new Set(tableInfo.map((col) => col.name));
-      if (!columnNames.has('payer')) {
+      const txInfo = expoDb.getAllSync<{ name: string }>('PRAGMA table_info(transactions);');
+      const txCols = new Set(txInfo.map((col) => col.name));
+      if (!txCols.has('payer')) {
         expoDb.execSync('ALTER TABLE transactions ADD COLUMN payer TEXT;');
       }
-      if (!columnNames.has('payment_type')) {
+      if (!txCols.has('payment_type')) {
         expoDb.execSync('ALTER TABLE transactions ADD COLUMN payment_type TEXT DEFAULT "cash";');
       }
-      if (!columnNames.has('transaction_time')) {
+      if (!txCols.has('transaction_time')) {
         expoDb.execSync('ALTER TABLE transactions ADD COLUMN transaction_time TEXT;');
+      }
+
+      const catInfo = expoDb.getAllSync<{ name: string }>('PRAGMA table_info(categories);');
+      const catCols = new Set(catInfo.map((col) => col.name));
+      if (!catCols.has('group')) {
+        expoDb.execSync('ALTER TABLE categories ADD COLUMN "group" TEXT DEFAULT "others";');
       }
     } catch (alterErr) {
       console.warn('Column check warning:', alterErr);
     }
 
-    // 2. Check if Categories exist, otherwise seed default categories
+    // 2. Check if Categories exist, otherwise seed default categories (or backfill missing defaults)
     const existingCats = expoDb.getAllSync<{ count: number }>('SELECT count(*) as count FROM categories;');
     if (existingCats[0]?.count === 0) {
       const stmt = expoDb.prepareSync(
-        'INSERT INTO categories (id, name, icon, color, type, is_default) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO categories (id, name, icon, color, type, [group], is_default) VALUES (?, ?, ?, ?, ?, ?, ?)'
       );
       for (const cat of DEFAULT_CATEGORIES) {
-        stmt.executeSync([cat.id, cat.name, cat.icon, cat.color, cat.type, cat.isDefault ? 1 : 0]);
+        stmt.executeSync([cat.id, cat.name, cat.icon, cat.color, cat.type, cat.group || 'others', cat.isDefault ? 1 : 0]);
       }
       stmt.finalizeSync();
+    } else {
+      // Backfill group on existing default categories
+      const updateStmt = expoDb.prepareSync('UPDATE categories SET [group] = ?, name = ?, icon = ?, color = ? WHERE id = ?;');
+      for (const cat of DEFAULT_CATEGORIES) {
+        updateStmt.executeSync([cat.group || 'others', cat.name, cat.icon, cat.color, cat.id]);
+      }
+      updateStmt.finalizeSync();
+
+      // Insert any new default categories that don't exist yet
+      const currentIds = new Set(expoDb.getAllSync<{ id: string }>('SELECT id FROM categories;').map((r) => r.id));
+      const insertStmt = expoDb.prepareSync(
+        'INSERT INTO categories (id, name, icon, color, type, [group], is_default) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      );
+      for (const cat of DEFAULT_CATEGORIES) {
+        if (!currentIds.has(cat.id)) {
+          insertStmt.executeSync([cat.id, cat.name, cat.icon, cat.color, cat.type, cat.group || 'others', cat.isDefault ? 1 : 0]);
+        }
+      }
+      insertStmt.finalizeSync();
     }
 
     // 3. Check if Wallets exist, otherwise seed default wallets (Cash & Primary Bank)
@@ -253,7 +279,7 @@ export async function initializeDatabase(): Promise<void> {
       ]);
       budgetStmt.executeSync([
         'b_transport',
-        'cat_transport',
+        'cat_public_transit',
         4000,
         'monthly',
         `${todayStr.slice(0, 7)}-01`,

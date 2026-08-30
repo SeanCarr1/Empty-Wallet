@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Category } from '../types';
+import { Category, CategoryGroup } from '../types';
 import * as SQLite from 'expo-sqlite';
 import { DATABASE_NAME } from '../db/client';
 import { DEFAULT_CATEGORIES } from '../constants/categories';
@@ -11,6 +11,7 @@ interface CategoryState {
   addCategory: (cat: Omit<Category, 'id' | 'isDefault'>) => void;
   getExpenseCategories: () => Category[];
   getIncomeCategories: () => Category[];
+  getCategoriesByGroup: (group: CategoryGroup) => Category[];
 }
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
@@ -28,6 +29,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
           icon: r.icon,
           color: r.color,
           type: r.type,
+          group: r.group || (r.type === 'income' ? 'income' : 'others'),
           isDefault: Boolean(r.is_default),
         }));
         set({ categories: mapped });
@@ -41,10 +43,11 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     try {
       const db = SQLite.openDatabaseSync(DATABASE_NAME);
       const id = `cat_custom_${Date.now()}`;
+      const group = cat.group || (cat.type === 'income' ? 'income' : 'others');
       const stmt = db.prepareSync(
-        'INSERT INTO categories (id, name, icon, color, type, is_default) VALUES (?, ?, ?, ?, ?, ?);'
+        'INSERT INTO categories (id, name, icon, color, type, [group], is_default) VALUES (?, ?, ?, ?, ?, ?, ?);'
       );
-      stmt.executeSync([id, cat.name, cat.icon, cat.color, cat.type, 0]);
+      stmt.executeSync([id, cat.name, cat.icon, cat.color, cat.type, group, 0]);
       stmt.finalizeSync();
       get().fetchCategories();
     } catch (err) {
@@ -58,5 +61,9 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
 
   getIncomeCategories: () => {
     return get().categories.filter((c) => c.type === 'income');
+  },
+
+  getCategoriesByGroup: (group: CategoryGroup) => {
+    return get().categories.filter((c) => c.group === group);
   },
 }));

@@ -11,7 +11,8 @@ import { formatCurrency } from '../../src/services/currency';
 import { HapticKeypad } from '../../src/components/keypad/HapticKeypad';
 import { Icon } from '../../src/components/ui/Icon';
 import { triggerHaptic } from '../../src/services/haptics';
-import { X, Calendar, Clock, Edit3, ChevronDown, Check, User, CreditCard } from 'lucide-react-native';
+import { MACRO_CATEGORY_GROUPS } from '../../src/constants/categories';
+import { X, Calendar, Clock, Edit3, ChevronDown, Check, User, CreditCard, Search } from 'lucide-react-native';
 import { format } from 'date-fns';
 
 export default function QuickAddModal() {
@@ -37,6 +38,7 @@ export default function QuickAddModal() {
   // 4. Category Selector
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('cat_food_dining');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [categorySearchQuery, setCategorySearchQuery] = useState('');
 
   // 5. Date & Time State
   const now = new Date();
@@ -51,7 +53,38 @@ export default function QuickAddModal() {
   const [paymentType, setPaymentType] = useState<PaymentType>('cash');
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
 
-  const activeCategories = type === 'expense' ? getExpenseCategories() : getIncomeCategories();
+  const activeCategories = useMemo(() => {
+    return type === 'expense' ? getExpenseCategories() : getIncomeCategories();
+  }, [type, categories, getExpenseCategories, getIncomeCategories]);
+
+  // Grouped active categories filtered by current active type and search query
+  const groupedCategories = useMemo(() => {
+    const query = categorySearchQuery.trim().toLowerCase();
+    const filtered = activeCategories.filter((c) => {
+      if (!query) return true;
+      const matchName = c.name.toLowerCase().includes(query);
+      const groupObj = MACRO_CATEGORY_GROUPS.find((g) => g.id === c.group);
+      const matchGroup = groupObj ? groupObj.name.toLowerCase().includes(query) : false;
+      return matchName || matchGroup;
+    });
+
+    const groups: { group: (typeof MACRO_CATEGORY_GROUPS)[number]; items: typeof categories }[] = [];
+
+    for (const macroGroup of MACRO_CATEGORY_GROUPS) {
+      if (macroGroup.type !== 'both' && macroGroup.type !== type) {
+        continue;
+      }
+      const items = filtered.filter(
+        (c) => (c.group || (c.type === 'income' ? 'income' : 'others')) === macroGroup.id
+      );
+      if (items.length > 0) {
+        groups.push({ group: macroGroup, items });
+      }
+    }
+
+    return groups;
+  }, [activeCategories, categorySearchQuery, type]);
+
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
   const selectedWallet = wallets.find((w) => w.id === selectedWalletId);
   const destWallet = wallets.find((w) => w.id === destinationWalletId);
@@ -148,6 +181,17 @@ export default function QuickAddModal() {
                 onPress={() => {
                   triggerHaptic.selection();
                   setType(t);
+                  if (t === 'expense') {
+                    const expenseCats = getExpenseCategories();
+                    if (!expenseCats.some((c) => c.id === selectedCategoryId)) {
+                      setSelectedCategoryId(expenseCats[0]?.id || 'cat_food_dining');
+                    }
+                  } else if (t === 'income') {
+                    const incomeCats = getIncomeCategories();
+                    if (!incomeCats.some((c) => c.id === selectedCategoryId)) {
+                      setSelectedCategoryId(incomeCats[0]?.id || 'cat_salary');
+                    }
+                  }
                 }}
                 className={`px-3 py-1 rounded-md ${isSelected ? bgClass : ''}`}
               >
@@ -445,46 +489,127 @@ export default function QuickAddModal() {
 
       {/* CATEGORY PICKER MODAL */}
       <Modal visible={categoryModalOpen} animationType="slide" transparent>
-        <View className="flex-1 bg-black/75 justify-end">
-          <View className="bg-background-card rounded-t-xl p-5 border-t border-background-border max-h-[75%]">
-            <View className="flex-row items-center justify-between mb-3.5">
-              <Text className="text-base font-bold text-content-primary">Choose Category</Text>
-              <TouchableOpacity onPress={() => setCategoryModalOpen(false)}>
+        <View className="flex-1 bg-black/80 justify-end">
+          <View className="bg-background-card rounded-t-2xl p-5 border-t border-background-border max-h-[85%]">
+            {/* Modal Header */}
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center">
+                <Text className="text-base font-bold text-content-primary">Choose Category</Text>
+                <View className="bg-background-elevated px-2 py-0.5 rounded-md border border-background-border ml-2.5">
+                  <Text className="text-[10px] font-semibold text-content-secondary uppercase tracking-wider">
+                    {type === 'expense' ? 'Expense' : 'Income'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setCategoryModalOpen(false);
+                  setCategorySearchQuery('');
+                }}
+                className="p-1 rounded-lg"
+              >
                 <X size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <View className="flex-row flex-wrap">
-                {activeCategories.map((c) => {
-                  const isSelected = selectedCategoryId === c.id;
-                  return (
-                    <TouchableOpacity
-                      key={c.id}
-                      onPress={() => {
-                        triggerHaptic.selection();
-                        setSelectedCategoryId(c.id);
-                        setCategoryModalOpen(false);
-                      }}
-                      className={`flex-row items-center w-[48%] p-2.5 rounded-lg mr-2 mb-2 border ${
-                        isSelected
-                          ? 'bg-primary/20 border-primary'
-                          : 'bg-background-elevated border-background-border'
-                      }`}
-                    >
-                      <Icon name={c.icon} size={16} color={isSelected ? '#10B981' : c.color} />
-                      <Text
-                        className={`text-xs font-semibold ml-2 ${
-                          isSelected ? 'text-primary' : 'text-content-primary'
-                        }`}
-                        numberOfLines={1}
-                      >
-                        {c.name}
+            {/* Real-Time Search Bar */}
+            <View className="flex-row items-center bg-background-elevated border border-background-border rounded-lg px-3 py-2 mb-3">
+              <Search size={15} color="#6B7280" />
+              <TextInput
+                value={categorySearchQuery}
+                onChangeText={setCategorySearchQuery}
+                placeholder="Search categories or groups..."
+                placeholderTextColor="#6B7280"
+                className="flex-1 ml-2 text-content-primary text-xs font-medium"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {categorySearchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setCategorySearchQuery('')}>
+                  <X size={14} color="#6B7280" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Sectioned Visual Grid */}
+            <ScrollView showsVerticalScrollIndicator={false} className="mb-2">
+              {groupedCategories.length === 0 ? (
+                <View className="py-8 items-center justify-center">
+                  <Text className="text-content-tertiary text-xs">
+                    No categories found for "{categorySearchQuery}"
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setCategorySearchQuery('')}
+                    className="mt-2.5 bg-background-elevated px-3 py-1.5 rounded-lg border border-background-border"
+                  >
+                    <Text className="text-primary text-xs font-semibold">Clear Search</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                groupedCategories.map(({ group, items }) => (
+                  <View key={group.id} className="mb-4">
+                    {/* Sticky / Clear Group Header */}
+                    <View className="flex-row items-center justify-between mb-2 px-1">
+                      <View className="flex-row items-center">
+                        <View
+                          className="w-5 h-5 rounded-md items-center justify-center mr-1.5"
+                          style={{ backgroundColor: `${group.color}20` }}
+                        >
+                          <Icon name={group.icon} size={12} color={group.color} />
+                        </View>
+                        <Text className="text-[11px] font-bold text-content-secondary uppercase tracking-wider">
+                          {group.name}
+                        </Text>
+                      </View>
+                      <Text className="text-[10px] text-content-tertiary font-mono">
+                        {items.length} {items.length === 1 ? 'item' : 'items'}
                       </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                    </View>
+
+                    {/* Category Items in Sleek Grid Tiles */}
+                    <View className="flex-row flex-wrap justify-between">
+                      {items.map((c) => {
+                        const isSelected = selectedCategoryId === c.id;
+                        return (
+                          <TouchableOpacity
+                            key={c.id}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              triggerHaptic.selection();
+                              setSelectedCategoryId(c.id);
+                              setCategoryModalOpen(false);
+                              setCategorySearchQuery('');
+                            }}
+                            className={`w-[48.5%] flex-row items-center p-2.5 rounded-lg mb-2 border ${
+                              isSelected
+                                ? 'bg-primary/20 border-primary shadow-sm'
+                                : 'bg-background-elevated border-background-border'
+                            }`}
+                          >
+                            <View
+                              className="w-7 h-7 rounded-md items-center justify-center mr-2"
+                              style={{
+                                backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.25)' : `${c.color}20`,
+                              }}
+                            >
+                              <Icon name={c.icon} size={14} color={isSelected ? '#10B981' : c.color} />
+                            </View>
+                            <Text
+                              className={`text-xs font-semibold flex-1 mr-1 ${
+                                isSelected ? 'text-primary' : 'text-content-primary'
+                              }`}
+                              numberOfLines={1}
+                            >
+                              {c.name}
+                            </Text>
+                            {isSelected && <Check size={13} color="#10B981" />}
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))
+              )}
             </ScrollView>
           </View>
         </View>

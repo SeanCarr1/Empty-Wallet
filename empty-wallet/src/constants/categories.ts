@@ -1,143 +1,458 @@
-import { Category } from '../types';
+import { Category, CategoryGroup } from '../types';
+
+export interface CategoryGroupMeta {
+  id: CategoryGroup;
+  label: string;
+  name: string;
+  icon: string;
+  color: string;
+  type?: 'expense' | 'income' | 'both';
+}
+
+export const CATEGORY_GROUPS: CategoryGroupMeta[] = [
+  {
+    id: 'food_drinks',
+    label: 'Food & Drinks',
+    name: 'Food & Drinks',
+    icon: 'UtensilsCrossed',
+    color: '#F59E0B',
+    type: 'expense',
+  },
+  {
+    id: 'shopping',
+    label: 'Shopping',
+    name: 'Shopping',
+    icon: 'ShoppingBag',
+    color: '#3B82F6',
+    type: 'expense',
+  },
+  {
+    id: 'housing',
+    label: 'Housing',
+    name: 'Housing',
+    icon: 'Home',
+    color: '#6366F1',
+    type: 'expense',
+  },
+  {
+    id: 'transportation',
+    label: 'Transportation',
+    name: 'Transportation',
+    icon: 'Bus',
+    color: '#06B6D4',
+    type: 'expense',
+  },
+  {
+    id: 'vehicle',
+    label: 'Vehicle',
+    name: 'Vehicle',
+    icon: 'Car',
+    color: '#EF4444',
+    type: 'expense',
+  },
+  {
+    id: 'life_entertainment',
+    label: 'Life & Entertainment',
+    name: 'Life & Entertainment',
+    icon: 'Gamepad2',
+    color: '#EC4899',
+    type: 'expense',
+  },
+  {
+    id: 'financial_expenses',
+    label: 'Financial Expenses',
+    name: 'Financial Expenses',
+    icon: 'Receipt',
+    color: '#64748B',
+    type: 'expense',
+  },
+  {
+    id: 'income',
+    label: 'Income',
+    name: 'Income',
+    icon: 'TrendingUp',
+    color: '#10B981',
+    type: 'income',
+  },
+  {
+    id: 'others',
+    label: 'Others',
+    name: 'Others',
+    icon: 'MoreHorizontal',
+    color: '#94A3B8',
+    type: 'both',
+  },
+];
+
+export const MACRO_CATEGORY_GROUPS = CATEGORY_GROUPS;
 
 export const DEFAULT_CATEGORIES: Category[] = [
-  // Expense Categories
+  // 1. Food & Drinks (food_drinks)
   {
     id: 'cat_food_dining',
-    name: 'Food & Dining',
-    icon: 'Utensils',
-    color: '#F43F5E', // Rose
+    name: 'Dining Out',
+    icon: 'UtensilsCrossed',
+    color: '#F59E0B',
     type: 'expense',
+    group: 'food_drinks',
     isDefault: true,
   },
   {
     id: 'cat_groceries',
     name: 'Groceries',
-    icon: 'ShoppingCart',
-    color: '#10B981', // Emerald
+    icon: 'ShoppingBag',
+    color: '#10B981',
     type: 'expense',
+    group: 'food_drinks',
     isDefault: true,
   },
   {
-    id: 'cat_transport',
-    name: 'Transportation',
-    icon: 'Car',
-    color: '#3B82F6', // Blue
+    id: 'cat_coffee',
+    name: 'Coffee & Tea',
+    icon: 'Coffee',
+    color: '#8B5CF6',
     type: 'expense',
+    group: 'food_drinks',
     isDefault: true,
   },
   {
-    id: 'cat_bills_utilities',
-    name: 'Bills & Utilities',
-    icon: 'Zap',
-    color: '#F59E0B', // Amber
+    id: 'cat_drinks',
+    name: 'Drinks & Bars',
+    icon: 'Wine',
+    color: '#EC4899',
     type: 'expense',
+    group: 'food_drinks',
     isDefault: true,
   },
+  {
+    id: 'cat_food_delivery',
+    name: 'Food Delivery',
+    icon: 'Package',
+    color: '#F97316',
+    type: 'expense',
+    group: 'food_drinks',
+    isDefault: true,
+  },
+
+  // 2. Shopping (shopping)
+  {
+    id: 'cat_clothing',
+    name: 'Clothing & Apparel',
+    icon: 'Shirt',
+    color: '#3B82F6',
+    type: 'expense',
+    group: 'shopping',
+    isDefault: true,
+  },
+  {
+    id: 'cat_electronics',
+    name: 'Electronics & Tech',
+    icon: 'Smartphone',
+    color: '#06B6D4',
+    type: 'expense',
+    group: 'shopping',
+    isDefault: true,
+  },
+  {
+    id: 'cat_beauty',
+    name: 'Personal Care & Beauty',
+    icon: 'Sparkles',
+    color: '#EC4899',
+    type: 'expense',
+    group: 'shopping',
+    isDefault: true,
+  },
+  {
+    id: 'cat_home_furniture',
+    name: 'Home & Furniture',
+    icon: 'Armchair',
+    color: '#10B981',
+    type: 'expense',
+    group: 'shopping',
+    isDefault: true,
+  },
+
+  // 3. Housing (housing)
   {
     id: 'cat_housing_rent',
-    name: 'Housing & Rent',
+    name: 'Rent & Mortgage',
     icon: 'Home',
-    color: '#8B5CF6', // Purple
+    color: '#6366F1',
     type: 'expense',
+    group: 'housing',
     isDefault: true,
   },
+  {
+    id: 'cat_electricity',
+    name: 'Electricity & Power',
+    icon: 'Zap',
+    color: '#F59E0B',
+    type: 'expense',
+    group: 'housing',
+    isDefault: true,
+  },
+  {
+    id: 'cat_water',
+    name: 'Water Utility',
+    icon: 'Droplets',
+    color: '#0EA5E9',
+    type: 'expense',
+    group: 'housing',
+    isDefault: true,
+  },
+  {
+    id: 'cat_internet',
+    name: 'Internet & Mobile',
+    icon: 'Wifi',
+    color: '#8B5CF6',
+    type: 'expense',
+    group: 'housing',
+    isDefault: true,
+  },
+  {
+    id: 'cat_home_repairs',
+    name: 'Home Repairs',
+    icon: 'Wrench',
+    color: '#64748B',
+    type: 'expense',
+    group: 'housing',
+    isDefault: true,
+  },
+
+  // 4. Transportation (transportation)
+  {
+    id: 'cat_public_transit',
+    name: 'Public Transit',
+    icon: 'Bus',
+    color: '#3B82F6',
+    type: 'expense',
+    group: 'transportation',
+    isDefault: true,
+  },
+  {
+    id: 'cat_train',
+    name: 'Commute / Train',
+    icon: 'Train',
+    color: '#06B6D4',
+    type: 'expense',
+    group: 'transportation',
+    isDefault: true,
+  },
+  {
+    id: 'cat_taxi',
+    name: 'Taxi / Ride Hailing',
+    icon: 'Car',
+    color: '#F59E0B',
+    type: 'expense',
+    group: 'transportation',
+    isDefault: true,
+  },
+
+  // 5. Vehicle (vehicle)
+  {
+    id: 'cat_fuel',
+    name: 'Fuel & Gas',
+    icon: 'Fuel',
+    color: '#EF4444',
+    type: 'expense',
+    group: 'vehicle',
+    isDefault: true,
+  },
+  {
+    id: 'cat_parking',
+    name: 'Parking & Tolls',
+    icon: 'CircleParking',
+    color: '#64748B',
+    type: 'expense',
+    group: 'vehicle',
+    isDefault: true,
+  },
+  {
+    id: 'cat_car_insurance',
+    name: 'Car Insurance',
+    icon: 'ShieldCheck',
+    color: '#3B82F6',
+    type: 'expense',
+    group: 'vehicle',
+    isDefault: true,
+  },
+  {
+    id: 'cat_car_maintenance',
+    name: 'Maintenance & Service',
+    icon: 'Wrench',
+    color: '#F97316',
+    type: 'expense',
+    group: 'vehicle',
+    isDefault: true,
+  },
+
+  // 6. Life & Entertainment (life_entertainment)
   {
     id: 'cat_entertainment',
-    name: 'Entertainment',
-    icon: 'Film',
-    color: '#EC4899', // Pink
+    name: 'Movies & Streaming',
+    icon: 'Tv',
+    color: '#8B5CF6',
     type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
   {
-    id: 'cat_shopping',
-    name: 'Shopping',
-    icon: 'ShoppingBag',
-    color: '#06B6D4', // Cyan
+    id: 'cat_gaming',
+    name: 'Gaming',
+    icon: 'Gamepad2',
+    color: '#6366F1',
     type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
   {
-    id: 'cat_health',
-    name: 'Health & Wellness',
-    icon: 'HeartPulse',
-    color: '#14B8A6', // Teal
+    id: 'cat_gym',
+    name: 'Gym & Fitness',
+    icon: 'Dumbbell',
+    color: '#10B981',
     type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
   {
-    id: 'cat_subscriptions',
-    name: 'Subscriptions',
-    icon: 'CreditCard',
-    color: '#6366F1', // Indigo
+    id: 'cat_hobbies',
+    name: 'Hobbies & Leisure',
+    icon: 'Palette',
+    color: '#EC4899',
     type: 'expense',
-    isDefault: true,
-  },
-  {
-    id: 'cat_education',
-    name: 'Education & Books',
-    icon: 'GraduationCap',
-    color: '#F97316', // Orange
-    type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
   {
     id: 'cat_travel',
     name: 'Travel & Vacation',
     icon: 'Plane',
-    color: '#0EA5E9', // Sky
+    color: '#0EA5E9',
     type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
   {
-    id: 'cat_other_expense',
-    name: 'Miscellaneous',
-    icon: 'MoreHorizontal',
-    color: '#64748B', // Slate
+    id: 'cat_health',
+    name: 'Medical & Pharmacy',
+    icon: 'HeartPulse',
+    color: '#EF4444',
     type: 'expense',
+    group: 'life_entertainment',
     isDefault: true,
   },
 
-  // Income Categories
+  // 7. Financial Expenses (financial_expenses)
+  {
+    id: 'cat_bank_fees',
+    name: 'Bank Fees & Charges',
+    icon: 'Receipt',
+    color: '#64748B',
+    type: 'expense',
+    group: 'financial_expenses',
+    isDefault: true,
+  },
+  {
+    id: 'cat_taxes',
+    name: 'Taxes & Government',
+    icon: 'Landmark',
+    color: '#EF4444',
+    type: 'expense',
+    group: 'financial_expenses',
+    isDefault: true,
+  },
+  {
+    id: 'cat_loan',
+    name: 'Loan Repayment',
+    icon: 'CreditCard',
+    color: '#F59E0B',
+    type: 'expense',
+    group: 'financial_expenses',
+    isDefault: true,
+  },
+  {
+    id: 'cat_interest',
+    name: 'Interest & Charges',
+    icon: 'TrendingDown',
+    color: '#F43F5E',
+    type: 'expense',
+    group: 'financial_expenses',
+    isDefault: true,
+  },
+
+  // 8. Income (income)
   {
     id: 'cat_salary',
     name: 'Salary & Wages',
-    icon: 'Briefcase',
-    color: '#10B981', // Emerald
+    icon: 'Landmark',
+    color: '#10B981',
     type: 'income',
+    group: 'income',
     isDefault: true,
   },
   {
     id: 'cat_freelance',
-    name: 'Freelance & Side Gig',
+    name: 'Freelance & Side Hustle',
     icon: 'Laptop',
-    color: '#06B6D4', // Cyan
+    color: '#3B82F6',
     type: 'income',
+    group: 'income',
+    isDefault: true,
+  },
+  {
+    id: 'cat_business',
+    name: 'Business Revenue',
+    icon: 'Building2',
+    color: '#8B5CF6',
+    type: 'income',
+    group: 'income',
     isDefault: true,
   },
   {
     id: 'cat_investments',
-    name: 'Investments & Dividends',
+    name: 'Investment Dividends',
     icon: 'TrendingUp',
-    color: '#8B5CF6', // Purple
+    color: '#10B981',
     type: 'income',
+    group: 'income',
     isDefault: true,
   },
   {
     id: 'cat_gifts',
-    name: 'Gifts & Allowance',
+    name: 'Gifts & Grants',
     icon: 'Gift',
-    color: '#EC4899', // Pink
+    color: '#EC4899',
     type: 'income',
+    group: 'income',
     isDefault: true,
   },
   {
     id: 'cat_other_income',
     name: 'Other Income',
-    icon: 'PlusCircle',
-    color: '#3B82F6', // Blue
+    icon: 'Wallet',
+    color: '#06B6D4',
     type: 'income',
+    group: 'income',
+    isDefault: true,
+  },
+
+  // 9. Others (others)
+  {
+    id: 'cat_other_expense',
+    name: 'General / Miscellaneous',
+    icon: 'MoreHorizontal',
+    color: '#64748B',
+    type: 'expense',
+    group: 'others',
+    isDefault: true,
+  },
+  {
+    id: 'cat_donations',
+    name: 'Donations & Charity',
+    icon: 'Heart',
+    color: '#F43F5E',
+    type: 'expense',
+    group: 'others',
     isDefault: true,
   },
 ];

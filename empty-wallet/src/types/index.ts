@@ -20,12 +20,24 @@ export interface Wallet {
   createdAt: string;
 }
 
+export type CategoryGroup =
+  | 'food_drinks'
+  | 'shopping'
+  | 'housing'
+  | 'transportation'
+  | 'vehicle'
+  | 'life_entertainment'
+  | 'financial_expenses'
+  | 'income'
+  | 'others';
+
 export interface Category {
   id: string;
   name: string;
   icon: string;
   color: string;
   type: 'expense' | 'income';
+  group: CategoryGroup;
   isDefault?: boolean;
 }
 

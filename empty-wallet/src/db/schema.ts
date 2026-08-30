@@ -1,4 +1,5 @@
 import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+import { CategoryGroup } from '../types';
 
 export const wallets = sqliteTable('wallets', {
   id: text('id').primaryKey(),
@@ -18,6 +19,7 @@ export const categories = sqliteTable('categories', {
   icon: text('icon').notNull(),
   color: text('color').notNull(),
   type: text('type').$type<'expense' | 'income'>().notNull().default('expense'),
+  group: text('group').$type<CategoryGroup>().notNull().default('others'),
   isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
 });
 
