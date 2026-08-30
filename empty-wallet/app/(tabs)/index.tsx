@@ -12,6 +12,7 @@ import { formatCurrency } from '../../src/services/currency';
 import { WalletGrid } from '../../src/components/wallets/WalletGrid';
 import { SafeToSpendGauge } from '../../src/components/velocity/SafeToSpendGauge';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
+import { TransactionDetailModal } from '../../src/components/transactions/TransactionDetailModal';
 import { BalanceTrendLineChart } from '../../src/components/charts/BalanceTrendLineChart';
 import { DashboardWidgetModal } from '../../src/components/ui/DashboardWidgetModal';
 import { Plus, ArrowRightLeft, Sparkles } from 'lucide-react-native';
@@ -21,6 +22,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = React.useState(false);
   const [customizeModalVisible, setCustomizeModalVisible] = React.useState(false);
+  const [selectedTxForDetail, setSelectedTxForDetail] = React.useState<any | null>(null);
 
   const { wallets, fetchWallets, getTotalBalance } = useWalletStore();
   const { transactions, fetchTransactions, deleteTransaction } = useTransactionStore();
@@ -56,6 +58,20 @@ export default function DashboardScreen() {
         visible={customizeModalVisible}
         onClose={() => setCustomizeModalVisible(false)}
       />
+      
+      {selectedTxForDetail && (
+        <TransactionDetailModal
+          visible={!!selectedTxForDetail}
+          transaction={selectedTxForDetail}
+          category={selectedTxForDetail.categoryId ? categoryMap.get(selectedTxForDetail.categoryId) : undefined}
+          wallet={walletMap.get(selectedTxForDetail.walletId)}
+          currency={currency}
+          onClose={() => setSelectedTxForDetail(null)}
+          onEdit={(id) => { setSelectedTxForDetail(null); router.push({ pathname: '/modal/quick-add', params: { id } }); }}
+          onDelete={(id) => { deleteTransaction(id); setSelectedTxForDetail(null); }}
+        />
+      )}
+
       <ScrollView
         className="flex-1 px-4 pt-2"
         showsVerticalScrollIndicator={false}
@@ -64,7 +80,7 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
         }
       >
-        {/* Top Header with App Logo, Net Balance & Quick Actions */}
+        {/* Top Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-1 mr-3 flex-row items-center">
             <Image
@@ -109,11 +125,11 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Wallets Horizontal Strip */}
+        {/* Wallets & Accounts Section */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
-              Wallets & Accounts
+              WALLETS & ACCOUNTS
             </Text>
             <TouchableOpacity
               onPress={() => {
@@ -128,43 +144,42 @@ export default function DashboardScreen() {
           <WalletGrid />
         </View>
 
-        {/* Safe-to-Spend Velocity Gauge */}
-        {dashboardWidgets.safeToSpendGauge && (
-          <View className="mb-4">
-            <SafeToSpendGauge metrics={safeToSpendMetrics} currency={currency} />
+        {/* Graphs & Charts Section */}
+        <View className="mb-4">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
+              GRAPHS & CHARTS
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                triggerHaptic.selection();
+                setCustomizeModalVisible(true);
+              }}
+            >
+              <Text className="text-primary text-xs font-semibold">Manage</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        {/* Balance Trend Sparkline Graph */}
-        {dashboardWidgets.sparklineTrend && (
-          <View className="mb-2">
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
-                Graphs & Charts
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  triggerHaptic.selection();
-                  setCustomizeModalVisible(true);
-                }}
-              >
-                <Text className="text-primary text-xs font-semibold">Manage</Text>
-              </TouchableOpacity>
-            </View>
-            <BalanceTrendLineChart
-              transactions={transactions}
-              currentTotalBalance={totalBalance}
-              currency={currency}
-              isSparkline={true}
-            />
-          </View>
-        )}
+          
+          {dashboardWidgets.safeToSpendGauge && (
+             <View className="mb-4">
+               <SafeToSpendGauge metrics={safeToSpendMetrics} currency={currency} />
+             </View>
+          )}
+          {dashboardWidgets.sparklineTrend && (
+             <BalanceTrendLineChart
+               transactions={transactions}
+               currentTotalBalance={totalBalance}
+               currency={currency}
+               isSparkline={true}
+             />
+          )}
+        </View>
 
         {/* Recent Transactions Section */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between mb-2.5">
             <Text className="text-content-tertiary font-bold text-[10px] uppercase tracking-wider">
-              Recent Transactions
+              RECENT TRANSACTIONS
             </Text>
             <TouchableOpacity
               onPress={() => {
@@ -195,7 +210,7 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 key={tx.id}
                 activeOpacity={0.7}
-                onPress={() => router.push({ pathname: '/modal/quick-add', params: { id: tx.id } })}
+                onPress={() => setSelectedTxForDetail(tx)}
               >
                 <TransactionItem
                   transaction={tx}

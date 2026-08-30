@@ -9,6 +9,7 @@ import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { TransactionType, PaymentType } from '../../src/types';
 import { formatCurrency } from '../../src/services/currency';
 import { TransactionItem } from '../../src/components/transactions/TransactionItem';
+import { TransactionDetailModal } from '../../src/components/transactions/TransactionDetailModal';
 import { Icon } from '../../src/components/ui/Icon';
 import { triggerHaptic } from '../../src/services/haptics';
 import { MACRO_CATEGORY_GROUPS } from '../../src/constants/categories';
@@ -275,7 +276,6 @@ export default function RecordsScreen() {
                 category={tx.categoryId ? categoryMap.get(tx.categoryId) : undefined}
                 wallet={walletMap.get(tx.walletId)}
                 currency={currency}
-                onPress={() => router.push({ pathname: '/modal/quick-add', params: { id: tx.id } })}
                 onDelete={deleteTransaction}
               />
             ))
